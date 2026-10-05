@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ISCO 現地化學氧化灌注設計工具 v2</title>
-<!-- v2：單一檔案、無外部資源（不需 Tailwind / Chart.js CDN），可離線使用 -->
+<title>ISCO 現地化學氧化灌注設計工具 v3（附參數來源）</title>
+<!-- v3：在 v2 基礎上，於每個分頁加入「數字、參數、公式來源與核實方式」備註；計算邏輯未變更 -->
 <style>
 :root{--teal:#0d9488;--teal7:#0f766e;--teal1:#ccfbf1;--sl1:#f1f5f9;--sl2:#e2e8f0;--sl4:#94a3b8;--sl5:#64748b;--sl7:#334155;--sl8:#1e293b;--red:#b91c1c;--amb:#92400e}
 *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI","Microsoft JhengHei","Noto Sans TC",sans-serif;background:var(--sl1);color:var(--sl8);font-size:14px}
@@ -44,16 +44,23 @@ canvas{width:100%;height:340px;display:block}
 .bar{height:10px;background:var(--sl2);border-radius:99px;overflow:hidden}.bar>div{height:10px;background:var(--teal)}
 #banner{position:fixed;right:16px;bottom:16px;max-width:380px;z-index:9;display:none}
 @media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}.g4,.g6{grid-template-columns:repeat(2,1fr)}.cols{grid-template-columns:1fr}}
-@media print{.tabs,.btn,#banner{display:none}.pane{display:block!important;page-break-after:always}}
+@media print{.tabs,.btn,#banner{display:none}.pane{display:block!important;page-break-after:always}details.srcbox{display:block}details.srcbox>*{display:block}}
+/* v3 來源備註 */
+details.srcbox{background:#fcfcfd;border:1px dashed #94a3b8;border-radius:16px;padding:12px 16px;margin-bottom:12px}
+details.srcbox>summary{cursor:pointer;font-weight:700;color:#0f766e;font-size:14px}
+details.srcbox table{font-size:12px;margin-top:8px}
+details.srcbox td:nth-child(1){white-space:nowrap}
+.st{display:inline-block;font-size:10.5px;padding:1px 6px;border-radius:6px;white-space:nowrap}
+.st.lit{background:#dcfce7;color:#166534}.st.std{background:#e0f2fe;color:#075985}.st.der{background:#ede9fe;color:#5b21b6}
+.st.asm{background:#fef3c7;color:#92400e}.st.ex{background:#f1f5f9;color:#334155;border:1px solid #cbd5e1}.st.nv{background:#fee2e2;color:#991b1b}.st.prev{background:#fef9c3;color:#713f12;border:1px solid #fde047}
 </style>
 </head>
 <body>
 <header>
-  <p>In-Situ Chemical Oxidation · Design Prototype v2（離線單一檔案）</p>
+  <p>In-Situ Chemical Oxidation · Design Prototype v3（離線單一檔案，附參數來源備註）</p>
   <h1>ISCO 現地化學氧化灌注設計工具</h1>
   <p>劑量（TOD = POD + NOD + DEO）｜井位配置｜注入水力與傳輸稀釋｜反應動力學｜放熱評估｜安全檢查清單</p>
 </header>
-
 <div class="wrap">
   <div class="kpis">
     <div class="kpi hl"><div class="l" id="kOxName">氧化劑設計用量 TOD</div><div class="v"><span id="kTOD">–</span> kg</div><div class="s" id="kTODs">–</div></div>
@@ -63,7 +70,6 @@ canvas{width:100%;height:340px;display:block}
     <div class="kpi"><div class="l">地下水流速 v</div><div class="v"><span id="kV">–</span> m/d</div><div class="s" id="kVs">–</div></div>
     <div class="kpi"><div class="l">警示</div><div class="v"><span id="kAl">–</span></div><div class="s">各分頁詳列</div></div>
   </div>
-
   <div class="tabs" id="tabs">
     <button class="tab on" data-p="p1">① 場址與水文地質</button>
     <button class="tab" data-p="p2">② 污染物與分配</button>
@@ -77,7 +83,6 @@ canvas{width:100%;height:340px;display:block}
     <button class="tab" data-p="p10">⑩ 計算依據與來源</button>
   </div>
   <div id="alertsTop"></div>
-
   <!-- ================= P1 場址 ================= -->
   <section class="pane on" id="p1">
     <div class="card"><h2>處理區幾何</h2>
@@ -118,8 +123,10 @@ canvas{width:100%;height:340px;display:block}
       <p class="note">Fe²⁺、Mn²⁺、S²⁻ 以化學計量（Fe²⁺→Fe³⁺ 1e⁻、Mn²⁺→MnO₂ 2e⁻、S²⁻→SO₄²⁻ 8e⁻）計入「地下水還原物質需求」，加在 NOD 之上；pH、鹼度、氯離子僅作定性警示。</p>
     </div>
     <div class="card"><h2>場址衍生參數</h2><div id="siteOut"></div></div>
+      <details class="srcbox" open><summary>📑 本頁數字／參數／公式來源與核實方式：① 場址與水文地質</summary>
+      <table><thead><tr><th>項目</th><th>數值／公式</th><th>來源、推估依據與核實方式</th><th>狀態</th></tr></thead><tbody><tr><td>L、W、H、頂部深度、水位深度</td><td>10、10、3、3、2 m</td><td>示範用場址尺寸，無文獻依據；報告須以場址調查（鑽探柱狀圖、污染範圍界定）取代。</td><td><span class="st ex">範例預設值（須以場址資料取代）</span></td></tr><tr><td>總孔隙率 n</td><td>0.35</td><td>砂質含水層常見範圍約 0.25–0.50（Freeze &amp; Cherry, 1979, <i>Groundwater</i>, Table 2.4）；取中間值。核實：查該表或以土樣含水量／比重試驗計算。</td><td><span class="st asm">工程假設（未查證）</span></td></tr><tr><td>有效孔隙率 nₑ</td><td>0.25</td><td>依「有效孔隙率小於總孔隙率」的一般原則取 n 的約 70%，無特定文獻值；建議以示蹤試驗或土壤粒徑推估取代。</td><td><span class="st asm">工程假設（未查證）</span></td></tr><tr><td>乾總體密度 ρb</td><td>1.6 g/cm³</td><td>砂土常見約 1.5–1.8 g/cm³ 的中間值（一般土壤力學教科書）；核實：土樣乾密度試驗。與 n 的關係 ρb = ρs(1−n)，ρs≈2.65 時 n=0.35 對應 ρb≈1.72，兩預設值未嚴格一致，請以實測為準。</td><td><span class="st asm">工程假設（未查證）</span></td></tr><tr><td>有機碳分率 f_oc</td><td>0.002</td><td>與 US EPA (1996) Soil Screening Guidance Technical Background Document（EPA/540/R-95/128）地下土壤預設 f_oc 0.002 相同（依記憶，本次未核對原文頁碼）；核實：土樣 TOC 分析。</td><td><span class="st prev">文獻（前次對話查得，本次未重核）</span></td></tr><tr><td>水力傳導係數 K</td><td>1 m/d</td><td>細砂至粉質砂量級（Freeze &amp; Cherry, 1979, Table 2.2 範圍）；須以微水試驗／抽水試驗取代。</td><td><span class="st ex">範例預設值（須以場址資料取代）</span></td></tr><tr><td>水力梯度 i</td><td>0.005</td><td>示範值；須以監測井水位等值線計算。</td><td><span class="st ex">範例預設值（須以場址資料取代）</span></td></tr><tr><td>異向性 Kh/Kv</td><td>10</td><td>層狀沉積物常用假設值（一般水文地質實務），無單一文獻出處。</td><td><span class="st asm">工程假設（未查證）</span></td></tr><tr><td>地下水溫</td><td>25 °C</td><td>依台灣平地淺層地下水溫約 23–26 °C 的一般經驗推估；須以現場量測取代。</td><td><span class="st asm">工程假設（未查證）</span></td></tr><tr><td>分子擴散係數 Dm</td><td>1×10⁻⁹ m²/s</td><td>水中溶質擴散係數量級約 1–2×10⁻⁹ m²/s（Fetter, <i>Applied Hydrogeology</i>）；×86400 換算為 m²/d。</td><td><span class="st std">標準常數／教科書定義</span></td></tr><tr><td>αL 自動值</td><td>αL = 0.83 (log₁₀L)<sup>2.414</sup></td><td>Xu &amp; Eckstein (1995), <i>Ground Water</i> 33(6)；公式與係數已於 US EPA On-Site「Longitudinal Dispersivity」頁面核對一致（archive.epa.gov/ceampubl/learn2model/part-two/onsite/longdisp.html）。L<1 m 時工具強制取 0.01 m（工具自訂下限，假設）。</td><td><span class="st lit">文獻（本次已線上核對）</span></td></tr><tr><td>αT/αL、αV/αL</td><td>0.1、0.01</td><td>依 Gelhar, Welty &amp; Rehfeldt (1992, <i>WRR</i> 28(7)) 綜整「橫向約小一個數量級、垂向更小」的趨勢取值；比例為常用假設，非固定文獻值。</td><td><span class="st asm">工程假設（未查證）</span></td></tr><tr><td>Darcy 通量、流速</td><td>q = K·i；v = K·i/nₑ</td><td>Darcy 定律與平均線性流速定義（Fetter；Freeze &amp; Cherry）。</td><td><span class="st std">標準常數／教科書定義</span></td></tr><tr><td>水動力延散係數</td><td>D = αL·v + Dm</td><td>標準定義（Fetter；Bear, 1972）。</td><td><span class="st std">標準常數／教科書定義</span></td></tr><tr><td>Peclet 數、停留時間、Kv</td><td>v·L/D；L/v；K/(Kh/Kv)</td><td>定義式推導。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>pH、鹼度、Cl⁻、Fe²⁺、Mn²⁺、S²⁻</td><td>7、200、50、1、0.2、0 mg/L</td><td>示範值；須以地下水採樣分析取代。</td><td><span class="st ex">範例預設值（須以場址資料取代）</span></td></tr><tr><td>還原物質電子數</td><td>Fe²⁺→Fe³⁺ 1e⁻；Mn²⁺→MnO₂ 2e⁻；S²⁻→SO₄²⁻ 8e⁻</td><td>依氧化數變化（Fe +2→+3；Mn +2→+4；S −2→+6）推導；假設完全氧化，屬保守上限。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>原子量 Fe、Mn、S</td><td>55.845、54.938、32.06</td><td>IUPAC 標準原子量。</td><td><span class="st std">標準常數／教科書定義</span></td></tr></tbody></table><p class="note">狀態說明：<span class="st lit">文獻（本次已線上核對）</span>、<span class="st prev">文獻（前次對話查得，本次未重核）</span>、<span class="st std">標準常數／教科書定義</span>、<span class="st der">數學／化學計量推導</span>、<span class="st asm">工程假設（未查證）</span>、<span class="st ex">範例預設值（須以場址資料取代）</span>、<span class="st nv">未查證</span>。「範例預設值」只是讓工具可以運算的示範數字，不得直接寫入報告。</p>
+    </details>
   </section>
-
   <!-- ================= P2 污染物 ================= -->
   <section class="pane" id="p2">
     <div class="card"><h2>污染物濃度與質量</h2>
@@ -129,8 +136,10 @@ canvas{width:100%;height:340px;display:block}
     <div class="card"><h2>相分配、遲滯與質量</h2><div id="partOut"></div>
       <p class="note">Kd = Koc × f_oc；遲滯因子 R = 1 + ρb·Kd / nₑ；土壤飽和濃度 Csat ≈ S·(Kd + n/ρb)（飽和層、忽略氣相）。土壤濃度 &gt; Csat 表示可能有 NAPL，POD 與反彈風險會被低估。</p>
     </div>
+      <details class="srcbox" open><summary>📑 本頁數字／參數／公式來源與核實方式：② 污染物與分配</summary>
+      <table><thead><tr><th>項目</th><th>數值／公式</th><th>來源、推估依據與核實方式</th><th>狀態</th></tr></thead><tbody><tr><td>預設污染物濃度</td><td>TCE 50 mg/kg、20 mg/L；Benzene 10 mg/kg、5 mg/L</td><td>示範值；須以場址採樣結果取代。</td><td><span class="st ex">範例預設值（須以場址資料取代）</span></td></tr><tr><td>Koc（資料庫）</td><td>見⑨資料庫</td><td>PCE 265、TCE 94.3、1,1,1-TCA 135、1,2-DCA 38.0、Benzene 61.7、Toluene 140、Ethylbenzene 204、o-Xylene 241、Chlorobenzene 224 L/kg：取自 US EPA (1996) SSG Technical Background Document, Appendix K（實測 Koc 幾何平均）；MTBE 11 L/kg：US EPA On-Site 工具化學性質表。前次對話查得，本次未重開原文。核實：查 EPA/540/R-95/128 Appendix K 表格。</td><td><span class="st prev">文獻（前次對話查得，本次未重核）</span></td></tr><tr><td>Kd</td><td>Kd = Koc × f_oc</td><td>線性吸附、疏水性有機物假設（Karickhoff et al., 1979；Fetter）。f_oc &lt; 0.001 時此式誤差變大。</td><td><span class="st std">標準常數／教科書定義</span></td></tr><tr><td>遲滯因子 R</td><td>R = 1 + ρb·Kd/nₑ</td><td>標準定義（Freeze &amp; Cherry, 1979；Fetter）。</td><td><span class="st std">標準常數／教科書定義</span></td></tr><tr><td>Csat</td><td>Csat ≈ S·(Kd + n/ρb)</td><td>由 US EPA SSG 的 Csat 公式 Csat = S/ρb·(Kd·ρb + θw + H′·θa) 在飽和層 θa=0、θw=n 時化簡而得。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>溶解度 S、亨利常數 H′</td><td>僅 BTEX、MTBE</td><td>US EPA On-Site 工具化學性質表（前次對話查得）；其他污染物未建，故不計算 Csat。</td><td><span class="st prev">文獻（前次對話查得，本次未重核）</span></td></tr><tr><td>質量</td><td>土壤 = C·V·ρb；地下水 = C·V·n</td><td>質量平衡定義；地下水用總孔隙率 n（假設孔隙全飽和）。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>Koc 空白時 R = 1</td><td>R = 1</td><td>保守假設（不吸附 → 流速最快、質量估計偏低）。請自行輸入文獻 Koc。</td><td><span class="st asm">工程假設（未查證）</span></td></tr></tbody></table><p class="note">狀態說明：<span class="st lit">文獻（本次已線上核對）</span>、<span class="st prev">文獻（前次對話查得，本次未重核）</span>、<span class="st std">標準常數／教科書定義</span>、<span class="st der">數學／化學計量推導</span>、<span class="st asm">工程假設（未查證）</span>、<span class="st ex">範例預設值（須以場址資料取代）</span>、<span class="st nv">未查證</span>。「範例預設值」只是讓工具可以運算的示範數字，不得直接寫入報告。</p>
+    </details>
   </section>
-
   <!-- ================= P3 劑量 ================= -->
   <section class="pane" id="p3">
     <div class="card"><h2>氧化劑選擇與配製</h2>
@@ -149,8 +158,10 @@ canvas{width:100%;height:340px;display:block}
       <div class="card"><h2>計算明細</h2><div id="doseOut"></div></div>
       <div class="card"><h2>需求量組成</h2><canvas id="cvDose" style="height:280px"></canvas><div id="doseAl"></div></div>
     </div>
+      <details class="srcbox" open><summary>📑 本頁數字／參數／公式來源與核實方式：③ 氧化劑與劑量</summary>
+      <table><thead><tr><th>項目</th><th>數值／公式</th><th>來源、推估依據與核實方式</th><th>狀態</th></tr></thead><tbody><tr><td>TOD 架構</td><td>TOD = (POD + NOD + 地下水還原物質) ÷ (1 − DEO) × SF</td><td>需氧量 = 污染物需求 + 天然需求 + 氧化劑自身分解，概念見 ITRC (2005) ISCO-2 及 Huling &amp; Pivetz（US EPA Engineering Issue: In-Situ Chemical Oxidation）的 oxidant demand 章節。「÷(1−DEO)」與「×SF」的寫法是本工具的組合方式，非文獻原式。</td><td><span class="st prev">文獻（前次對話查得，本次未重核）</span></td></tr><tr><td>POD 化學計量</td><td>(n<sub>e,c</sub>/n<sub>e,ox</sub>)·(MW<sub>ox</sub>/MW<sub>c</sub>)</td><td>以電子當量平衡推導（完全礦化）。驗證例：TCE nₑ=6、KMnO₄ nₑ=3 → 2 mol KMnO₄/mol TCE，與 Huang et al. (1999, <i>Environ. Eng. Sci.</i> 16(4):265) 實驗確認的計量比一致（本次已線上核對）。</td><td><span class="st lit">文獻（本次已線上核對）</span></td></tr><tr><td>SOD 預設</td><td>5 g/kg</td><td>示範值。須以場址土樣批次試驗取代（過錳酸鹽可依 ASTM D7262；過硫酸鹽依供應商或處理性試驗方法，本次未查證方法編號）。</td><td><span class="st ex">範例預設值（須以場址資料取代）</span></td></tr><tr><td>KMnO₄ → 所選氧化劑換算</td><td>× (eq<sub>ox</sub>/eq<sub>KMnO₄</sub>)；Na₂S₂O₈ ≈ 119.05/52.68 = 2.26</td><td>當量重 = MW/nₑ 推導，可自行驗算。<b>注意：</b>不同氧化劑對天然有機質的反應性不同，以 KMnO₄ 量測的 NOD 換算為過硫酸鹽需求屬假設，報告中應優先使用同一氧化劑的實測 SOD。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>NOD</td><td>SOD (g/kg) × 乾土質量 (kg) ÷ 1000</td><td>單位換算。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>DEO</td><td>0.1</td><td>假設氧化劑自身無效分解 10%；無文獻依據，應以處理性試驗中的氧化劑殘留曲線估計。</td><td><span class="st asm">工程假設（未查證）</span></td></tr><tr><td>安全係數 SF</td><td>1.2</td><td>工程判斷值，無文獻依據；報告中需說明考量的不確定性（非均質性、SOD 量測變異等）。</td><td><span class="st asm">工程假設（未查證）</span></td></tr><tr><td>藥劑純度</td><td>100%</td><td>示範值；以實際採購藥劑的 COA／TDS 取代。</td><td><span class="st ex">範例預設值（須以場址資料取代）</span></td></tr><tr><td>灌注濃度</td><td>100 g/L</td><td>示範值。依 Evonik 換算式 g/L = 0.1049·wt%² + 9.1501·wt% + 3.1347，100 g/L ≈ 9.5 wt%（本次已核對換算式）。</td><td><span class="st ex">範例預設值（須以場址資料取代）</span></td></tr><tr><td>過硫酸鈉溶解度上限</td><td>560 g/L</td><td>推估依據：Evonik《The Solution to Klozur® SP Solutions》最大溶解度 25 °C 42 wt%、0 °C 37 wt%；以同文件換算式得 ≈572 g/L（25 °C）、≈485 g/L（0 °C）。560 g/L 為介於兩者的近似值；若現場水溫低於 25 °C，實際上限會較低。舊版的「約 56 g/100 mL」是把 55.6 g/100 g 水（20 °C，BenchChem）誤寫成 mL，請以 Evonik 數值為準。</td><td><span class="st lit">文獻（本次已線上核對）</span></td></tr><tr><td>KMnO₄ 溶解度</td><td>64 g/L @20 °C</td><td>常見手冊值約 6.4 g/100 g 水（如 CRC Handbook），本次未核對原文。</td><td><span class="st nv">未查證</span></td></tr><tr><td>NaMnO₄</td><td>&gt;400 g/L；商品 40% 溶液</td><td>供應商產品型態（如 Carus RemOx® L），本次未核對。</td><td><span class="st nv">未查證</span></td></tr></tbody></table><p class="note">狀態說明：<span class="st lit">文獻（本次已線上核對）</span>、<span class="st prev">文獻（前次對話查得，本次未重核）</span>、<span class="st std">標準常數／教科書定義</span>、<span class="st der">數學／化學計量推導</span>、<span class="st asm">工程假設（未查證）</span>、<span class="st ex">範例預設值（須以場址資料取代）</span>、<span class="st nv">未查證</span>。「範例預設值」只是讓工具可以運算的示範數字，不得直接寫入報告。</p>
+    </details>
   </section>
-
   <!-- ================= P4 井位 ================= -->
   <section class="pane" id="p4">
     <div class="card"><h2>灌注井矩陣排列（圓形覆蓋演算法）</h2>
@@ -166,8 +177,10 @@ canvas{width:100%;height:340px;display:block}
       <div class="card"><h3>三角形（交錯）配置</h3><canvas id="cvTri" style="height:360px"></canvas></div>
     </div>
     <div class="card"><button class="btn p" id="dlWells">⬇ 下載採用配置井位座標 CSV</button></div>
+      <details class="srcbox" open><summary>📑 本頁數字／參數／公式來源與核實方式：④ 井位配置</summary>
+      <table><thead><tr><th>項目</th><th>數值／公式</th><th>來源、推估依據與核實方式</th><th>狀態</th></tr></thead><tbody><tr><td>ROI</td><td>3 m</td><td>示範值。ROI 必須以注水／示蹤試驗或模場試驗求得，報告不可直接採用。</td><td><span class="st ex">範例預設值（須以場址資料取代）</span></td></tr><tr><td>ROI 折減係數</td><td>1.0</td><td>不折減的假設；保守設計可取 0.7–0.8（工程判斷，無文獻依據）。</td><td><span class="st asm">工程假設（未查證）</span></td></tr><tr><td>正方形配置</td><td>井距 ≤ √2·R</td><td>圓內接正方形邊長為 √2·R，網格四角皆被覆蓋（幾何推導）。工具實際以「排距 b、列距 a = 2√(R²−b²/4)」搜尋最少井數。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>三角形配置</td><td>井距 √3·R、排距 1.5·R</td><td>正六邊形覆蓋的幾何推導；每口井覆蓋面積 (3√3/2)R² ≈ 2.598R²。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>理論井數下限</td><td>⌈L·W / 2.598R²⌉</td><td>平面圓覆蓋的最佳密度（Kershner, 1939, <i>Am. J. Math.</i> 61:665–671），本次未核對原文；邊界效應使實際井數必大於此值。</td><td><span class="st prev">文獻（前次對話查得，本次未重核）</span></td></tr><tr><td>覆蓋率驗證</td><td>121 ×（≥26）網格點逐點檢查</td><td>數值驗證，不涉文獻。</td><td><span class="st der">數學／化學計量推導</span></td></tr></tbody></table><p class="note">狀態說明：<span class="st lit">文獻（本次已線上核對）</span>、<span class="st prev">文獻（前次對話查得，本次未重核）</span>、<span class="st std">標準常數／教科書定義</span>、<span class="st der">數學／化學計量推導</span>、<span class="st asm">工程假設（未查證）</span>、<span class="st ex">範例預設值（須以場址資料取代）</span>、<span class="st nv">未查證</span>。「範例預設值」只是讓工具可以運算的示範數字，不得直接寫入報告。</p>
+    </details>
   </section>
-
   <!-- ================= P5 注入與傳輸 ================= -->
   <section class="pane" id="p5">
     <div class="card"><h2>注入水力參數</h2>
@@ -191,8 +204,10 @@ canvas{width:100%;height:340px;display:block}
       <canvas id="cvOB" style="margin-top:10px"></canvas>
       <div id="trOut"></div>
     </div>
+      <details class="srcbox" open><summary>📑 本頁數字／參數／公式來源與核實方式：⑤ 注入水力與傳輸稀釋</summary>
+      <table><thead><tr><th>項目</th><th>數值／公式</th><th>來源、推估依據與核實方式</th><th>狀態</th></tr></thead><tbody><tr><td>篩管長 b、井半徑 r_w、流率 Q</td><td>3 m（跟隨 H）、0.025 m、10 L/min</td><td>示範值（0.025 m 約對應 2 吋井）。Q 須以注水試驗與允許注入壓力決定。</td><td><span class="st ex">範例預設值（須以場址資料取代）</span></td></tr><tr><td>徑向推移體積</td><td>V = π r² b nₑ</td><td>柱塞流（plug flow）體積平衡推導；假設均質、無延散、無密度效應。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>Thiem 水頭上升</td><td>Δh = Q/(2πKb)·ln(R/r_w)</td><td>Thiem (1906) 受壓含水層穩態徑向流解（Fetter；Freeze &amp; Cherry）。工具以 ROI 作為影響半徑 R 屬假設；實際壓力影響半徑通常大於 ROI，故 Δh 可能低估。</td><td><span class="st std">標準常數／教科書定義</span></td></tr><tr><td>流率換算、井口壓力</td><td>1 L/min = 1.44 m³/d；1 m 水頭 = 9.81 kPa</td><td>單位換算（ρgh）。</td><td><span class="st std">標準常數／教科書定義</span></td></tr><tr><td>NOD 限制半徑 r_ox</td><td>√(M/(π b ρb SOD))</td><td>假設氧化劑接觸土壤即被瞬間消耗完 SOD 的質量平衡推導（工具自行推導，非文獻公式）；結果偏保守。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>孔隙水當量 NOD 濃度</td><td>SOD·ρb/nₑ</td><td>單位推導：g/kg × kg/L ÷ (L 水/L 土)。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>前緣混合帶寬</td><td>σ ≈ √(4/3·αL·r)</td><td>徑向流延散結果，出處列為 Gelhar &amp; Collins (1971, <i>WRR</i> 7(6))，本次未核對原文。αL 取 Xu &amp; Eckstein 在 ROI 尺度（數公尺）的外插值，該公式資料多來自較大尺度，屬假設。</td><td><span class="st nv">未查證</span></td></tr><tr><td>氧化劑存留時間</td><td>t = ln10 / k_d</td><td>一階衰減降到 10% 的時間（推導）；k_d 來源見⑥。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>一維傳輸</td><td>Ogata-Banks 解（含 R、一階衰減 λ）</td><td>Ogata &amp; Banks (1961), USGS Prof. Paper 411-A；含衰減形式見 van Genuchten &amp; Alves (1982), USDA Tech. Bull. 1661（本次未核對原文）。</td><td><span class="st prev">文獻（前次對話查得，本次未重核）</span></td></tr><tr><td>Domenico 中心線</td><td>exp[...]·erf(Y/(4√(αy·x)))·erf(Z/(2√(αz·x)))</td><td>Domenico (1987), <i>J. Hydrol.</i> 91:49–58；與 BIOSCREEN（Newell et al., 1996）使用的形式相同。本次未逐字核對公式。</td><td><span class="st prev">文獻（前次對話查得，本次未重核）</span></td></tr><tr><td>erfc 數值近似</td><td>Numerical Recipes erfcc</td><td>Press et al. (1992) <i>Numerical Recipes</i> §6.2，相對誤差 &lt; 1.2×10⁻⁷。</td><td><span class="st std">標準常數／教科書定義</span></td></tr><tr><td>λ、x、繪圖距離、時間點</td><td>0、50 m、100 m、30/90/180/365 d</td><td>示範值；λ 須依場址自然衰減評估，受體距離依實際敏感受體位置。</td><td><span class="st ex">範例預設值（須以場址資料取代）</span></td></tr><tr><td>密度流提示</td><td>過硫酸鈉 10 wt% 密度 1.067 g/mL</td><td>Evonik 換算式：密度 = 6×10⁻⁵·wt%² + 0.0061·wt% + 0.9999（本次已核對）。</td><td><span class="st lit">文獻（本次已線上核對）</span></td></tr></tbody></table><p class="note">狀態說明：<span class="st lit">文獻（本次已線上核對）</span>、<span class="st prev">文獻（前次對話查得，本次未重核）</span>、<span class="st std">標準常數／教科書定義</span>、<span class="st der">數學／化學計量推導</span>、<span class="st asm">工程假設（未查證）</span>、<span class="st ex">範例預設值（須以場址資料取代）</span>、<span class="st nv">未查證</span>。「範例預設值」只是讓工具可以運算的示範數字，不得直接寫入報告。</p>
+    </details>
   </section>
-
   <!-- ================= P6 動力學 ================= -->
   <section class="pane" id="p6">
     <div class="card"><h2>反應動力學（二階反應＋氧化劑衰減＋多次灌注＋脫附回補＋流出稀釋）</h2>
@@ -220,8 +235,10 @@ canvas{width:100%;height:340px;display:block}
       <canvas id="cvKin" style="margin-top:10px"></canvas>
       <div id="kinOut"></div>
     </div>
+      <details class="srcbox" open><summary>📑 本頁數字／參數／公式來源與核實方式：⑥ 反應動力學</summary>
+      <table><thead><tr><th>項目</th><th>數值／公式</th><th>來源、推估依據與核實方式</th><th>狀態</th></tr></thead><tbody><tr><td>k₂ (TCE + MnO₄⁻)</td><td>0.67 M⁻¹s⁻¹（21 °C）</td><td>Yan &amp; Schwartz (1999), <i>J. Contam. Hydrol.</i> 37:343–365：k = 0.67 ± 0.03 M⁻¹s⁻¹，pH 4–8 範圍內與 pH 無關；Yan &amp; Schwartz (2000), <i>ES&amp;T</i> 34(12):2535–2541：0.65–0.68 M⁻¹s⁻¹ @21 °C（本次已線上核對摘要）。另 Huang et al. (1999)：0.89 ± 0.03 M⁻¹s⁻¹（pH 7、20 °C）。</td><td><span class="st lit">文獻（本次已線上核對）</span></td></tr><tr><td>k₂ (TCE + NaMnO₄)</td><td>沿用 0.67</td><td>反應物種同為 MnO₄⁻，陽離子不參與反應的推論。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>參考溫度</td><td>21 °C</td><td>與 Yan &amp; Schwartz 實驗溫度一致。</td><td><span class="st lit">文獻（本次已線上核對）</span></td></tr><tr><td>活化能 Ea</td><td>60 kJ/mol（預設）</td><td>假設值。<b>文獻可替代值：</b>TCE–MnO₄⁻ 為 35 ± 2.9 kJ/mol（Huang et al., 1999）、41.46 kJ/mol（Yan &amp; Schwartz, 2000），本次已核對摘要。若模擬 TCE + 過錳酸鹽，建議改用文獻值。</td><td><span class="st asm">工程假設（未查證）</span></td></tr><tr><td>Arrhenius 修正</td><td>f(T) = exp[−Ea/R·(1/T − 1/T<sub>ref</sub>)]，R = 8.314 J/mol·K</td><td>標準式。</td><td><span class="st std">標準常數／教科書定義</span></td></tr><tr><td>氧化劑衰減 k_d 預設</td><td>過硫酸鈉 0.03、KMnO₄ 0.1、H₂O₂ 5、O₃ 10 (1/d)</td><td>均為假設。過硫酸鈉 0.03/d（半衰期約 23 d）是配合 Evonik「地下有效存留數週至數月」的描述推估（本次已核對該描述）；H₂O₂ 5/d（半衰期約 3.3 h）配合「數分鐘至數小時」的一般描述；KMnO₄、O₃ 無依據。應以處理性試驗的氧化劑殘留曲線取代。</td><td><span class="st asm">工程假設（未查證）</span></td></tr><tr><td>C₀、目標濃度</td><td>20 mg/L、0.05 mg/L</td><td>示範值；目標濃度應依適用的管制標準（如地下水污染管制標準）填入，本工具未內建法規值。</td><td><span class="st ex">範例預設值（須以場址資料取代）</span></td></tr><tr><td>k_obs、氧化劑濃度、灌注次數／間隔、k_des、C_up、天數</td><td>0.2/d、50 mg/L、2 次／30 d、0、0、120 d</td><td>示範值；須以處理性試驗與設計方案取代。</td><td><span class="st ex">範例預設值（須以場址資料取代）</span></td></tr><tr><td>模型結構</td><td>dC/dt = −k₂[Ox]C·f(T) + k_des(C_eq−C) − v/(R·L_f)(C−C_up)</td><td>二階反應（Yan &amp; Schwartz）＋一階質傳（集總參數）＋完全混合反應槽（CSTR）出流項的組合，屬本工具自建的簡化模型，非單一文獻模型。</td><td><span class="st asm">工程假設（未查證）</span></td></tr><tr><td>數值解法</td><td>時間步長 = 天數/20000；反應項指數解＋其他項顯式 Euler</td><td>數值方法；步長足夠小時誤差可忽略，可改步長比對結果。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>過硫酸鹽動力學提示</td><td>建議用 k_obs</td><td>活化過硫酸鹽以自由基反應為主、受活化方式影響的一般認知；本次未查特定文獻。</td><td><span class="st nv">未查證</span></td></tr></tbody></table><p class="note">狀態說明：<span class="st lit">文獻（本次已線上核對）</span>、<span class="st prev">文獻（前次對話查得，本次未重核）</span>、<span class="st std">標準常數／教科書定義</span>、<span class="st der">數學／化學計量推導</span>、<span class="st asm">工程假設（未查證）</span>、<span class="st ex">範例預設值（須以場址資料取代）</span>、<span class="st nv">未查證</span>。「範例預設值」只是讓工具可以運算的示範數字，不得直接寫入報告。</p>
+    </details>
   </section>
-
   <!-- ================= P7 放熱 ================= -->
   <section class="pane" id="p7">
     <div class="card"><h2>H₂O₂ / Fenton 放熱與氣體生成評估</h2>
@@ -235,8 +252,10 @@ canvas{width:100%;height:340px;display:block}
       <div id="heatOut" style="margin-top:10px"></div>
       <canvas id="cvHeat" style="height:300px;margin-top:10px"></canvas>
     </div>
+      <details class="srcbox" open><summary>📑 本頁數字／參數／公式來源與核實方式：⑦ 放熱評估</summary>
+      <table><thead><tr><th>項目</th><th>數值／公式</th><th>來源、推估依據與核實方式</th><th>狀態</th></tr></thead><tbody><tr><td>H₂O₂ 分解熱</td><td>98.25 kJ/mol</td><td>前次標註出處為 Miletiev et al. (2012)，本次未核對。<b>可自行核實：</b>以標準生成焓 ΔfH°[H₂O₂(l)] = −187.78、ΔfH°[H₂O(l)] = −285.83 kJ/mol（NIST／CRC）計算 H₂O₂ → H₂O + ½O₂，得 −98.05 kJ/mol，與工具值差約 0.2%。稀溶液中（H₂O₂(aq)）約 −94.6 kJ/mol，故工具值略偏保守。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>水比熱</td><td>4.18 kJ/kg·K</td><td>標準物性。</td><td><span class="st std">標準常數／教科書定義</span></td></tr><tr><td>土壤固體比熱</td><td>0.84 kJ/kg·K</td><td>礦物土壤固體常見約 0.7–0.9 kJ/kg·K 的近似值（土壤物理教科書一般值），本次未查特定出處。</td><td><span class="st asm">工程假設（未查證）</span></td></tr><tr><td>情境 A 絕熱溫升</td><td>ΔT = wt·1000/MW·ΔH/c<sub>p,w</sub></td><td>能量平衡推導（假設熱全留在注入液、以水比熱計）。可驗算：25 °C、11 wt% → ≈101 °C，即安全清單「11–12% 以上有沸騰風險」的來源。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>情境 B 整體溫升</td><td>Q/(m<sub>soil</sub>c<sub>s</sub> + m<sub>water</sub>c<sub>w</sub>)</td><td>能量平衡推導（假設熱均勻分布於處理區、無熱散失）。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>氣體生成</td><td>O₂ = 0.5 mol/mol H₂O₂；CO₂ = 污染物碳原子數</td><td>化學計量；CO₂ 假設污染物完全礦化（保守）。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>現地氣體體積</td><td>理想氣體 PV = nRT；P = 1 atm + 處理區中點靜水壓</td><td>推導；忽略氣體溶解於水，偏保守。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>STP 莫耳體積</td><td>22.414 L/mol</td><td>標準常數（0 °C、1 atm）。</td><td><span class="st std">標準常數／教科書定義</span></td></tr><tr><td>H₂O₂ 濃度、分解時間、警戒溫度</td><td>10 wt%、24 h、60 °C</td><td>示範值與工程判斷；警戒溫度應依專案 HSE 計畫訂定。</td><td><span class="st ex">範例預設值（須以場址資料取代）</span></td></tr><tr><td>Fenton 常見濃度 1–15%</td><td>警示門檻</td><td>ISCO 一般實務範圍（前次對話引用），本次未核對。</td><td><span class="st nv">未查證</span></td></tr><tr><td>非 H₂O₂ 時預設用量</td><td>1000 kg</td><td>純示範數字，讓頁面可運算。</td><td><span class="st ex">範例預設值（須以場址資料取代）</span></td></tr></tbody></table><p class="note">狀態說明：<span class="st lit">文獻（本次已線上核對）</span>、<span class="st prev">文獻（前次對話查得，本次未重核）</span>、<span class="st std">標準常數／教科書定義</span>、<span class="st der">數學／化學計量推導</span>、<span class="st asm">工程假設（未查證）</span>、<span class="st ex">範例預設值（須以場址資料取代）</span>、<span class="st nv">未查證</span>。「範例預設值」只是讓工具可以運算的示範數字，不得直接寫入報告。</p>
+    </details>
   </section>
-
   <!-- ================= P8 安全 ================= -->
   <section class="pane" id="p8">
     <div class="card"><h2 id="safeTitle">現場安全檢查清單</h2>
@@ -248,17 +267,45 @@ canvas{width:100%;height:340px;display:block}
       <div id="chkList"></div>
       <div style="margin-top:8px"><button class="btn p" id="dlChk">⬇ 下載檢查清單 CSV（現場簽核）</button></div>
     </div>
+      <details class="srcbox" open><summary>📑 本頁數字／參數／公式來源與核實方式：⑧ 安全檢查清單</summary>
+      <table><thead><tr><th>項目</th><th>數值／公式</th><th>來源、推估依據與核實方式</th><th>狀態</th></tr></thead><tbody><tr><td>H₂O₂ 材料相容性</td><td>各材料評等</td><td>ISM／Cole-Parmer 化學相容性資料庫（前次對話查得）。核實：向管材／墊圈供應商索取相容性表。</td><td><span class="st prev">文獻（前次對話查得，本次未重核）</span></td></tr><tr><td>過硫酸鈉材料相容性</td><td>各材料評等</td><td>Klozur® Persulfate 材料相容性技術公報（Evonik，前次對話查得）。</td><td><span class="st prev">文獻（前次對話查得，本次未重核）</span></td></tr><tr><td>H₂O₂ 金屬催化分解、KMnO₄ 沉澱、Fenton pH</td><td>各條文</td><td>BenchChem 技術文件（廠商撰寫的網頁文件，非同儕審查）。<b>建議</b>報告中改引 ITRC (2005) ISCO-2 或供應商 SDS。</td><td><span class="st prev">文獻（前次對話查得，本次未重核）</span></td></tr><tr><td>台灣法規分類</td><td>公共危險物品第 6 類、工廠危險物品申報</td><td>使用者 OneDrive《貯存系統設置設施及監測設備與預防管理參考手冊》（前次對話查得）。核實：查「公共危險物品及可燃性高壓氣體製造儲存處理場所設置標準暨安全管理辦法」附表原文。</td><td><span class="st prev">文獻（前次對話查得，本次未重核）</span></td></tr><tr><td>H₂O₂ Class 1／Class 2</td><td>8–28%／28–52%</td><td>NFPA 400 氧化劑分級（前次對話經 ISM 資料引用），本次未核對 NFPA 原文。</td><td><span class="st prev">文獻（前次對話查得，本次未重核）</span></td></tr><tr><td>標示「未查證」的項目</td><td>PPE、儲存分隔、洗眼器等</td><td>一般化學品作業實務，須以供應商 SDS 第 7、8、10 節及專案 HSE 計畫確認。</td><td><span class="st nv">未查證</span></td></tr><tr><td>Stantec HSSE SWP／HSE 計畫範本</td><td>文件類項目</td><td>公司內部文件（前次對話引用），請以台灣專案現行版本為準。</td><td><span class="st prev">文獻（前次對話查得，本次未重核）</span></td></tr></tbody></table><p class="note">狀態說明：<span class="st lit">文獻（本次已線上核對）</span>、<span class="st prev">文獻（前次對話查得，本次未重核）</span>、<span class="st std">標準常數／教科書定義</span>、<span class="st der">數學／化學計量推導</span>、<span class="st asm">工程假設（未查證）</span>、<span class="st ex">範例預設值（須以場址資料取代）</span>、<span class="st nv">未查證</span>。「範例預設值」只是讓工具可以運算的示範數字，不得直接寫入報告。</p>
+    </details>
   </section>
-
   <!-- ================= P9 資料庫 ================= -->
   <section class="pane" id="p9">
     <div class="card"><h2>污染物資料庫</h2><div id="dbC"></div></div>
     <div class="card"><h2>氧化劑資料庫</h2><div id="dbO"></div></div>
     <div class="card"><h2>化學計量比（kg 氧化劑 / kg 污染物，完全礦化）</h2><div id="dbS"></div></div>
+      <details class="srcbox" open><summary>📑 本頁數字／參數／公式來源與核實方式：⑨ 資料庫</summary>
+      <table><thead><tr><th>項目</th><th>數值／公式</th><th>來源、推估依據與核實方式</th><th>狀態</th></tr></thead><tbody><tr><td>原子量</td><td>H 1.008、C 12.011、O 15.999、Na 22.990、S 32.06、Cl 35.45、K 39.098、Mn 54.938…</td><td>IUPAC 標準原子量（常用簡化值）。</td><td><span class="st std">標準常數／教科書定義</span></td></tr><tr><td>分子量 MW</td><td>由化學式自動計算</td><td>原子量加總，可手算核實（如 Na₂S₂O₈ = 238.1、KMnO₄ = 158.03）。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>礦化電子數 nₑ</td><td>nₑ = 4C + H − Cl − Br − 2O + 8N</td><td>依完全礦化產物 CO₂、H₂O、X⁻ 的氧化數平衡推導（含 N 項假設 N→NO₃⁻）。可驗算：TCE = 4×2 + 1 − 3 = 6。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>氧化劑半反應、nₑ</td><td>S₂O₈²⁻ 2e⁻；MnO₄⁻→MnO₂ 3e⁻；H₂O₂ 2e⁻；O₃ 2e⁻</td><td>標準半反應（無機化學教科書；ITRC 2005 列有相同反應）。MnO₄⁻ 在中性 pH 生成 MnO₂（3e⁻），強酸下可為 5e⁻，工具採 ISCO 常見中性條件。</td><td><span class="st std">標準常數／教科書定義</span></td></tr><tr><td>當量重</td><td>MW / nₑ</td><td>定義式。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>Koc、S、H′</td><td>見表</td><td>見②來源說明。</td><td><span class="st prev">文獻（前次對話查得，本次未重核）</span></td></tr><tr><td>TPH 以 C₁₀H₂₂ 代表</td><td>—</td><td>假設代表物，實際 TPH 組成差異大，計量比僅供參考。</td><td><span class="st asm">工程假設（未查證）</span></td></tr><tr><td>溶解度、k_d、備註欄</td><td>見表</td><td>見③、⑥來源說明。</td><td><span class="st asm">工程假設（未查證）</span></td></tr></tbody></table><p class="note">狀態說明：<span class="st lit">文獻（本次已線上核對）</span>、<span class="st prev">文獻（前次對話查得，本次未重核）</span>、<span class="st std">標準常數／教科書定義</span>、<span class="st der">數學／化學計量推導</span>、<span class="st asm">工程假設（未查證）</span>、<span class="st ex">範例預設值（須以場址資料取代）</span>、<span class="st nv">未查證</span>。「範例預設值」只是讓工具可以運算的示範數字，不得直接寫入報告。</p>
+    </details>
   </section>
-
   <!-- ================= P10 依據 ================= -->
   <section class="pane" id="p10">
+    <details class="srcbox" open><summary>📑 狀態說明與參考文獻清單</summary>
+      <p class="note">上表「已查證」標籤原為前次對話標註。本版在各分頁底部逐項列出來源與狀態，以各分頁說明為準。</p>
+      
+      <table><thead><tr><th>文獻</th><th>用於</th><th>狀態</th></tr></thead><tbody>
+      <tr><td>ITRC (2005). <i>Technical and Regulatory Guidance for In Situ Chemical Oxidation of Contaminated Soil and Groundwater</i>, 2nd ed. (ISCO-2)</td><td>TOD 架構、藥劑化學、設計流程</td><td><span class="st lit">文獻（本次已線上核對）</span></td></tr>
+      <tr><td>Huling, S.G. &amp; Pivetz, B.E. <i>In-Situ Chemical Oxidation</i>. US EPA Engineering Issue（年份／報告編號請以原文為準）</td><td>需氧量試驗、設計考量</td><td><span class="st lit">文獻（本次已線上核對）</span></td></tr>
+      <tr><td>Yan, Y.E. &amp; Schwartz, F.W. (1999). <i>J. Contam. Hydrol.</i> 37:343–365</td><td>k₂ TCE–MnO₄⁻</td><td><span class="st lit">文獻（本次已線上核對）</span></td></tr>
+      <tr><td>Yan, Y.E. &amp; Schwartz, F.W. (2000). <i>Environ. Sci. Technol.</i> 34(12):2535–2541</td><td>k₂、Ea 41.46 kJ/mol</td><td><span class="st lit">文獻（本次已線上核對）</span></td></tr>
+      <tr><td>Huang, K.-C. et al. (1999). <i>Environ. Eng. Sci.</i> 16(4):265</td><td>k₂ 0.89、Ea 35 kJ/mol、2:1 計量比</td><td><span class="st lit">文獻（本次已線上核對）</span></td></tr>
+      <tr><td>Xu, M. &amp; Eckstein, Y. (1995). <i>Ground Water</i> 33(6)（經 US EPA On-Site 頁面核對公式）</td><td>αL 經驗式</td><td><span class="st lit">文獻（本次已線上核對）</span></td></tr>
+      <tr><td>Evonik. <i>The Solution to Klozur® SP Solutions</i>；KLOZUR® SP 產品頁</td><td>溶解度、密度、g/L 換算、存留時間</td><td><span class="st lit">文獻（本次已線上核對）</span></td></tr>
+      <tr><td>US EPA (1996). <i>Soil Screening Guidance: Technical Background Document</i>, EPA/540/R-95/128, Appendix K</td><td>Koc、f_oc、Csat 公式</td><td><span class="st prev">文獻（前次對話查得，本次未重核）</span></td></tr>
+      <tr><td>Ogata, A. &amp; Banks, R.B. (1961). USGS Prof. Paper 411-A；van Genuchten &amp; Alves (1982) USDA Tech. Bull. 1661</td><td>一維傳輸解</td><td><span class="st prev">文獻（前次對話查得，本次未重核）</span></td></tr>
+      <tr><td>Domenico, P.A. (1987). <i>J. Hydrol.</i> 91:49–58</td><td>中心線稀釋</td><td><span class="st prev">文獻（前次對話查得，本次未重核）</span></td></tr>
+      <tr><td>Gelhar, L.W. &amp; Collins, M.A. (1971). <i>Water Resour. Res.</i> 7(6)</td><td>徑向前緣混合</td><td><span class="st nv">未查證</span></td></tr>
+      <tr><td>Gelhar, L.W., Welty, C. &amp; Rehfeldt, K.R. (1992). <i>Water Resour. Res.</i> 28(7)</td><td>αT、αV 比例趨勢</td><td><span class="st prev">文獻（前次對話查得，本次未重核）</span></td></tr>
+      <tr><td>Schulze-Makuch, D. (2005). <i>Ground Water</i> 43(3)</td><td>延散度尺度效應</td><td><span class="st prev">文獻（前次對話查得，本次未重核）</span></td></tr>
+      <tr><td>Kershner, R. (1939). <i>Am. J. Math.</i> 61:665–671</td><td>圓覆蓋最小井數</td><td><span class="st prev">文獻（前次對話查得，本次未重核）</span></td></tr>
+      <tr><td>Thiem, G. (1906)；Fetter, C.W. <i>Applied Hydrogeology</i>；Freeze, R.A. &amp; Cherry, J.A. (1979) <i>Groundwater</i></td><td>Darcy、Thiem、R、孔隙率範圍</td><td><span class="st std">標準常數／教科書定義</span></td></tr>
+      <tr><td>Press, W.H. et al. (1992). <i>Numerical Recipes</i>, §6.2</td><td>erfc 近似</td><td><span class="st std">標準常數／教科書定義</span></td></tr>
+      <tr><td>陳凱等，ISCO 氧化劑需求量測算綜述；Brown (ERM, 2003)；Miletiev et al. (2012)</td><td>前版列為出處</td><td><span class="st nv">未查證</span>（完整書目資訊不足，引用前請取得原文；分解熱可改以 NIST 生成焓自行推導，見⑦）</td></tr>
+      </tbody></table><p class="note">狀態說明：<span class="st lit">文獻（本次已線上核對）</span>、<span class="st prev">文獻（前次對話查得，本次未重核）</span>、<span class="st std">標準常數／教科書定義</span>、<span class="st der">數學／化學計量推導</span>、<span class="st asm">工程假設（未查證）</span>、<span class="st ex">範例預設值（須以場址資料取代）</span>、<span class="st nv">未查證</span>。「範例預設值」只是讓工具可以運算的示範數字，不得直接寫入報告。</p>
+    </details>
+
     <div class="card"><h2>理論架構</h2>
       <table><thead><tr><th>模組</th><th>理論／方程式</th><th>狀態</th></tr></thead><tbody>
         <tr><td>劑量</td><td>TOD = (POD + NOD + 地下水還原物質需求) ÷ (1 − DEO) × SF；POD 以電子當量化學計量：kg 氧化劑/kg 污染物 = (n<sub>e,c</sub>/n<sub>e,ox</sub>)·(MW<sub>ox</sub>/MW<sub>c</sub>)</td><td><span class="tag src">已查證</span> TOD 組成：陳凱等，ISCO 氧化劑需求量測算綜述；當量重：Brown (ERM, 2003)</td></tr>
@@ -267,9 +314,9 @@ canvas{width:100%;height:340px;display:block}
         <tr><td>注入</td><td>徑向推移（plug flow）：V = π r² b nₑ；Thiem 穩態徑向流：Δh = Q/(2πKb)·ln(R/r<sub>w</sub>)；NOD 限制傳輸半徑 r<sub>ox</sub> = √(M/(π b ρb·SOD))</td><td>Thiem 為經典解；r<sub>ox</sub> 為瞬時消耗假設之推導</td></tr>
         <tr><td>前緣混合</td><td>徑向延散前緣寬度 σ ≈ √(4/3·αL·r)（Gelhar &amp; Collins, 1971）</td><td><span class="tag">未查證</span></td></tr>
         <tr><td>流速</td><td>v = K·i / nₑ；污染物速度 v/R</td><td><span class="tag src">已查證</span> Ogata-Banks 計算例（Fetter, 1994）</td></tr>
-        <tr><td>延散</td><td>D = αL·v + Dm；αL 自動值 Xu &amp; Eckstein：αL = 0.83 (log₁₀ L)<sup>2.414</sup>；αT = 0.1αL、αV = 0.01αL</td><td>αL 隨尺度增加：<span class="tag src">已查證</span> Schulze-Makuch (2005)；公式係數 <span class="tag">未查證</span></td></tr>
+        <tr><td>延散</td><td>D = αL·v + Dm；αL 自動值 Xu &amp; Eckstein：αL = 0.83 (log₁₀ L)<sup>2.414</sup>；αT = 0.1αL、αV = 0.01αL</td><td>αL 隨尺度增加：Schulze-Makuch (2005)（前次查得）；公式與係數 <span class="tag src">已查證</span>（US EPA On-Site 頁面）</td></tr>
         <tr><td>下游傳輸</td><td>Ogata-Banks 一維解（含遲滯 R、一階衰減 λ）；Domenico 穩態中心線稀釋（橫向、垂向延散）</td><td>Ogata-Banks <span class="tag src">已查證</span>；Domenico <span class="tag">未逐字查證</span></td></tr>
-        <tr><td>動力學</td><td>dC/dt = −k₂[Ox]C·f(T) + k<sub>des</sub>(C<sub>eq</sub>−C) − (v/(R·L<sub>f</sub>))(C−C<sub>up</sub>)；d[Ox]/dt = −(k<sub>d</sub> + v/L<sub>f</sub>)[Ox]；f(T)：Arrhenius</td><td>k₂(TCE+KMnO₄)≈0.65–0.68 M⁻¹s⁻¹ <span class="tag src">已查證</span>；Ea 預設 60 kJ/mol <span class="tag">假設</span></td></tr>
+        <tr><td>動力學</td><td>dC/dt = −k₂[Ox]C·f(T) + k<sub>des</sub>(C<sub>eq</sub>−C) − (v/(R·L<sub>f</sub>))(C−C<sub>up</sub>)；d[Ox]/dt = −(k<sub>d</sub> + v/L<sub>f</sub>)[Ox]；f(T)：Arrhenius</td><td>k₂(TCE+KMnO₄)≈0.65–0.68 M⁻¹s⁻¹ <span class="tag src">已查證（Yan &amp; Schwartz 1999/2000）</span>；Ea 預設 60 kJ/mol <span class="tag">假設</span>（文獻值 35–41.5 kJ/mol，見⑥）</td></tr>
         <tr><td>放熱</td><td>H₂O₂ 分解熱 98.25 kJ/mol；情境 A 注入液絕熱、情境 B 處理區整體熱容</td><td><span class="tag src">已查證</span> Miletiev et al. (2012)；土壤比熱 <span class="tag">假設</span></td></tr>
       </tbody></table>
     </div>
@@ -287,7 +334,6 @@ canvas{width:100%;height:340px;display:block}
   </section>
 </div>
 <div id="banner"></div>
-
 <script>
 "use strict";
 /* ============================================================
@@ -318,7 +364,7 @@ const CONT={
 };
 for(const k in CONT){CONT[k].mw=molw(CONT[k].f);CONT[k].ne=nElec(CONT[k].f);CONT[k].nC=parseF(CONT[k].f).C||0;}
 const OX={
- Na2S2O8:{name:'過硫酸鈉',f:'Na2S2O8',ne:2,half:'S₂O₈²⁻ + 2e⁻ → 2SO₄²⁻',sol:560,kd:0.03,note:'溶解度約 56 g/100 mL；土中可存留數週至數月'},
+ Na2S2O8:{name:'過硫酸鈉',f:'Na2S2O8',ne:2,half:'S₂O₈²⁻ + 2e⁻ → 2SO₄²⁻',sol:560,kd:0.03,note:'溶解度 42 wt% @25°C（≈572 g/L，Evonik）；地下有效存留數週至數月'},
  KMnO4:{name:'過錳酸鉀',f:'KMnO4',ne:3,half:'MnO₄⁻ + 4H⁺ + 3e⁻ → MnO₂ + 2H₂O',sol:64,kd:0.1,note:'溶解度 64 g/L @20°C；MnO₂ 沉澱'},
  NaMnO4:{name:'過錳酸鈉',f:'NaMnO4',ne:3,half:'MnO₄⁻ + 4H⁺ + 3e⁻ → MnO₂ + 2H₂O',sol:400,kd:0.1,note:'溶解度 >400 g/L；商品多為 40% 溶液'},
  H2O2:{name:'過氧化氫',f:'H2O2',ne:2,half:'H₂O₂ + 2H⁺ + 2e⁻ → 2H₂O',sol:null,kd:5,note:'與水互溶；分解放熱並產生 O₂；存留數分鐘至數小時'},
@@ -327,7 +373,6 @@ const OX={
 for(const k in OX){OX[k].mw=molw(OX[k].f);OX[k].eq=OX[k].mw/OX[k].ne;}
 const stoich=(c,o)=>(CONT[c].ne/OX[o].ne)*OX[o].mw/CONT[c].mw;
 const K2PRE={'TCE|KMnO4':[0.67,'文獻 0.65–0.68 M⁻¹s⁻¹（pH 4–8, 21°C）'],'TCE|NaMnO4':[0.67,'同 MnO₄⁻ 反應，沿用 KMnO₄ 值（推論）']};
-
 /* ============================================================
    2. 安全資料
    ============================================================ */
@@ -346,7 +391,6 @@ const SPEC={
  O3:[['行政管理','臭氧為現場產生之氣體，需另行評估氣體偵測與通風；本工具未建資料','未查證']]
 };
 SPEC.NaMnO4=SPEC.KMnO4;
-
 /* ============================================================
    3. 工具函式
    ============================================================ */
@@ -367,7 +411,6 @@ function expErfc(a,b){ // exp(a)*erfc(b)，避免溢位（Numerical Recipes erfc
 const erf=x=>1-expErfc(0,x);
 const xuEck=Ls=>Ls>1?Math.max(0.01,0.83*Math.pow(Math.log10(Ls),2.414)):0.01;
 function download(name,text){const b=new Blob(['\ufeff'+text],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();}
-
 /* ---------- 簡易 Canvas 繪圖 ---------- */
 function niceTicks(a,b,n=6){if(a===b){a-=1;b+=1;}const s=(b-a)/n,p=Math.pow(10,Math.floor(Math.log10(s))),m=s/p,st=(m<1.5?1:m<3?2:m<7?5:10)*p;const t=[];for(let x=Math.ceil(a/st)*st;x<=b+st*1e-9;x+=st)t.push(+x.toFixed(10));return t;}
 function setupCv(cv){const dpr=window.devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;if(!W)return null;cv.width=W*dpr;cv.height=H*dpr;const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,H);g.font='11px "Segoe UI","Microsoft JhengHei",sans-serif';return{g,W,H};}
@@ -411,7 +454,6 @@ function drawLayout(cv,L,W,d){
   g.fillStyle='#334155';g.textAlign='center';g.fillText(`${d.n} 口｜dx=${fmt(d.dx,2)} m、dy=${fmt(d.dy,2)} m｜覆蓋率 ${(d.cov*100).toFixed(2)}%`,CW/2,14);
   g.fillText(`L = ${L} m`,X(L/2),Y(0)+16);g.save();g.translate(X(0)-10,Y(W/2));g.rotate(-Math.PI/2);g.fillText(`W = ${W} m`,0,0);g.restore();
 }
-
 /* ============================================================
    4. 井位配置演算法
    ============================================================ */
@@ -429,7 +471,6 @@ function triLayout(L,W,R){let best=null;
 function designLayout(L,W,R){const sq=squareLayout(L,W,R),tr=triLayout(L,W,R);
   for(const d of [sq,tr]){d.R=R;d.n=d.wells.length;d.cov=coverage(d.wells,L,W,R);d.apw=L*W/d.n;}
   return{sq,tr,rec:tr.n<sq.n?'tr':'sq',tmin:Math.ceil(L*W/(1.5*Math.sqrt(3)*R*R))};}
-
 /* ============================================================
    5. 污染物表格狀態
    ============================================================ */
@@ -447,7 +488,6 @@ function renderRows(){
 $('ctab').addEventListener('input',e=>{const t=e.target,i=t.dataset.i;if(i===undefined)return;const k=t.dataset.k;rows[i][k]=k==='c'?t.value:(t.value===''?'':parseFloat(t.value));if(k==='c')renderRows();calcAll();});
 $('ctab').addEventListener('click',e=>{const d=e.target.dataset.del;if(d!==undefined){rows.splice(+d,1);renderRows();calcAll();}});
 $('addRow').onclick=()=>{rows.push({c:'PCE',soil:0,gw:0,napl:0,koc:''});renderRows();calcAll();};
-
 /* ============================================================
    6. 主計算
    ============================================================ */
@@ -522,7 +562,6 @@ function calcAll(){
   $('alertsTop').innerHTML=A.filter(a=>a[0]!=='info').slice(0,3).map(a=>al(...a)).join('')+(A.filter(a=>a[0]!=='info').length>3?al('info','其他警示請見各分頁'):'');
   renderKPI();renderSite();renderPart();renderDose();renderLayoutTxt();renderInj();renderSafety();renderVisible();
 }
-
 function renderKPI(){const s=S;
   $('kOxName').textContent=`${s.ox.name}${s.p.fenton?'（Fenton）':''} 設計用量 TOD`;
   $('kTOD').textContent=fmt(s.tod,1);$('kTODs').textContent=`商品量 ${fmt(s.prod,1)} kg（純度 ${s.p.purity}%）`;
@@ -606,7 +645,6 @@ function renderLayoutCv(){const s=S;drawLayout($('cvSq'),s.p.L,s.p.W,s.lay.sq);d
 function renderDoseCv(){const s=S;const items=[['POD',s.pod,'#0f766e'],['NOD',s.nod,'#0891b2'],['地下水還原物質',s.gwRed,'#7c3aed'],['DEO',s.deoKg,'#ea580c'],['安全餘裕',s.sfKg,'#94a3b8']];
   const c=setupCv($('cvDose'));if(!c)return;const{g,W,H}=c;const mx=Math.max(...items.map(i=>i[1]),1);const bh=(H-30)/items.length;
   items.forEach(([l,val,col],i)=>{const y=10+i*bh;g.fillStyle='#334155';g.textAlign='right';g.fillText(l,108,y+bh/2+4);g.fillStyle=col;const w=(W-200)*val/mx;g.fillRect(114,y+4,w,bh-10);g.fillStyle='#334155';g.textAlign='left';g.fillText(`${fmt(val,1)} kg（${fmt(val/s.tod*100,1)}%）`,118+w,y+bh/2+4);});}
-
 /* ---------- 動力學 ---------- */
 function renderKin(){const s=S,p=s.p;const c=$('kc').value;const ox=s.ox;
   const pre=K2PRE[`${c}|${p.ox}`];const mode=$('kmode').value;
@@ -635,7 +673,6 @@ function renderKin(){const s=S,p=s.p;const c=$('kc').value;const ox=s.ox;
    +'<p class="note">完全混合（CSTR）假設：處理區內均勻，流出稀釋以 v/L_f 近似。溶解相常在數小時內被氧化，實場速率多受吸附相／NAPL 脫附（k_des）與傳輸限制。</p>';
 }
 $('kFill').onclick=()=>{const s=S;$('oxIn').value=(s.Cdes*1000).toFixed(0);$('kd').value=s.ox.kd;const r=s.pr.find(r=>r.c===$('kc').value);if(r)$('kC0').value=r.gw;const pre=K2PRE[`${$('kc').value}|${s.p.ox}`];if(pre)$('k2').value=pre[0];calcAll();};
-
 /* ---------- 放熱 ---------- */
 function renderHeat(){const s=S,p=s.p;const MWH=OX.H2O2.mw,DH=98.25,CPW=4.18,cps=v('cps');
   const hkg=isFinite(v('hkg'))?v('hkg'):(p.ox==='H2O2'?s.tod:1000);const wt=v('hwt')/100,hrs=v('hhr'),Tl=v('hTl');
@@ -652,7 +689,6 @@ function renderHeat(){const s=S,p=s.p;const MWH=OX.H2O2.mw,DH=98.25,CPW=4.18,cps
   const xs=[...Array(35)].map((_,i)=>i+1);
   plot($('cvHeat'),{series:[{x:xs,y:xs.map(w=>p.Tgw+w*10/MWH*DH/CPW),color:'#ea580c',label:'注入液絕熱溫度 (°C)'}],hlines:[{y:100,label:'沸點 100°C',color:'#b91c1c'},{y:Tl,label:`警戒 ${Tl}°C`,color:'#d97706'}],xlabel:'H₂O₂ 濃度 (wt%)',ylabel:'溫度 (°C)',xmin:1,xmax:35});
 }
-
 /* ---------- 安全 ---------- */
 let lastOx=null;const chkState={};
 function renderSafety(){const s=S,p=s.p;const key=p.fenton?'Fenton':p.ox;const label=`${s.ox.name}${p.fenton?'（Fenton）':''}`;
@@ -670,7 +706,6 @@ function renderSafety(){const s=S,p=s.p;const key=p.fenton?'Fenton':p.ox;const l
   $('dlChk').onclick=()=>download(`safety_checklist_${key}.csv`,'完成,類別,項目,依據\n'+items.map(([c,t,src],i)=>`${chkState[`${key}_${i}`]?'☑':'☐'},${c},"${t}","${src}"`).join('\n'));
 }
 $('matPick').addEventListener('change',()=>renderSafety());
-
 /* ---------- 資料庫 ---------- */
 function renderDB(){
   $('dbC').innerHTML=tbl(['名稱','化學式','MW','nₑ（礦化電子數）','類別','Koc (L/kg)','S (mg/L)','H′','Koc 來源'],Object.entries(CONT).map(([k,c])=>[k,c.f,fmt(c.mw,2),c.ne,c.g,c.koc??'–',c.S??'–',c.H??'–',c.kocS==='未查證'?tagNV:c.kocS]),[2,3,5,6,7])
@@ -678,7 +713,6 @@ function renderDB(){
   $('dbO').innerHTML=tbl(['代號','名稱','MW','nₑ','當量重','半反應','溶解度 (g/L)','預設 k_d (1/d)','備註'],Object.entries(OX).map(([k,o])=>[k,o.name,fmt(o.mw,2),o.ne,fmt(o.eq,2),o.half,o.sol??'–',`${o.kd} ${tagNV}`,o.note]),[2,3,4,6]);
   const ks=Object.keys(OX);$('dbS').innerHTML=tbl(['污染物',...ks],Object.keys(CONT).map(c=>[c,...ks.map(o=>fmt(stoich(c,o),2))]),[1,2,3,4,5]);
 }
-
 /* ============================================================
    7. 介面控制
    ============================================================ */
