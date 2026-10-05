@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ISCO 現地化學氧化灌注設計工具｜過硫酸鈉</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  input[type=number]::-webkit-inner-spin-button{opacity:.4}
+  .num{font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen">
+
+<!-- Header -->
+<header class="bg-gradient-to-r from-teal-700 to-cyan-600 text-white">
+  <div class="max-w-6xl mx-auto px-6 py-6">
+    <p class="text-teal-100 text-sm tracking-wide">In-Situ Chemical Oxidation · Design Prototype</p>
+    <h1 class="text-2xl md:text-3xl font-bold mt-1">ISCO 現地化學氧化灌注設計工具</h1>
+    <p class="text-teal-50 text-sm mt-1">主要氧化劑：過硫酸鈉 Sodium Persulfate (Na<sub>2</sub>S<sub>2</sub>O<sub>8</sub>)　|　劑量基礎：土壤氧化劑需求量 SOD</p>
+  </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+  <!-- ===== Input Panel ===== -->
+  <section class="lg:col-span-2 space-y-6">
+
+    <!-- Card: Site geometry -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+      <h2 class="font-semibold text-teal-800 flex items-center gap-2 mb-4">
+        <span class="w-7 h-7 rounded-lg bg-teal-100 text-teal-700 grid place-items-center text-sm">1</span>
+        目標處理區範圍
+      </h2>
+      <div class="grid grid-cols-3 gap-3">
+        <label class="block">
+          <span class="text-xs text-slate-500">長 L (m)</span>
+          <input id="L" type="number" step="0.1" min="0" value="10" class="inp">
+        </label>
+        <label class="block">
+          <span class="text-xs text-slate-500">寬 W (m)</span>
+          <input id="W" type="number" step="0.1" min="0" value="10" class="inp">
+        </label>
+        <label class="block">
+          <span class="text-xs text-slate-500">處理厚度 H (m)</span>
+          <input id="H" type="number" step="0.1" min="0" value="3" class="inp">
+        </label>
+      </div>
+    </div>
+
+    <!-- Card: Soil properties -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+      <h2 class="font-semibold text-teal-800 flex items-center gap-2 mb-4">
+        <span class="w-7 h-7 rounded-lg bg-teal-100 text-teal-700 grid place-items-center text-sm">2</span>
+        土壤參數
+      </h2>
+      <div class="grid grid-cols-2 gap-3">
+        <label class="block">
+          <span class="text-xs text-slate-500">有效孔隙率 n (–)</span>
+          <input id="n" type="number" step="0.01" min="0" max="1" value="0.35" class="inp">
+        </label>
+        <label class="block">
+          <span class="text-xs text-slate-500">乾總體密度 ρ<sub>b</sub> (g/cm³)</span>
+          <input id="rho" type="number" step="0.01" min="0" value="1.6" class="inp">
+        </label>
+      </div>
+      <p class="text-[11px] text-slate-400 mt-2">SOD 以乾土重 (g/kg dry soil) 表示時，密度應使用乾總體密度。</p>
+    </div>
+
+    <!-- Card: Oxidant -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+      <h2 class="font-semibold text-teal-800 flex items-center gap-2 mb-4">
+        <span class="w-7 h-7 rounded-lg bg-teal-100 text-teal-700 grid place-items-center text-sm">3</span>
+        氧化劑需求與藥劑配製
+      </h2>
+      <div class="grid grid-cols-2 gap-3">
+        <label class="block col-span-2">
+          <span class="text-xs text-slate-500">主要氧化劑</span>
+          <input type="text" value="過硫酸鈉 Na₂S₂O₈（MW 238.10 g/mol）" disabled class="inp bg-slate-50 text-slate-500">
+        </label>
+        <label class="block">
+          <span class="text-xs text-slate-500">SOD 值 (g/kg)</span>
+          <input id="sod" type="number" step="0.1" min="0" value="5" class="inp">
+        </label>
+        <label class="block">
+          <span class="text-xs text-slate-500">SOD 量測基準</span>
+          <select id="basis" class="inp">
+            <option value="PS">以 Na₂S₂O₈ 表示</option>
+            <option value="KMnO4">以 KMnO₄ 當量表示</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-xs text-slate-500">安全係數 SF (–)</span>
+          <input id="sf" type="number" step="0.1" min="1" value="1.0" class="inp">
+        </label>
+        <label class="block">
+          <span class="text-xs text-slate-500">藥劑純度 (%)</span>
+          <input id="purity" type="number" step="0.1" min="1" max="100" value="100" class="inp">
+        </label>
+        <label class="block col-span-2">
+          <span class="text-xs text-slate-500">灌注溶液濃度 (g/L)</span>
+          <input id="conc" type="number" step="1" min="1" value="100" class="inp">
+        </label>
+      </div>
+      <div class="flex gap-3 mt-5">
+        <button id="btnReset" class="flex-1 rounded-xl border border-slate-300 py-2 text-sm hover:bg-slate-50">重設預設值</button>
+        <button id="btnPrint" class="flex-1 rounded-xl bg-teal-600 text-white py-2 text-sm hover:bg-teal-700">列印 / 存成 PDF</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Output Panel ===== -->
+  <section class="lg:col-span-3 space-y-6">
+
+    <div id="alerts" class="space-y-2"></div>
+
+    <!-- KPI cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <p class="text-xs text-slate-500">目標區土壤總重量</p>
+        <p class="text-3xl font-bold text-slate-800 num mt-1"><span id="oSoilT">–</span><span class="text-base font-medium text-slate-400 ml-1">t</span></p>
+        <p class="text-xs text-slate-400 num mt-1">= <span id="oSoilKg">–</span> kg</p>
+      </div>
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <p class="text-xs text-slate-500">總孔隙體積 PV</p>
+        <p class="text-3xl font-bold text-slate-800 num mt-1"><span id="oPV">–</span><span class="text-base font-medium text-slate-400 ml-1">m³</span></p>
+        <p class="text-xs text-slate-400 num mt-1">= <span id="oPVL">–</span> L</p>
+      </div>
+      <div class="bg-gradient-to-br from-teal-600 to-cyan-600 rounded-2xl shadow-sm p-5 text-white">
+        <p class="text-xs text-teal-50">過硫酸鈉設計用量</p>
+        <p class="text-3xl font-bold num mt-1"><span id="oPSdesign">–</span><span class="text-base font-medium text-teal-100 ml-1">kg</span></p>
+        <p class="text-xs text-teal-50 num mt-1">≈ <span id="oPSdesignT">–</span> t（含 SF 與純度修正）</p>
+      </div>
+    </div>
+
+    <!-- Detail table -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+      <h3 class="font-semibold text-slate-700 mb-3">計算明細</h3>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-slate-500 border-b">
+              <th class="py-2 pr-2">項目</th><th class="py-2 pr-2">公式</th><th class="py-2 text-right">結果</th>
+            </tr>
+          </thead>
+          <tbody id="tbl" class="num"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Injection gauge -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+      <div class="flex justify-between items-end mb-2">
+        <h3 class="font-semibold text-slate-700">灌注溶液體積 / 孔隙體積</h3>
+        <p class="text-sm text-slate-500 num"><span id="oVsol">–</span> m³ ÷ PV</p>
+      </div>
+      <div class="w-full h-4 rounded-full bg-slate-100 overflow-hidden">
+        <div id="bar" class="h-4 rounded-full bg-teal-500 transition-all" style="width:0%"></div>
+      </div>
+      <div class="flex justify-between mt-2 text-xs text-slate-400"><span>0%</span><span>50%</span><span>100% PV</span></div>
+      <p class="mt-3 text-2xl font-bold num text-slate-800"><span id="oRatio">–</span><span class="text-sm font-medium text-slate-400 ml-1">% PV</span></p>
+      <p class="text-[11px] text-slate-400 mt-1">本比值僅作為灌注量合理性的參考指標；實際灌注體積需依現地透水性、影響半徑及模場試驗決定。</p>
+    </div>
+
+    <!-- Method note -->
+    <details class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+      <summary class="font-semibold text-slate-700 cursor-pointer">計算依據與限制</summary>
+      <ul class="list-disc pl-5 mt-3 text-sm text-slate-600 space-y-1">
+        <li>總氧化劑需求量 TOD = 污染物需求 POD + 天然需求 NOD + 氧化劑自身分解 DEO；本工具以實驗室批次試驗所得 SOD 作為整體劑量基礎。</li>
+        <li>KMnO₄ 當量換算以電子當量計：KMnO₄（MnO₄⁻→MnO₂，3e⁻）當量重 52.68 g/eq；Na₂S₂O₈（S₂O₈²⁻→2SO₄²⁻，2e⁻）當量重 119.05 g/eq；換算係數 ≈ 2.26。</li>
+        <li>過硫酸鈉約 20 °C 溶解度約 570 g/L（供應商技術資料），濃度超過時本工具會提示。</li>
+        <li>本工具未計入活化劑（鹼、鐵螯合物、H₂O₂ 或熱）用量，亦未考慮多次灌注分配。</li>
+      </ul>
+    </details>
+  </section>
+</main>
+
+<footer class="max-w-6xl mx-auto px-6 pb-8 text-xs text-slate-400">
+  原型工具，計算結果僅供初步設計估算，實場劑量應以處理性試驗（treatability study）與模場試驗結果確認。
+</footer>
+
+<style type="text/tailwindcss">
+  .inp{ @apply mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500; }
+</style>
+
+<script>
+// ===== Constants =====
+const MW_PS = 238.10;               // Na2S2O8 g/mol
+const MW_KMnO4 = 158.03;            // KMnO4 g/mol
+const EQ_PS = MW_PS / 2;            // 2 e- per S2O8^2-  -> 119.05 g/eq
+const EQ_KMnO4 = MW_KMnO4 / 3;      // 3 e- per MnO4- (to MnO2) -> 52.68 g/eq
+const KMNO4_TO_PS = EQ_PS / EQ_KMnO4; // ≈ 2.26
+const PS_SOLUBILITY = 570;          // g/L at ~20 °C
+
+const DEFAULTS = {L:10, W:10, H:3, n:0.35, rho:1.6, sod:5, basis:'PS', sf:1.0, purity:100, conc:100};
+const ids = Object.keys(DEFAULTS);
+const $ = id => document.getElementById(id);
+
+const fmt = (v, d=2) => isFinite(v)
+  ? v.toLocaleString('zh-TW', {minimumFractionDigits:d, maximumFractionDigits:d})
+  : '–';
+
+function readInputs(){
+  const o = {};
+  ids.forEach(k => o[k] = k === 'basis' ? $(k).value : parseFloat($(k).value));
+  return o;
+}
+
+function validate(p){
+  const msgs = [];
+  ['L','W','H','rho','sod','conc'].forEach(k => { if(!(p[k] > 0)) msgs.push(['err', `「${k}」需為大於 0 的數值。`]); });
+  if(!(p.n > 0 && p.n < 1)) msgs.push(['err','孔隙率需介於 0 與 1 之間。']);
+  if(!(p.purity > 0 && p.purity <= 100)) msgs.push(['err','藥劑純度需介於 0–100%。']);
+  if(!(p.sf >= 1)) msgs.push(['warn','安全係數小於 1，設計用量將低於 SOD 理論需求。']);
+  if(p.rho < 1.0 || p.rho > 2.3) msgs.push(['warn','土壤密度超出一般土壤常見範圍（約 1.0–2.3 g/cm³），請確認單位。']);
+  if(p.conc > PS_SOLUBILITY) msgs.push(['warn',`灌注濃度 ${p.conc} g/L 高於過硫酸鈉約 ${PS_SOLUBILITY} g/L（~20 °C）溶解度。`]);
+  return msgs;
+}
+
+function calc(p){
+  const V = p.L * p.W * p.H;                       // m³
+  const soilKg = V * p.rho * 1000;                 // g/cm³ = t/m³ → ×1000 kg
+  const PV = V * p.n;                              // m³
+  const sodPS = p.basis === 'KMnO4' ? p.sod * KMNO4_TO_PS : p.sod; // g Na2S2O8 / kg soil
+  const psTheo = sodPS * soilKg / 1000;            // kg
+  const psDesign = psTheo * p.sf / (p.purity/100); // kg product
+  const psPure = psTheo * p.sf;                    // kg active Na2S2O8
+  const Vsol = psPure / p.conc;                    // kg ÷ (g/L) = m³
+  const ratio = Vsol / PV * 100;                   // %
+  return {V, soilKg, PV, sodPS, psTheo, psPure, psDesign, Vsol, ratio};
+}
+
+function render(){
+  const p = readInputs();
+  const msgs = validate(p);
+  $('alerts').innerHTML = msgs.map(([t,m]) =>
+    `<div class="rounded-xl px-4 py-2 text-sm ${t==='err'?'bg-red-50 text-red-700 border border-red-200':'bg-amber-50 text-amber-800 border border-amber-200'}">${t==='err'?'⛔':'⚠️'} ${m}</div>`
+  ).join('');
+  if(msgs.some(m => m[0]==='err')) return;
+
+  const r = calc(p);
+  $('oSoilT').textContent = fmt(r.soilKg/1000, 1);
+  $('oSoilKg').textContent = fmt(r.soilKg, 0);
+  $('oPV').textContent = fmt(r.PV, 2);
+  $('oPVL').textContent = fmt(r.PV*1000, 0);
+  $('oPSdesign').textContent = fmt(r.psDesign, 1);
+  $('oPSdesignT').textContent = fmt(r.psDesign/1000, 2);
+  $('oVsol').textContent = fmt(r.Vsol, 2);
+  $('oRatio').textContent = fmt(r.ratio, 1);
+  $('bar').style.width = Math.min(r.ratio,100) + '%';
+  $('bar').className = 'h-4 rounded-full transition-all ' + (r.ratio > 100 ? 'bg-rose-500' : 'bg-teal-500');
+
+  const rows = [
+    ['處理區體積 V', 'L × W × H', `${fmt(r.V,2)} m³`],
+    ['土壤總重量 M<sub>soil</sub>', 'V × ρ<sub>b</sub> × 1,000', `${fmt(r.soilKg,0)} kg`],
+    ['總孔隙體積 PV', 'V × n', `${fmt(r.PV,2)} m³`],
+    ['SOD（Na₂S₂O₈ 基準）', p.basis==='KMnO4' ? `SOD<sub>KMnO₄</sub> × ${KMNO4_TO_PS.toFixed(3)}` : 'SOD', `${fmt(r.sodPS,2)} g/kg`],
+    ['理論需求量 M<sub>PS,theo</sub>', 'SOD × M<sub>soil</sub> ÷ 1,000', `${fmt(r.psTheo,1)} kg`],
+    ['有效成分設計量', 'M<sub>PS,theo</sub> × SF', `${fmt(r.psPure,1)} kg`],
+    ['<b>商品藥劑設計量</b>', 'M<sub>PS,theo</sub> × SF ÷ 純度', `<b>${fmt(r.psDesign,1)} kg</b>`],
+    ['灌注溶液體積 V<sub>sol</sub>', '有效成分量 ÷ 濃度', `${fmt(r.Vsol,2)} m³`],
+    ['V<sub>sol</sub> / PV', 'V<sub>sol</sub> ÷ PV × 100', `${fmt(r.ratio,1)} %`],
+  ];
+  $('tbl').innerHTML = rows.map(([a,b,c]) =>
+    `<tr class="border-b last:border-0"><td class="py-2 pr-2">${a}</td><td class="py-2 pr-2 text-slate-500">${b}</td><td class="py-2 text-right whitespace-nowrap">${c}</td></tr>`
+  ).join('');
+}
+
+ids.forEach(k => $(k).addEventListener('input', render));
+$('btnReset').addEventListener('click', () => { ids.forEach(k => $(k).value = DEFAULTS[k]); render(); });
+$('btnPrint').addEventListener('click', () => window.print());
+render();
+</script>
+</body>
+</html>
