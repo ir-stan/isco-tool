@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ISCO 現地化學氧化灌注設計工具 v7.4</title>
-<!-- ISCO 現地化學氧化灌注設計工具 v7.4（2026-10-05）；單一離線 HTML 檔 -->
+<title>ISCO 現地化學氧化灌注設計工具 v7.5</title>
+<!-- ISCO 現地化學氧化灌注設計工具 v7.5（2026-10-05）；單一離線 HTML 檔 -->
 <style>
 :root{--teal:#0d9488;--teal7:#0f766e;--teal1:#ccfbf1;--sl1:#f1f5f9;--sl2:#e2e8f0;--sl4:#94a3b8;--sl5:#64748b;--sl7:#334155;--sl8:#1e293b;--red:#b91c1c;--amb:#92400e}
 *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI","Microsoft JhengHei","Noto Sans TC",sans-serif;background:var(--sl1);color:var(--sl8);font-size:14px}
@@ -121,16 +121,16 @@ img,canvas{max-width:100%}
 </head>
 <body>
 <header>
-  <p>In-Situ Chemical Oxidation · Design v7.4（2026-10-05｜離線單一檔案｜參數來源連結｜報告產出（含限制與假設說明）｜自動填入參數｜報告檢核｜QA／委員意見）</p>
+  <p>In-Situ Chemical Oxidation · Design v7.5（2026-10-05｜離線單一檔案｜參數來源連結｜報告產出（含限制與假設說明）｜自動填入參數｜報告檢核｜QA／委員意見）</p>
   <h1>ISCO 現地化學氧化灌注設計工具</h1>
-  <p>劑量（TOD = POD + NOD + DEO）｜井位配置｜注入水力與傳輸稀釋｜反應動力學｜放熱評估｜安全檢查清單</p>
+  <p>劑量（TOD = (POD + NOD + 地下水還原物質) ÷ (1 − DEO) × SF）｜井位配置｜注入水力與傳輸稀釋｜反應動力學｜放熱評估｜安全檢查清單</p>
 </header>
 <div class="wrap">
   <div class="kpis">
     <div class="kpi hl"><div class="l" id="kOxName">氧化劑設計用量 TOD</div><div class="v"><span id="kTOD">–</span> kg</div><div class="s" id="kTODs">–</div></div>
     <div class="kpi"><div class="l">灌注溶液總量</div><div class="v"><span id="kVsol">–</span> m³</div><div class="s" id="kVsols">–</div></div>
     <div class="kpi"><div class="l">建議井數</div><div class="v"><span id="kWells">–</span> 口</div><div class="s" id="kWellss">–</div></div>
-    <div class="kpi"><div class="l">單井注入量</div><div class="v"><span id="kVw">–</span> m³</div><div class="s" id="kVws">–</div></div>
+    <div class="kpi"><div class="l">單井每次注入量</div><div class="v"><span id="kVw">–</span> m³</div><div class="s" id="kVws">–</div></div>
     <div class="kpi"><div class="l">地下水流速 v</div><div class="v"><span id="kV">–</span> m/d</div><div class="s" id="kVs">–</div></div>
     <div class="kpi"><div class="l">警示</div><div class="v"><span id="kAl">–</span></div><div class="s">各分頁詳列</div></div>
   </div>
@@ -304,7 +304,7 @@ img,canvas{max-width:100%}
       <div id="kinOut"></div>
     </div>
       <details class="srcbox" open><summary>📑 本頁數字／參數／公式來源與核實方式：⑥ 反應動力學</summary>
-      <table><thead><tr><th>項目</th><th>數值／公式</th><th>來源、推估依據與核實方式</th><th>狀態</th></tr></thead><tbody><tr><td>k₂ (TCE + MnO₄⁻)</td><td>0.67 M⁻¹s⁻¹（21 °C）</td><td>Yan &amp; Schwartz (1999), <i>J. Contam. Hydrol.</i> 37:343–365 <a href="https://doi.org/10.1016/S0169-7722(98)00166-1" target="_blank" rel="noopener noreferrer" title="開啟來源">🔗</a>：k = 0.67 ± 0.03 M⁻¹s⁻¹，pH 4–8 範圍內與 pH 無關；Yan &amp; Schwartz (2000), <i>ES&amp;T</i> 34(12):2535–2541 <a href="https://doi.org/10.1021/es991279q" target="_blank" rel="noopener noreferrer" title="開啟來源">🔗</a>：0.65–0.68 M⁻¹s⁻¹ @21 °C（已於 2026-10-05 線上核對摘要）。另 Huang et al. (1999)：0.89 ± 0.03 M⁻¹s⁻¹（pH 7、20 °C）。</td><td><span class="st lit">文獻（已線上核對，2026-10-05）</span></td></tr><tr><td>k₂ (TCE + NaMnO₄)</td><td>沿用 0.67</td><td>反應物種同為 MnO₄⁻，陽離子不參與反應的推論。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>參考溫度</td><td>21 °C</td><td>與 Yan &amp; Schwartz 實驗溫度一致。</td><td><span class="st lit">文獻（已線上核對，2026-10-05）</span></td></tr><tr><td>活化能 Ea</td><td>60 kJ/mol（無文獻組合時之預設）；TCE＋過錳酸鹽自動帶入 41.46</td><td>60 為假設值；選擇 TCE＋過錳酸鹽時工具自動改用 Yan &amp; Schwartz (2000) 之 41.46 kJ/mol。<b>文獻可替代值：</b>TCE–MnO₄⁻ 為 35 ± 2.9 kJ/mol（Huang et al., 1999 <a href="https://doi.org/10.1089/ees.1999.16.265" target="_blank" rel="noopener noreferrer" title="開啟來源">🔗</a>）、41.46 kJ/mol（Yan &amp; Schwartz, 2000 <a href="https://doi.org/10.1021/es991279q" target="_blank" rel="noopener noreferrer" title="開啟來源">🔗</a>），已於 2026-10-05 核對摘要。若模擬 TCE + 過錳酸鹽，建議改用文獻值。</td><td><span class="st asm">工程假設（未查證）</span></td></tr><tr><td>Arrhenius 修正</td><td>f(T) = exp[−Ea/R·(1/T − 1/T<sub>ref</sub>)]，R = 8.314 J/mol·K</td><td>標準式。</td><td><span class="st std">標準常數／教科書定義</span></td></tr><tr><td>氧化劑衰減 k_d 預設</td><td>過硫酸鈉 0.03、KMnO₄ 0.1、H₂O₂ 5、O₃ 10 (1/d)</td><td>均為假設。過硫酸鈉 0.03/d（半衰期約 23 d）是配合 Evonik「地下有效存留數週至數月」 <a href="https://active-oxygens.evonik.com/en/media/white-papers/attachment/137995?rev=79f852e2af8a4294d8499b54db9ed54e" target="_blank" rel="noopener noreferrer" title="開啟來源">🔗</a>的描述推估（已於 2026-10-05 核對該描述）；H₂O₂ 5/d（半衰期約 3.3 h）配合「數分鐘至數小時」的一般描述；KMnO₄、O₃ 無依據。應以處理性試驗的氧化劑殘留曲線取代。</td><td><span class="st asm">工程假設（未查證）</span></td></tr><tr><td>C₀、目標濃度</td><td>20 mg/L、0.05 mg/L</td><td>示範值；目標濃度應依適用的管制標準（如地下水污染管制標準）填入，本工具未內建法規值。</td><td><span class="st ex">範例預設值（須以場址資料取代）</span></td></tr><tr><td>k_obs、氧化劑濃度、灌注次數／間隔、k_des、C_up、天數</td><td>0.2/d、50 mg/L、2 次／30 d、0、0、120 d</td><td>示範值；須以處理性試驗與設計方案取代。</td><td><span class="st ex">範例預設值（須以場址資料取代）</span></td></tr><tr><td>模型結構</td><td>dC/dt = −k₂[Ox]C·f(T) + k_des(C_eq−C) − v/(R·L_f)(C−C_up)</td><td>二階反應（Yan &amp; Schwartz）＋一階質傳（集總參數）＋完全混合反應槽（CSTR）出流項的組合，屬本工具自建的簡化模型，非單一文獻模型。</td><td><span class="st asm">工程假設（未查證）</span></td></tr><tr><td>數值解法</td><td>時間步長 = 天數/20000；反應項指數解＋其他項顯式 Euler</td><td>數值方法；步長足夠小時誤差可忽略，可改步長比對結果。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>過硫酸鹽動力學提示</td><td>建議用 k_obs</td><td>活化過硫酸鹽以自由基反應為主、受活化方式影響的一般認知；未查特定文獻。</td><td><span class="st nv">未查證</span></td></tr></tbody></table><p class="note">狀態說明：<span class="st lit">文獻（已線上核對，2026-10-05）</span>、<span class="st prev">文獻（書目已知，數值未逐一重核）</span>、<span class="st std">標準常數／教科書定義</span>、<span class="st der">數學／化學計量推導</span>、<span class="st asm">工程假設（未查證）</span>、<span class="st ex">範例預設值（須以場址資料取代）</span>、<span class="st nv">未查證</span>。「範例預設值」只是讓工具可以運算的示範數字，不得直接寫入報告。</p>
+      <table><thead><tr><th>項目</th><th>數值／公式</th><th>來源、推估依據與核實方式</th><th>狀態</th></tr></thead><tbody><tr><td>k₂ (TCE + MnO₄⁻)</td><td>0.67 M⁻¹s⁻¹（21 °C）</td><td>Yan &amp; Schwartz (1999), <i>J. Contam. Hydrol.</i> 37:343–365 <a href="https://doi.org/10.1016/S0169-7722(98)00166-1" target="_blank" rel="noopener noreferrer" title="開啟來源">🔗</a>：k = 0.67 ± 0.03 M⁻¹s⁻¹，pH 4–8 範圍內與 pH 無關；Yan &amp; Schwartz (2000), <i>ES&amp;T</i> 34(12):2535–2541 <a href="https://doi.org/10.1021/es991279q" target="_blank" rel="noopener noreferrer" title="開啟來源">🔗</a>：0.65–0.68 M⁻¹s⁻¹ @21 °C（已於 2026-10-05 線上核對摘要）。另 Huang et al. (1999)：0.89 ± 0.03 M⁻¹s⁻¹（pH 7、20 °C）。</td><td><span class="st lit">文獻（已線上核對，2026-10-05）</span></td></tr><tr><td>k₂ (TCE + NaMnO₄)</td><td>沿用 0.67</td><td>反應物種同為 MnO₄⁻，陽離子不參與反應的推論。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>參考溫度</td><td>21 °C</td><td>與 Yan &amp; Schwartz 實驗溫度一致。</td><td><span class="st lit">文獻（已線上核對，2026-10-05）</span></td></tr><tr><td>活化能 Ea</td><td>60 kJ/mol（無文獻組合時之預設）；TCE＋過錳酸鹽自動帶入 41.46</td><td>60 為假設值；選擇 TCE＋過錳酸鹽時工具自動改用 Yan &amp; Schwartz (2000) 之 41.46 kJ/mol。<b>文獻可替代值：</b>TCE–MnO₄⁻ 為 35 ± 2.9 kJ/mol（Huang et al., 1999 <a href="https://doi.org/10.1089/ees.1999.16.265" target="_blank" rel="noopener noreferrer" title="開啟來源">🔗</a>）、41.46 kJ/mol（Yan &amp; Schwartz, 2000 <a href="https://doi.org/10.1021/es991279q" target="_blank" rel="noopener noreferrer" title="開啟來源">🔗</a>），已於 2026-10-05 核對摘要。選擇 TCE＋過錳酸鹽時工具已自動帶入文獻值。</td><td><span class="st asm">工程假設（未查證）</span></td></tr><tr><td>Arrhenius 修正</td><td>f(T) = exp[−Ea/R·(1/T − 1/T<sub>ref</sub>)]，R = 8.314 J/mol·K</td><td>標準式。</td><td><span class="st std">標準常數／教科書定義</span></td></tr><tr><td>氧化劑衰減 k_d 預設</td><td>過硫酸鈉 0.03、KMnO₄ 0.1、H₂O₂ 5、O₃ 10 (1/d)</td><td>均為假設。過硫酸鈉 0.03/d（半衰期約 23 d）是配合 Evonik「地下有效存留數週至數月」 <a href="https://active-oxygens.evonik.com/en/media/white-papers/attachment/137995?rev=79f852e2af8a4294d8499b54db9ed54e" target="_blank" rel="noopener noreferrer" title="開啟來源">🔗</a>的描述推估（已於 2026-10-05 核對該描述）；H₂O₂ 5/d（半衰期約 3.3 h）配合「數分鐘至數小時」的一般描述；KMnO₄、O₃ 無依據。應以處理性試驗的氧化劑殘留曲線取代。</td><td><span class="st asm">工程假設（未查證）</span></td></tr><tr><td>C₀、目標濃度</td><td>20 mg/L、0.05 mg/L</td><td>示範值；目標濃度應依適用的管制標準（如地下水污染管制標準）填入，本工具未內建法規值。</td><td><span class="st ex">範例預設值（須以場址資料取代）</span></td></tr><tr><td>k_obs、氧化劑濃度、灌注次數／間隔、k_des、C_up、天數</td><td>0.2/d、50 mg/L、2 次／30 d、0、0、120 d</td><td>示範值；須以處理性試驗與設計方案取代。</td><td><span class="st ex">範例預設值（須以場址資料取代）</span></td></tr><tr><td>模型結構</td><td>dC/dt = −k₂[Ox]C·f(T) + k_des(C_eq−C) − v/(R·L_f)(C−C_up)</td><td>二階反應（Yan &amp; Schwartz）＋一階質傳（集總參數）＋完全混合反應槽（CSTR）出流項的組合，屬本工具自建的簡化模型，非單一文獻模型。</td><td><span class="st asm">工程假設（未查證）</span></td></tr><tr><td>數值解法</td><td>時間步長 = 天數/20000；反應項指數解＋其他項顯式 Euler</td><td>數值方法；步長足夠小時誤差可忽略，可改步長比對結果。</td><td><span class="st der">數學／化學計量推導</span></td></tr><tr><td>過硫酸鹽動力學提示</td><td>建議用 k_obs</td><td>活化過硫酸鹽以自由基反應為主、受活化方式影響的一般認知；未查特定文獻。</td><td><span class="st nv">未查證</span></td></tr></tbody></table><p class="note">狀態說明：<span class="st lit">文獻（已線上核對，2026-10-05）</span>、<span class="st prev">文獻（書目已知，數值未逐一重核）</span>、<span class="st std">標準常數／教科書定義</span>、<span class="st der">數學／化學計量推導</span>、<span class="st asm">工程假設（未查證）</span>、<span class="st ex">範例預設值（須以場址資料取代）</span>、<span class="st nv">未查證</span>。「範例預設值」只是讓工具可以運算的示範數字，不得直接寫入報告。</p>
     </details>
   </section>
   <!-- ================= P7 放熱 ================= -->
@@ -686,7 +686,7 @@ function calcAll(){
     if(p.cl>500||p.alk>300)A.push(['warn',`Cl⁻ ${p.cl} mg/L、鹼度 ${p.alk} mg/L：可能清除自由基、降低活化效率（門檻值為示意，未查證），請以處理性試驗確認`]);}
   if(p.fenton){if(p.pH>5)A.push(['warn',`地下水 pH ${p.pH} 高於 Fenton 常見最佳範圍 3–5；土壤緩衝能力會抵抗酸化`]);}
   if(p.ox.includes('MnO4'))A.push(['info','過錳酸鹽反應生成 MnO₂ 沉澱，可能降低含水層透水性']);
-  if(p.ox==='KMnO4'&&Cdes>64)A.push(['warn','KMnO₄ 溶解度僅約 64 g/L @20°C']);
+  
   if(p.Tgw<10)A.push(['info','地下水溫低，反應速率下降（見⑥ Arrhenius 修正）']);
   $('alertsTop').innerHTML=A.filter(a=>a[0]!=='info').slice(0,3).map(a=>al(...a)).join('')+(A.filter(a=>a[0]!=='info').length>3?al('info','其他警示請見各分頁'):'');
   renderKPI();renderSite();renderPart();renderDose();renderLayoutTxt();renderInj();renderSafety();renderVisible();
@@ -741,7 +741,7 @@ function renderInj(){const s=S,p=s.p;
    ['<b>採用單井每次注入體積</b>',$('vctl').selectedOptions[0].text,`<b>${fmt(s.Vw,2)} m³</b>`],['單井累計氧化劑量','TOD ÷ 井數',`${fmt(s.Mw,1)} kg`],['單井每次氧化劑量','單井累計 ÷ 灌注次數 '+s.ni,`${fmt(s.Mev,1)} kg`],['全場累計注入體積','井數 × 每次體積 × 次數',`${fmt(s.Vtot,1)} m³`],
    ['<b>設計注入濃度</b>','單井每次量 ÷ 單井每次體積',`<b>${fmt(s.Cdes,1)} g/L</b>`],['注入體積對應半徑','√(V/(π b nₑ))',`${fmt(s.rFromV,2)} m`],
    ['孔隙水當量 NOD 濃度','SOD·ρb / nₑ',`${fmt(s.demC,1)} g/L`],['NOD 限制傳輸半徑 r_ox','√(M/(π b ρb SOD))',`${fmt(s.rox,2)} m`],
-   ['單井注入時間','V / Q',`${fmt(s.tinj,1)} h（Q = ${p.Q} L/min）`],['注入水頭上升 Δh（Thiem）','Q/(2πKb)·ln(R/r_w)',`${fmt(s.dh,2)} m`],
+   ['單井每次注入時間','每次體積 V / Q',`${fmt(s.tinj,1)} h（Q = ${p.Q} L/min）`],['注入水頭上升 Δh（Thiem）','Q/(2πKb)·ln(R/r_w)',`${fmt(s.dh,2)} m`],
    ['所需井口壓力（估）','(Δh − 地下水位深度)×9.81',`${fmt(s.Pwh,0)} kPa`],['前緣混合帶寬 2σ','2√(4/3·αL(R)·R)'+tagNV,`${fmt(2*s.sig,2)} m（αL(R) = ${fmt(s.aLr,3)} m）`],
    ['氧化劑存留（衰減至 10%）','ln10 / k_d',`${fmt(s.tPers,1)} d（k_d = ${s.kdOx} 1/d）`],['存留期間漂移距離','v × 存留時間',`${fmt(s.drift,2)} m`],
    ['污染物移動速度','v / R',s.pr.map(r=>`${r.c}: ${sci(s.vel/(r.R||1))} m/d`).join('<br>')]],[2])
@@ -783,7 +783,7 @@ function renderKin(){const s=S,p=s.p;const c=$('kc').value;const ox=s.ox;
   if(mode==='lit'){k2=v('k2');msg=pre?al('info',`k₂ 預設來源：${pre[1]}`):al('warn',`資料庫無 ${c} + ${ox.name} 的 k₂，請查 IscoKin 資料庫（Tratnyek 等）或改用處理性試驗 k_obs；目前使用輸入值 ${k2}`);}
   else{k2=v('kobs')/86400/Math.max(oxM,1e-15);msg=al('info',`由 k_obs 反算 k₂ = ${sci(k2)} M⁻¹s⁻¹（於 ${oxIn} mg/L 氧化劑）`);}
   if(p.ox==='Na2S2O8')msg+=al('info','活化過硫酸鹽以自由基反應為主，k₂ 隨活化方式改變，建議使用處理性試驗 k_obs');
-  msg+=al('info',`Arrhenius 溫度修正係數 f(T) = ${fmt(fT,3)}（地下水 ${p.Tgw}°C、參考 ${v('Tref')}°C、Ea ${v('Ea')} kJ/mol；Ea 為假設值）`);
+  msg+=al('info',`Arrhenius 溫度修正係數 f(T) = ${fmt(fT,3)}（地下水 ${p.Tgw}°C、參考 ${v('Tref')}°C、Ea ${v('Ea')} kJ/mol；Ea ${Math.abs(v('Ea')-41.46)<1e-9&&pre?'為文獻值（Yan & Schwartz, 2000）':Math.abs(v('Ea')-60)<1e-9?'為假設值':'為使用者輸入值'}）`);
   const r0=s.pr.find(r=>r.c===c);const R=(r0&&r0.R)||1;
   const flush=$('flush').value==='1';const kfo=flush?s.vel/s.Lf:0,kfc=flush?s.vel/(R*s.Lf):0;
   const C0=v('kC0'),Ceq=isFinite(v('Ceq'))?v('Ceq'):C0,Cup=v('Cup'),kdes=v('kdes'),kd=s.kdOx,ninj=Math.max(1,Math.round(v('ninj'))),itv=v('itv'),days=v('days');
@@ -839,7 +839,7 @@ $('matPick').addEventListener('change',()=>renderSafety());
 function renderDB(){
   $('dbC').innerHTML=tbl(['名稱','化學式','MW','nₑ（礦化電子數）','類別','Koc (L/kg)','S (mg/L)','H′','Koc 來源'],Object.entries(CONT).map(([k,c])=>[k,c.f,fmt(c.mw,2),c.ne,c.g,c.koc??'–',c.S??'–',c.H??'–',c.kocS==='未查證'?tagNV:c.kocS]),[2,3,5,6,7])
    +'<p class="note">nₑ = 4C + H − Cl − Br − 2O（完全礦化：C→CO₂、H→H₂O、X→X⁻）；S、H′ 來源：US EPA On-Site 工具化學性質表（僅 BTEX、MTBE）。</p>';
-  $('dbO').innerHTML=tbl(['代號','名稱','MW','nₑ','當量重','半反應','溶解度 (g/L)','預設 k_d (1/d)','備註'],Object.entries(OX).map(([k,o])=>[k,o.name,fmt(o.mw,2),o.ne,fmt(o.eq,2),o.half,o.sol??'–',`${o.kd} ${tagNV}`,o.note]),[2,3,4,6]);
+  $('dbO').innerHTML=tbl(['代號','名稱','MW','nₑ','當量重','半反應','溶解度 (g/L)','預設 k_d (1/d)','備註'],Object.entries(OX).map(([k,o])=>[k,o.name,fmt(o.mw,2),o.ne,fmt(o.eq,2),o.half,k==='Na2S2O8'?'572（25 °C；計算時依水溫內插）':(o.sol??'–'),`${o.kd} ${tagNV}`,o.note]),[2,3,4,6]);
   const ks=Object.keys(OX);$('dbS').innerHTML=tbl(['污染物',...ks],Object.keys(CONT).map(c=>[c,...ks.map(o=>fmt(stoich(c,o),2))]),[1,2,3,4,5]);
 }
 /* ============================================================
@@ -886,7 +886,7 @@ function renderReport(){
   const pat=s.use===s.lay.tr?'三角形（交錯）':'正方形';
   const ztop=p.ztop,zbot=p.ztop+p.H,sb=p.ztop+p.bs;
   const H2=t=>`<h3 style="color:#0f766e;margin:16px 0 6px">${t}</h3>`;
-  let o=`<h2 style="color:#0f766e">${esc(site)}──現地化學氧化（ISCO）灌注設計說明</h2><p class="note">本節由「ISCO 現地化學氧化灌注設計工具 v7.4」依目前輸入值產生（${new Date().toLocaleDateString('zh-TW')}）。〔標註〕為查證狀態，正式提送前請逐項確認。</p>`;
+  let o=`<h2 style="color:#0f766e">${esc(site)}──現地化學氧化（ISCO）灌注設計說明</h2><p class="note">本節由「ISCO 現地化學氧化灌注設計工具 v7.5」依目前輸入值產生（${new Date().toLocaleDateString('zh-TW')}）。〔標註〕為查證狀態，正式提送前請逐項確認。</p>`;
   o+=H2('一、處理範圍與場址條件');
   o+=`<p>本計畫處理區範圍為長 ${p.L} m × 寬 ${p.W} m（面積 ${fmt(p.L*p.W,1)} m²）${SV('L')}，處理深度為地表下 ${fmt(ztop,1)}～${fmt(zbot,1)} m（厚度 ${p.H} m）${SV('H')}，處理土體體積 ${fmt(s.V,1)} m³${T('der')}。依乾總體密度 ρ<sub>b</sub> = ${p.rho} g/cm³ ${SV('rho')}估算土壤乾重約 ${fmt(s.soilKg/1000,1)} t；依總孔隙率 n = ${p.n} ${SV('n')}及有效孔隙率 n<sub>e</sub> = ${p.ne} ${SV('ne')}，孔隙體積 PV 為 ${fmt(s.PV,1)} m³、有效孔隙體積為 ${fmt(s.PVe,1)} m³${T('der')}。</p>`;
   o+=`<p>地下水位約地表下 ${p.dtw} m ${SV('dtw')}${s.unsat>0?`，處理區上方 ${fmt(s.unsat,2)} m 位於地下水位以上，該段藥劑分布需另行評估${T('asm')}`:''}。水力傳導係數 K = ${sci(p.K)} m/d ${SV('K')}、水力梯度 i = ${p.grad} ${SV('grad')}，依 v = K·i/n<sub>e</sub> 計算地下水平均線性流速 ${sci(s.vel)} m/d（約 ${fmt(s.vel*365,1)} m/yr）${T('std')}。地下水溫 ${p.Tgw} °C ${SV('Tgw')}、pH ${p.pH} ${SV('pH')}、鹼度 ${p.alk} mg/L as CaCO₃ ${SV('alk')}、Cl⁻ ${p.cl} mg/L ${SV('cl')}。</p>`;
@@ -911,7 +911,7 @@ function renderReport(){
   rws.push(['NOD','SOD × 土壤乾重',`${fmt(s.nod,1)} kg`,T('der')]);
   rws.push(['地下水還原物質','Fe²⁺、Mn²⁺、S²⁻ 化學計量 × PV',`${fmt(s.gwRed,2)} kg`,T('der')]);
   rws.push(['自身分解 DEO',`${p.deo}`,`${fmt(s.deoKg,1)} kg`,DEF.deo===$('deo').value?T('def'):T('asm')]);
-  rws.push(['安全係數 SF',`${p.sf}`,`${fmt(s.sfKg,1)} kg`,T('asm')]);
+  rws.push(['安全係數 SF',`${p.sf}`,`${fmt(s.sfKg,1)} kg`,DEF.sf===$('sf').value?T('def'):T('asm')]);
   rws.push(['<b>設計用量 TOD</b>','',`<b>${fmt(s.tod,1)} kg</b>`,T('der')]);
   rws.push(['商品藥劑量',`TOD ÷ 純度 ${p.purity}%`,`${fmt(s.prod,1)} kg`,SV('purity')]);
   o+=rtbl(['項目','計算','結果','查證狀態'],rws);
@@ -930,7 +930,7 @@ function renderReport(){
     let kt='';
     if(K.mode==='lit'){kt=K.pre?`TCE 與過錳酸鹽之二階速率常數 k₂ = 0.65–0.68 M⁻¹s⁻¹（21 °C，pH 4–8 間與 pH 無關）${CI('yan99','yan00')}${T('ok')}，本計算採 ${$('k2').value} M⁻¹s⁻¹。`:`${K.c} 與${s.ox.name}之 k₂ 採輸入值 ${$('k2').value} M⁻¹s⁻¹${T('nv')}${Math.abs(Number($('k2').value)-0.67)<1e-9&&!/MnO4/.test(p.ox)?'（此預設值為 TCE–過錳酸鹽文獻值，不適用於'+s.ox.name+'）':''}，<b>必須</b>以處理性試驗 k<sub>obs</sub> 取代。`;}
     else kt=`速率常數由處理性試驗 k<sub>obs</sub> = ${$('kobs').value} 1/d 反算${DEF.kobs===$('kobs').value?T('def'):T('site')}。`;
-    const eaTag=Math.abs(K.Ea-60)<1e-9?`${T('asm')}（TCE–過錳酸鹽文獻值為 35 kJ/mol${CI('huang99')}及 41.46 kJ/mol${CI('yan00')}${T('ok')}）`:T('site');
+    const eaTag=Math.abs(K.Ea-41.46)<1e-9&&K.pre?T('ok')+CI('yan00'):Math.abs(K.Ea-60)<1e-9?`${T('asm')}（TCE–過錳酸鹽文獻值為 35 kJ/mol${CI('huang99')}及 41.46 kJ/mol${CI('yan00')}${T('ok')}）`:T('site');
     o+=`<p>${kt}溫度以 Arrhenius 式修正至地下水溫 ${p.Tgw} °C，活化能 E<sub>a</sub> = ${K.Ea} kJ/mol ${eaTag}，修正係數 ${fmt(K.fT,3)}${T('std')}。${p.ox==='Na2S2O8'?`活化過硫酸鹽以自由基反應為主，速率受活化方式影響，應以處理性試驗 k<sub>obs</sub> 為準${T('nv')}。`:''}</p>`;
     o+=`<p>以完全混合簡化模型（二階反應＋氧化劑衰減＋${K.ninj} 次灌注、間隔 ${K.itv} d＋脫附回補＋地下水流出）模擬${T('asm')}：${K.c} 由 ${$('kC0').value} mg/L ${K.tt!=null?`約於第 <b>${fmt(K.tt,1)} d</b> 降至目標 ${K.tg} mg/L`:`於 ${K.days} d 內<b>未達</b>目標 ${K.tg} mg/L`}，最低濃度 ${K.mn<1e-6?'< 1×10⁻⁶':sci(K.mn)} mg/L，期末濃度 ${K.end<1e-6?'< 1×10⁻⁶':sci(K.end)} mg/L${K.end>K.mn*1.5&&K.end>1e-6?'（有反彈）':''}${T('der')}。整治目標依據：${esc($('rStd').value.trim())||'<span style="color:#991b1b">【請填寫適用管制標準】</span>'}。本模擬僅供趨勢評估，實際成效以灌注後監測為準。</p>`;
   }
@@ -1648,7 +1648,7 @@ $('aL').disabled=true;renderRows();renderDB();calcAll();
 (function(){
   if(typeof S==='undefined'||!document.getElementById('p11'))return;
   var $$=function(id){return document.getElementById(id);};
-  var VER='v7.4';
+  var VER='v7.5';
   var f2=function(x,d){return (typeof fmt==='function')?fmt(x,d):String(x);};
   var RED=function(s){return '<span style="color:#b91c1c">'+s+'</span>';};
   var TT=function(k){try{return T(k);}catch(e){return '';}};
@@ -1706,7 +1706,7 @@ $('aL').disabled=true;renderRows();renderDB();calcAll();
      [1,'影響半徑（ROI）與井位','以設計 ROI 進行圓形覆蓋配置（正方形或三角形），覆蓋率以網格逐點檢核。','幾何推導','ROI 高估將造成處理盲區','ROI '+f2(s.Rd,2)+' m'+roiTag+'，來源：'+roiSrc+'；'+pat+'配置 '+s.nW+' 口，覆蓋率 '+(s.use.cov*100).toFixed(1)+'%'+TT('der')],
      [1,'注入水頭','以 Thiem 穩態徑向流估算注入水頭上升，影響半徑取設計 ROI。','標準解析解；影響半徑取值為假設','實際影響半徑通常大於 ROI，注入壓力可能低估','Δh 約 '+f2(s.dh,2)+' m'+(s.dh>p.dtw?'，井口約需 '+f2(s.Pwh,0)+' kPa':'，理論上不需加壓')+TT('asm')+'；現場壓力上限：'+RED('【○ kPa】')],
      [!!s.ox.sol,'藥劑溶解度',PS?'過硫酸鈉最大溶解度依地下水溫於 0／25／50 °C 之 37／42／46 wt% 間線性內插。':'藥劑溶解度採手冊或供應商資料。',PS?'供應商技術文件'+ci('evonik')+'；內插為推導':'手冊／供應商資料（未查證）','低溫時上限降低',PS?'地下水溫 '+p.Tgw+' °C'+SVv('Tgw')+' → 上限約 '+f2(s.ox.sol,0)+' g/L；設計濃度 '+f2(s.Cdes,1)+' g/L'+TT('der'):s.ox.name+'約 '+f2(s.ox.sol||0,0)+' g/L'+TT('nv')],
-     [1,'反應動力學','處理區視為完全混合反應槽，污染物以二階反應消減，並考慮氧化劑一階衰減、分次灌注、脫附回補及地下水流出。','模型結構為簡化組合；TCE–MnO₄⁻ 速率常數引自文獻'+ci('yan99','yan00'),'僅供趨勢評估，不代表實際整治期程',kTxt+'；Ea '+($$('Ea')?$$('Ea').value:'–')+' kJ/mol；灌注 '+s.ni+' 次'],
+     [1,'反應動力學','處理區視為完全混合反應槽，污染物以二階反應消減，並考慮氧化劑一階衰減、分次灌注、脫附回補及地下水流出。','模型結構為簡化組合；TCE–MnO₄⁻ 速率常數引自文獻'+ci('yan99','yan00'),'僅供趨勢評估，不代表實際整治期程',kTxt+'；Ea '+($$('Ea')?$$('Ea').value:'–')+' kJ/mol'+(Math.abs(+$$('Ea').value-41.46)<1e-9&&K.pre?TT('ok'):Math.abs(+$$('Ea').value-60)<1e-9?TT('asm'):TT('site'))+'；灌注 '+s.ni+' 次'],
      [PS,'活化（過硫酸鈉）','劑量計算未包含活化劑（鹼、熱、鐵螯合或 H₂O₂）用量。','—','活化劑需另行計算','活化方式：'+(act==='未定'?RED('【未定，須依處理性試驗決定】'):esc(act)+TT('site'))+'；活化劑用量：'+RED('【○ kg】')],
      [1,'相分配與遲滯','吸附以線性 Kd = Koc × f<sub>oc</sub> 表示，遲滯因子 R = 1 + ρb·Kd／nₑ。','Koc 文獻值'+ci('ssg')+'；標準定義','f<sub>oc</sub> 很低或非線性吸附時誤差增加','f<sub>oc</sub> = '+p.foc+SVv('foc')],
      [1,'下游傳輸','以 Ogata–Banks 一維解及 Domenico 穩態中心線解估算；縱向延散度採 Xu 與 Eckstein（1995）經驗式，橫向、垂向延散度採固定比例。','Ogata–Banks 解、Domenico 解、延散度經驗式'+ci('ogata','domenico','xu95')+'；比例為假設','解析解假設均勻流場，僅供量級評估','受體距離 '+p.xr+' m'+SVv('xr')+'；αT/αL = '+p.aTr+'、αV/αL = '+p.aVr+TT('asm')],
