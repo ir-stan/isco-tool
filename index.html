@@ -68,9 +68,8 @@ img,canvas{max-width:100%}
   .wrap{padding:10px}
   .kpis{grid-template-columns:repeat(3,1fr);gap:8px}
   .kpi{padding:8px 10px}.kpi .v{font-size:17px}
-  .tabs{position:sticky;top:0;z-index:8;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;background:var(--sl1);padding:6px 0;margin:0 -10px 10px;padding-left:10px;padding-right:10px;scrollbar-width:none}
-  .tabs::-webkit-scrollbar{display:none}
-  .tab{flex:0 0 auto;white-space:nowrap}
+  .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;flex-wrap:wrap;overflow:visible;margin-bottom:10px}
+  .tab{width:100%;padding:8px 4px;font-size:12.5px;line-height:1.3;text-align:center;white-space:normal;word-break:keep-all;border-radius:10px;min-height:40px}
   .g6{grid-template-columns:repeat(3,1fr)}.g4,.g3{grid-template-columns:repeat(2,1fr)}
   .cols{grid-template-columns:1fr}
   .card{padding:12px;border-radius:12px}
@@ -86,7 +85,8 @@ img,canvas{max-width:100%}
   .inp,select.inp,textarea.inp{font-size:16px;padding:8px}   /* 避免 iOS 自動放大 */
   label.f{font-size:12px}
   .btn{min-height:40px;padding:8px 12px}
-  .tab{padding:8px 12px}
+  .tabs{grid-template-columns:repeat(3,1fr);gap:5px}
+  .tab{font-size:12px;padding:7px 3px;min-height:44px}
   table{font-size:12px}th,td{padding:5px 4px}
   canvas{height:240px!important}#cvSq,#cvTri{height:280px!important}
   .al{font-size:12px}
@@ -106,6 +106,9 @@ img,canvas{max-width:100%}
   #cmTab td:nth-child(6)::before{content:"狀態";display:block;font-size:11px;color:var(--sl5)}
   /* 匯入候選表：保留表格，加寬可捲動 */
   #imTab,#imCTab{min-width:760px}
+}
+@media (max-width:360px){
+  .tabs{grid-template-columns:repeat(2,1fr)}
 }
 @media print{.tabs{position:static}.tblwrap{overflow:visible}}
 </style><!--RWD-PATCH-END-->
@@ -1371,7 +1374,7 @@ $('aL').disabled=true;renderRows();renderDB();calcAll();
     .observe(document.body,{childList:true,subtree:true});
   var tabs=document.getElementById('tabs');
   if(tabs)tabs.addEventListener('click',function(e){var b=e.target.closest('.tab');if(!b)return;
-    try{b.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});}catch(x){}
+    
     if(window.innerWidth<=900){var y=tabs.getBoundingClientRect().top+window.scrollY;if(window.scrollY>y)window.scrollTo({top:y,behavior:'smooth'});}});
   var t;window.addEventListener('orientationchange',function(){clearTimeout(t);t=setTimeout(function(){window.dispatchEvent(new Event('resize'));},300);});
 })();
