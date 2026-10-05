@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ISCO 現地化學氧化灌注設計工具 v4（附來源連結與報告產出）</title>
+<title>ISCO 現地化學氧化灌注設計工具 v5</title>
 <!-- v3：在 v2 基礎上，於每個分頁加入「數字、參數、公式來源與核實方式」備註；計算邏輯未變更 -->
 <style>
 :root{--teal:#0d9488;--teal7:#0f766e;--teal1:#ccfbf1;--sl1:#f1f5f9;--sl2:#e2e8f0;--sl4:#94a3b8;--sl5:#64748b;--sl7:#334155;--sl8:#1e293b;--red:#b91c1c;--amb:#92400e}
@@ -53,11 +53,14 @@ details.srcbox td:nth-child(1){white-space:nowrap}
 .st{display:inline-block;font-size:10.5px;padding:1px 6px;border-radius:6px;white-space:nowrap}
 .st.lit{background:#dcfce7;color:#166534}.st.std{background:#e0f2fe;color:#075985}.st.der{background:#ede9fe;color:#5b21b6}
 .st.asm{background:#fef3c7;color:#92400e}.st.ex{background:#f1f5f9;color:#334155;border:1px solid #cbd5e1}.st.nv{background:#fee2e2;color:#991b1b}.st.prev{background:#fef9c3;color:#713f12;border:1px solid #fde047}
+.inp.auto{background:#fff7ed;outline:2px solid #fb923c}.inp.autoed{outline:2px dashed #94a3b8}
+.sev{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:6px}.sev.high{background:#fee2e2;color:#991b1b}.sev.mid{background:#fef3c7;color:#92400e}.sev.low{background:#e0f2fe;color:#075985}
+textarea.inp{font-family:inherit;resize:vertical}#cmTab select.ct{min-width:120px}#cmTab input.cs{min-width:100px}
 </style>
 </head>
 <body>
 <header>
-  <p>In-Situ Chemical Oxidation · Design Prototype v4（離線單一檔案，附參數來源連結與報告產出）</p>
+  <p>In-Situ Chemical Oxidation · Design Prototype v5（離線單一檔案｜參數來源連結｜報告產出｜資料匯入｜QA／委員意見｜報告檢核）</p>
   <h1>ISCO 現地化學氧化灌注設計工具</h1>
   <p>劑量（TOD = POD + NOD + DEO）｜井位配置｜注入水力與傳輸稀釋｜反應動力學｜放熱評估｜安全檢查清單</p>
 </header>
@@ -82,6 +85,9 @@ details.srcbox td:nth-child(1){white-space:nowrap}
     <button class="tab" data-p="p9">⑨ 資料庫</button>
     <button class="tab" data-p="p10">⑩ 計算依據與來源</button>
     <button class="tab" data-p="p11">⑪ 報告產出</button>
+    <button class="tab" data-p="p12">⑫ 資料匯入</button>
+    <button class="tab" data-p="p13">⑬ QA／委員意見</button>
+    <button class="tab" data-p="p14">⑭ 報告檢核</button>
   </div>
   <div id="alertsTop"></div>
   <!-- ================= P1 場址 ================= -->
@@ -340,6 +346,58 @@ details.srcbox td:nth-child(1){white-space:nowrap}
     </div>
     <div class="card" id="rpOut" style="line-height:1.75;font-size:13.5px"></div>
   </section>
+  <!-- ================= P12 資料匯入 ================= -->
+  <section class="pane" id="p12">
+    <div class="card"><h2>上傳調查報告或檢測結果，自動擷取參數</h2>
+      <div id="imDrop" style="border:2px dashed #94a3b8;border-radius:14px;padding:18px;text-align:center">
+        <p style="margin:4px 0">將檔案拖曳到這裡，或 <label class="btn p" style="display:inline-block">選擇檔案<input id="imFile" type="file" multiple accept=".docx,.xlsx,.xlsm,.pptx,.pdf,.txt,.csv,.md,.htm,.html" style="display:none"></label></p>
+        <p class="note">支援 Word（.docx）、Excel（.xlsx）、PowerPoint（.pptx）、PDF（文字型）、TXT／CSV。檔案只在您的瀏覽器內讀取，不會上傳到任何伺服器。</p>
+      </div>
+      <details style="margin-top:8px"><summary class="note">或貼上文字（掃描 PDF、網頁或表格內容可複製後貼上）</summary>
+        <textarea class="inp" id="imPaste" rows="6" placeholder="例：水力傳導係數 K = 3.2×10-4 cm/s；有效孔隙率 0.22；SOD（KMnO4）2.8 g/kg；MW-3 TCE 1.25 mg/L…"></textarea>
+        <button class="btn" id="imPasteGo" style="margin-top:6px">分析貼上文字</button></details>
+      <div id="imFiles" style="margin-top:10px"></div>
+      <div class="al info">擷取方式：以關鍵字（中英文同義詞）找到參數，再讀取其後的數值與單位，並換算為工具單位。污染物濃度依「mg/L→地下水、mg/kg→土壤」判定介質，同一項目有多筆時預設取最大值（偏保守）。含「管制標準、限值」字樣的數值會標示警示並預設不勾選。<b>擷取結果務必對照原文核對。</b></div>
+    </div>
+    <div class="card"><h2>擷取結果（勾選後套用；填入值可先修改）</h2>
+      <div id="imCands"></div>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn p" id="imApply" disabled>✔ 套用勾選項目到各分頁</button><button class="btn" id="imClear">清除自動填入標記</button><button class="btn" id="imReset">清空匯入資料</button></div>
+      <div id="imLog"></div>
+      <p class="note">套用後欄位以<span style="outline:2px solid #fb923c;background:#fff7ed;padding:0 4px">橘色外框</span>標示（滑鼠停留可看來源與原文），仍可直接修改；修改後改為<span style="outline:2px dashed #94a3b8;padding:0 4px">灰色虛線</span>，報告產出的標註也會從〔上傳資料自動擷取〕改為〔場址資料（使用者輸入）〕。</p>
+    </div>
+  </section>
+  <!-- ================= P13 QA／委員意見 ================= -->
+  <section class="pane" id="p13">
+    <div class="card"><h2>A. 設計檢核與建議（依目前各分頁輸入值）</h2><div id="qaSum"></div><div id="qaTab"></div></div>
+    <div class="card"><h2>B. 工具內問答</h2>
+      <div style="display:flex;gap:8px"><input class="inp" id="qaQ" placeholder="輸入問題或關鍵字，例如：ROI 怎麼決定？硫酸鹽會不會超標？"><button class="btn p" id="qaGo" style="white-space:nowrap">查詢</button></div>
+      <div id="qaChips" style="margin-top:6px"></div><div id="qaA"></div>
+      <p class="note">問答以內建知識庫比對關鍵字，回答會帶入目前計算值，並附查證標註與文獻；不是 AI 自由生成。</p>
+    </div>
+    <div class="card"><h2>C. 委員意見與答覆說明</h2>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn p" id="cmGen">由設計檢核產生預期意見</button><button class="btn" id="cmGen2">加入常見審查重點</button><button class="btn" id="cmRedraft">為「待處理」意見重新擬答</button></div>
+      <details style="margin-top:8px" open><summary class="note">貼上實際委員意見（每則一行，或以 1.、(1)、一、編號），自動對應範本擬答</summary>
+        <div class="g3" style="margin-top:6px"><label class="f">委員姓名<input class="inp" id="cmWho" placeholder="例：○○委員"></label></div>
+        <textarea class="inp" id="cmPaste" rows="5" placeholder="1. 請說明 SOD 試驗方法與樣品代表性。&#10;2. 灌注壓力控制與冒漿防範措施為何？"></textarea>
+        <button class="btn" id="cmImport" style="margin-top:6px">匯入並自動擬答</button></details>
+      <div id="cmMsg"></div>
+      <div class="note" id="cmCnt" style="margin:6px 0"></div>
+      <div id="cmTab" style="overflow-x:auto"></div>
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn p" id="cmDoc">⬇ 下載「審查意見及答覆說明對照表」（Word）</button><button class="btn" id="cmCsv">⬇ 下載 CSV</button><button class="btn" id="cmClear">清空</button></div>
+      <p class="note">答覆範本採「感謝委員意見。」開頭；〔○〕與【 】處需填入實際數據或選項。意見表會自動儲存在此瀏覽器（localStorage），換電腦或清除瀏覽資料會消失，請記得下載。</p>
+    </div>
+  </section>
+  <!-- ================= P14 報告檢核 ================= -->
+  <section class="pane" id="p14">
+    <div class="card"><h2>上傳完成報告進行檢核</h2>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><label class="btn p">選擇報告檔<input id="rcFile" type="file" accept=".docx,.pdf,.txt,.md,.htm,.html,.pptx" style="display:none"></label><span class="note" id="rcInfo">支援 .docx（建議）、文字型 PDF、TXT</span></div>
+      <label class="f" style="margin-top:8px">報告文字（上傳後自動帶入，也可直接貼上或修改）<textarea class="inp" id="rcText" rows="8"></textarea></label>
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn p" id="rcGo">▶ 執行檢核</button><button class="btn" id="rcAdd" disabled>＋ 將潛在意見加入⑬委員意見表</button><button class="btn" id="rcDoc" disabled>⬇ 下載檢核結果（Word）</button></div>
+      <div id="rcMsg"></div>
+      <p class="note">檢核內容：A. 章節完整性；B. 報告數值與工具計算一致性；C. 報告參數與工具輸入值比對；D. APA 內文引用與參考文獻對應、查證狀態、DOI；E. 殘留之未查證／待填標註；F. 綜合潛在委員意見與修改建議（含⑬設計檢核結果）。</p>
+    </div>
+    <div class="card" id="rcOut"></div>
+  </section>
 
 </div>
 <div id="banner"></div>
@@ -487,8 +545,8 @@ let rows=[{c:'TCE',soil:50,gw:20,napl:0,koc:''},{c:'Benzene',soil:10,gw:5,napl:0
 function renderRows(){
   $('ctab').querySelector('tbody').innerHTML=rows.map((r,i)=>`<tr>
     <td><select class="inp" data-i="${i}" data-k="c">${Object.keys(CONT).map(k=>`<option ${k===r.c?'selected':''}>${k}</option>`).join('')}</select></td>
-    <td><input class="inp" style="text-align:right" type="number" step="1" data-i="${i}" data-k="soil" value="${r.soil}"></td>
-    <td><input class="inp" style="text-align:right" type="number" step="0.1" data-i="${i}" data-k="gw" value="${r.gw}"></td>
+    <td><input class="inp${r.auto&&!r.auto.ed?' auto':''}" style="text-align:right" type="number" step="1" data-i="${i}" data-k="soil" value="${r.soil}"${r.auto&&!r.auto.ed?' title="由上傳資料自動填入：'+esc(r.auto.src)+'"':''}></td>
+    <td><input class="inp${r.auto&&!r.auto.ed?' auto':''}" style="text-align:right" type="number" step="0.1" data-i="${i}" data-k="gw" value="${r.gw}"></td>
     <td><input class="inp" style="text-align:right" type="number" step="1" data-i="${i}" data-k="napl" value="${r.napl}"></td>
     <td><input class="inp" style="text-align:right" type="number" step="1" data-i="${i}" data-k="koc" value="${r.koc}" placeholder="${CONT[r.c].koc??'未查證'}"></td>
     <td><button class="btn" data-del="${i}">刪除</button></td></tr>`).join('');
@@ -726,7 +784,7 @@ function renderDB(){
    7. 介面控制
    ============================================================ */
 let cur='p1';
-function renderVisible(){if(cur==='p11')renderReport();if(cur==='p3')renderDoseCv();if(cur==='p4')renderLayoutCv();if(cur==='p5')renderOB();if(cur==='p6')renderKin();if(cur==='p7')renderHeat();}
+function renderVisible(){if(cur==='p11')renderReport();if(cur==='p13')renderQA();if(cur==='p3')renderDoseCv();if(cur==='p4')renderLayoutCv();if(cur==='p5')renderOB();if(cur==='p6')renderKin();if(cur==='p7')renderHeat();}
 $('tabs').onclick=e=>{const b=e.target.closest('.tab');if(!b)return;document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t===b));document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id===b.dataset.p));cur=b.dataset.p;renderVisible();};
 $('ox').innerHTML=Object.entries(OX).map(([k,o])=>`<option value="${k}" ${k==='Na2S2O8'?'selected':''}>${o.name}（${k}）</option>`).join('');
 $('ox').addEventListener('change',()=>{$('kd').value=OX[$('ox').value].kd;const pre=K2PRE[`${$('kc').value}|${$('ox').value}`];if(pre)$('k2').value=pre[0];});
@@ -741,9 +799,12 @@ window.addEventListener('resize',renderVisible);
 const REFS={"itrc": {"it": "ITRC, 2005", "apa": "Interstate Technology &amp; Regulatory Council. (2005). <i>Technical and regulatory guidance for in situ chemical oxidation of contaminated soil and groundwater</i> (2nd ed., ISCO-2). ITRC.", "url": "https://frtr.gov/pdf/isco-itrc.pdf", "note": ""}, "huling": {"it": "Huling &amp; Pivetz, 2006", "apa": "Huling, S. G., &amp; Pivetz, B. E. (2006). <i>In-situ chemical oxidation</i> (Engineering Issue, EPA/600/R-06/072). U.S. Environmental Protection Agency.", "url": "https://archive.epa.gov/ada/web/pdf/insituchemicaloxidation_engineering_issue.pdf", "note": ""}, "yan99": {"it": "Yan &amp; Schwartz, 1999", "apa": "Yan, Y. E., &amp; Schwartz, F. W. (1999). Oxidative degradation and kinetics of chlorinated ethylenes by potassium permanganate. <i>Journal of Contaminant Hydrology, 37</i>(3–4), 343–365.", "url": "https://doi.org/10.1016/S0169-7722(98)00166-1", "note": ""}, "yan00": {"it": "Yan &amp; Schwartz, 2000", "apa": "Yan, Y. E., &amp; Schwartz, F. W. (2000). Kinetics and mechanisms for TCE oxidation by permanganate. <i>Environmental Science &amp; Technology, 34</i>(12), 2535–2541.", "url": "https://doi.org/10.1021/es991279q", "note": "卷期頁碼本次未核對，DOI 與摘要內容已核對"}, "huang99": {"it": "Huang et al., 1999", "apa": "Huang, K.-C., Hoag, G. E., Chheda, P., Woody, B. A., &amp; Dobbs, G. M. (1999). Kinetic study of oxidation of trichloroethylene by potassium permanganate. <i>Environmental Engineering Science, 16</i>(4), 265–274.", "url": "https://doi.org/10.1089/ees.1999.16.265", "note": "起始頁 265 已核對，末頁 274 未核對"}, "xu95": {"it": "Xu &amp; Eckstein, 1995", "apa": "Xu, M., &amp; Eckstein, Y. (1995). Use of weighted least-squares method in evaluation of the relationship between dispersivity and field scale. <i>Ground Water, 33</i>(6), 905–908.", "url": "https://doi.org/10.1111/j.1745-6584.1995.tb00035.x", "note": ""}, "epaos": {"it": "U.S. EPA, n.d.", "apa": "U.S. Environmental Protection Agency. (n.d.). <i>Longitudinal dispersivity</i> [EPA on-line tools for site assessment calculation]. Retrieved October 5, 2026, from", "url": "https://archive.epa.gov/ceampubl/learn2model/part-two/onsite/longdisp.html", "note": ""}, "ogata": {"it": "Ogata &amp; Banks, 1961", "apa": "Ogata, A., &amp; Banks, R. B. (1961). <i>A solution of the differential equation of longitudinal dispersion in porous media</i> (Professional Paper 411-A). U.S. Geological Survey.", "url": "https://doi.org/10.3133/pp411A", "note": ""}, "domenico": {"it": "Domenico, 1987", "apa": "Domenico, P. A. (1987). An analytical model for multidimensional transport of a decaying contaminant species. <i>Journal of Hydrology, 91</i>(1–2), 49–58.", "url": "https://doi.org/10.1016/0022-1694(87)90127-2", "note": "文獻已核對；工具使用之公式形式未逐字比對原文"}, "ssg": {"it": "U.S. EPA, 1996", "apa": "U.S. Environmental Protection Agency. (1996). <i>Soil screening guidance: Technical background document</i> (2nd ed., EPA/540/R-95/128). Office of Solid Waste and Emergency Response.", "url": "https://archive.epa.gov/region9/superfund/web/pdf/ssg_nonrad_technical-2.pdf", "note": "文件已核實存在；Appendix K 之 Koc 數值本次未逐一重核"}, "evonik": {"it": "Evonik, n.d.", "apa": "Evonik. (n.d.). <i>The solution to Klozur<sup>®</sup> SP solutions</i> [Peroxygen Talk]. Retrieved October 5, 2026, from", "url": "https://active-oxygens.evonik.com/en/media/white-papers/attachment/137995?rev=79f852e2af8a4294d8499b54db9ed54e", "note": "供應商技術文件，非同儕審查"}, "bench": {"it": "BenchChem, 2026", "apa": "BenchChem. (2026). <i>Technical guide: Solubility &amp; stability profile of sodium persulfate (Na<sub>2</sub>S<sub>2</sub>O<sub>8</sub>)</i>.", "url": "https://pdf.benchchem.com/104/Technical_Guide_Solubility_Stability_Profile_of_Sodium_Persulfate_Na_S_O_1.pdf", "note": "廠商網頁文件，非同儕審查；建議僅作輔助"}};
 const UREFS=["Freeze, R. A., &amp; Cherry, J. A. (1979). <i>Groundwater</i>. Prentice-Hall.（孔隙率、K 範圍、R 定義）", "Fetter, C. W. <i>Applied hydrogeology</i>（版次未確認；Darcy、Thiem、延散定義）", "Thiem, G. (1906). <i>Hydrologische Methoden</i>.（穩態徑向流）", "Gelhar, L. W., &amp; Collins, M. A. (1971). <i>Water Resources Research, 7</i>(6).（徑向前緣混合）", "Gelhar, L. W., Welty, C., &amp; Rehfeldt, K. R. (1992). <i>Water Resources Research, 28</i>(7).（αT、αV 比例）", "Schulze-Makuch, D. (2005). <i>Ground Water, 43</i>(3).（延散度尺度效應）", "van Genuchten, M. Th., &amp; Alves, W. J. (1982). USDA Technical Bulletin 1661.（含衰減一維解）", "Karickhoff, S. W., et al. (1979). <i>Water Research, 13</i>.（Kd = Koc·f<sub>oc</sub>）", "Kershner, R. (1939). <i>American Journal of Mathematics, 61</i>, 665–671.（圓覆蓋）", "Press, W. H., et al. (1992). <i>Numerical recipes</i>（2nd ed.）§6.2.（erfc 近似）", "ASTM D7262（過錳酸鉀天然需氧量試驗方法，版次未確認）", "NIST Chemistry WebBook／CRC Handbook（H₂O₂、H₂O 標準生成焓；KMnO₄ 溶解度）", "陳凱等，ISCO 氧化劑需求量測算綜述（書目資訊不足）", "Brown, R. A. (2003). ERM（當量重；書目資訊不足）", "Miletiev et al. (2012)（H₂O₂ 分解熱；書目資訊不足）", "ISM／Cole-Parmer 化學相容性資料庫；Evonik Klozur® 材料相容性技術公報（前次對話查得）", "使用者 OneDrive《貯存系統設置設施及監測設備與預防管理參考手冊》（公司內部文件）"];
 const DEF={};document.querySelectorAll('input.inp,select.inp').forEach(el=>{if(el.id)DEF[el.id]=el.value;});
-const TG={ok:['已查證','#166534','#dcfce7'],part:['文獻已核實，引用段落頁碼待核','#075985','#e0f2fe'],std:['標準定義／常數','#075985','#e0f2fe'],der:['推導','#5b21b6','#ede9fe'],asm:['工程假設，未查證','#92400e','#fef3c7'],def:['工具預設值，尚未以場址資料取代','#991b1b','#fee2e2'],nv:['未查證','#991b1b','#fee2e2'],site:['場址資料（使用者輸入）','#334155','#f1f5f9']};
+const AUTO={};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const TG={ok:['已查證','#166534','#dcfce7'],part:['文獻已核實，引用段落頁碼待核','#075985','#e0f2fe'],std:['標準定義／常數','#075985','#e0f2fe'],der:['推導','#5b21b6','#ede9fe'],asm:['工程假設，未查證','#92400e','#fef3c7'],def:['工具預設值，尚未以場址資料取代','#991b1b','#fee2e2'],nv:['未查證','#991b1b','#fee2e2'],site:['場址資料（使用者輸入）','#334155','#f1f5f9'],auto:['上傳資料自動擷取，請核對原始文件','#9a3412','#ffedd5']};
 const T=k=>`<span style="font-size:11px;padding:0 3px;border-radius:4px;color:${TG[k][1]};background:${TG[k][2]};white-space:nowrap">〔${TG[k][0]}〕</span>`;
-const SV=id=>T(DEF[id]===$(id).value?'def':'site');
+const SV=id=>T(AUTO[id]&&!AUTO[id].ed?'auto':DEF[id]===$(id).value?'def':'site');
+const RT=r=>T(r.auto&&!r.auto.ed?'auto':'site');
 let USED=new Set();
 const FULL={'ITRC':'Interstate Technology &amp; Regulatory Council [ITRC]','U.S. EPA':'U.S. Environmental Protection Agency [U.S. EPA]'};let AUS=new Set();
 const CI=(...ks)=>{const g=[];ks.forEach(k=>{USED.add(k);const it=REFS[k].it,i=it.lastIndexOf(', ');let au=it.slice(0,i);const yr=it.slice(i+2);if(FULL[au]&&!AUS.has(au)){AUS.add(au);au=FULL[au];}const a=`<a href="${REFS[k].url}" target="_blank" rel="noopener">${yr}</a>`;const e=g.find(x=>x.au===au);e?e.y.push(a):g.push({au,y:[a]});});return '（'+g.map(x=>`${x.au}, ${x.y.join(', ')}`).join('；')+'）';};
@@ -755,59 +816,53 @@ function renderReport(){
   const site=$('rSite').value.trim()||'【請填寫場址名稱】';
   const oxn=`${s.ox.name}（${s.ox.f.replace(/(\d)/g,'<sub>$1</sub>')}）${p.fenton?'，以 Fenton 方式施作':''}`;
   const sodS=$('rSod').value,roiS=$('rRoi').value,dsrc=$('rData').value.trim();
-  const sodTag=sodS==='def'?T('def'):T('site'),roiTag=roiS==='def'?T('def'):roiS==='asm'?T('asm'):T('site');
-  const sodTxt={def:'目前為工具預設值，尚未取得本場址實測數據',lab:'取自本場址土樣處理性試驗實測',doc:'引用既有調查／試驗報告'}[sodS]+(dsrc&&sodS!=='def'?`（${dsrc}）`:'');
-  const roiTxt={def:'目前為工具預設值，尚未經現地試驗確認',test:'依注水／示蹤試驗結果',pilot:'依模場試驗結果',asm:'依工程判斷假設'}[roiS]+(dsrc&&(roiS==='test'||roiS==='pilot')?`（${dsrc}）`:'');
+  const sodTag=AUTO.sod&&!AUTO.sod.ed?T('auto'):sodS==='def'?T('def'):T('site'),roiTag=AUTO.roi&&!AUTO.roi.ed?T('auto'):roiS==='def'?T('def'):roiS==='asm'?T('asm'):T('site');
+  const sodTxt={def:'目前為工具預設值，尚未取得本場址實測數據',lab:'取自本場址土樣處理性試驗實測',doc:'引用既有調查／試驗報告'}[sodS]+(dsrc&&sodS!=='def'?`（${dsrc}）`:'')+(AUTO.sod?`（自「${esc(AUTO.sod.src)}」擷取）`:'');
+  const roiTxt={def:'目前為工具預設值，尚未經現地試驗確認',test:'依注水／示蹤試驗結果',pilot:'依模場試驗結果',asm:'依工程判斷假設'}[roiS]+(dsrc&&(roiS==='test'||roiS==='pilot')?`（${dsrc}）`:'')+(AUTO.roi?`（自「${esc(AUTO.roi.src)}」擷取）`:'');
   const why=$('rWhy').value.trim();
   const act=$('rAct').value;
   const pat=s.use===s.lay.tr?'三角形（交錯）':'正方形';
   const ztop=p.ztop,zbot=p.ztop+p.H,sb=p.ztop+p.bs;
   const H2=t=>`<h3 style="color:#0f766e;margin:16px 0 6px">${t}</h3>`;
-  let o=`<h2 style="color:#0f766e">${site}──現地化學氧化（ISCO）灌注設計說明</h2><p class="note">本節由「ISCO 現地化學氧化灌注設計工具 v4」依目前輸入值產生（${new Date().toLocaleDateString('zh-TW')}）。〔標註〕為查證狀態，正式提送前請逐項確認。</p>`;
-  // 1
+  let o=`<h2 style="color:#0f766e">${esc(site)}──現地化學氧化（ISCO）灌注設計說明</h2><p class="note">本節由「ISCO 現地化學氧化灌注設計工具 v5」依目前輸入值產生（${new Date().toLocaleDateString('zh-TW')}）。〔標註〕為查證狀態，正式提送前請逐項確認。</p>`;
   o+=H2('一、處理範圍與場址條件');
   o+=`<p>本計畫處理區範圍為長 ${p.L} m × 寬 ${p.W} m（面積 ${fmt(p.L*p.W,1)} m²）${SV('L')}，處理深度為地表下 ${fmt(ztop,1)}～${fmt(zbot,1)} m（厚度 ${p.H} m）${SV('H')}，處理土體體積 ${fmt(s.V,1)} m³${T('der')}。依乾總體密度 ρ<sub>b</sub> = ${p.rho} g/cm³ ${SV('rho')}估算土壤乾重約 ${fmt(s.soilKg/1000,1)} t；依總孔隙率 n = ${p.n} ${SV('n')}及有效孔隙率 n<sub>e</sub> = ${p.ne} ${SV('ne')}，孔隙體積 PV 為 ${fmt(s.PV,1)} m³、有效孔隙體積為 ${fmt(s.PVe,1)} m³${T('der')}。</p>`;
-  o+=`<p>地下水位約地表下 ${p.dtw} m ${SV('dtw')}${s.unsat>0?`，處理區上方 ${fmt(s.unsat,2)} m 位於地下水位以上，該段藥劑分布需另行評估${T('asm')}`:''}。水力傳導係數 K = ${p.K} m/d ${SV('K')}、水力梯度 i = ${p.grad} ${SV('grad')}，依 v = K·i/n<sub>e</sub> 計算地下水平均線性流速 ${sci(s.vel)} m/d（約 ${fmt(s.vel*365,1)} m/yr）${T('std')}。地下水溫 ${p.Tgw} °C ${SV('Tgw')}、pH ${p.pH} ${SV('pH')}、鹼度 ${p.alk} mg/L as CaCO₃ ${SV('alk')}、Cl⁻ ${p.cl} mg/L ${SV('cl')}。</p>`;
-  o+=rtbl(['污染物','土壤 (mg/kg)','地下水 (mg/L)','估計總質量 (kg)','Koc (L/kg)','遲滯因子 R'],s.pr.map(r=>[r.c,`${r.soil} ${T('site')}`,`${r.gw} ${T('site')}`,`${fmt(r.m,2)} ${T('der')}`,r.koc!=null?`${r.koc}${r.kocSrc===SRCK?CI('ssg')+T('part'):r.kocSrc==='使用者輸入'?T('site'):T('nv')}`:`—${T('nv')}`,r.R!=null?fmt(r.R,2)+T('der'):'1'+T('asm')]));
-  o+=`<p class="note">污染物濃度為使用者輸入值，請確認來自場址調查採樣結果。Kd = Koc·f<sub>oc</sub>（f<sub>oc</sub> = ${p.foc} ${SV('foc')}），R = 1 + ρ<sub>b</sub>K<sub>d</sub>/n<sub>e</sub>${T('std')}。</p>`;
-  // 2
+  o+=`<p>地下水位約地表下 ${p.dtw} m ${SV('dtw')}${s.unsat>0?`，處理區上方 ${fmt(s.unsat,2)} m 位於地下水位以上，該段藥劑分布需另行評估${T('asm')}`:''}。水力傳導係數 K = ${sci(p.K)} m/d ${SV('K')}、水力梯度 i = ${p.grad} ${SV('grad')}，依 v = K·i/n<sub>e</sub> 計算地下水平均線性流速 ${sci(s.vel)} m/d（約 ${fmt(s.vel*365,1)} m/yr）${T('std')}。地下水溫 ${p.Tgw} °C ${SV('Tgw')}、pH ${p.pH} ${SV('pH')}、鹼度 ${p.alk} mg/L as CaCO₃ ${SV('alk')}、Cl⁻ ${p.cl} mg/L ${SV('cl')}。</p>`;
+  o+=rtbl(['污染物','土壤 (mg/kg)','地下水 (mg/L)','估計總質量 (kg)','Koc (L/kg)','遲滯因子 R'],s.pr.map(r=>[r.c,`${r.soil} ${RT(r)}`,`${r.gw} ${RT(r)}`,`${fmt(r.m,2)} ${T('der')}`,r.koc!=null?`${r.koc}${r.kocSrc===SRCK?CI('ssg')+T('part'):r.kocSrc==='使用者輸入'?T('site'):T('nv')}`:`—${T('nv')}`,r.R!=null?fmt(r.R,2)+T('der'):'1'+T('asm')]));
+  o+=`<p class="note">污染物濃度為${s.pr.some(r=>r.auto)?'上傳資料自動擷取或':''}使用者輸入值，請確認來自場址調查採樣結果。Kd = Koc·f<sub>oc</sub>（f<sub>oc</sub> = ${p.foc} ${SV('foc')}），R = 1 + ρ<sub>b</sub>K<sub>d</sub>/n<sub>e</sub>${T('std')}。</p>`;
   o+=H2('二、氧化劑選擇');
   o+=`<p>ISCO 藥劑之選擇須綜合考量污染物特性、含水層特性、氧化劑需求量（oxidant demand）、輸送方式與施工安全，並以實驗室批次試驗（bench-scale）及模場試驗確認${CI('itrc','huling')}${T('part')}。</p>`;
   o+=`<p>本計畫選用${oxn}作為主要氧化劑，其氧化半反應為 ${s.ox.half}，每莫耳轉移 ${s.ox.ne} 個電子${T('std')}。`;
-  o+=why?`選用理由：${why}${T('site')}</p>`:`<span style="color:#991b1b">【請補充選用理由，例如處理性試驗中各藥劑對目標污染物之去除率、SOD 比較、地下水化學適用性與成本】</span></p>`;
+  o+=why?`選用理由：${esc(why)}${T('site')}</p>`:`<span style="color:#991b1b">【請補充選用理由，例如處理性試驗中各藥劑對目標污染物之去除率、SOD 比較、地下水化學適用性與成本】</span></p>`;
   if(p.ox==='Na2S2O8'){
     o+=`<p>過硫酸鈉 25 °C 最大溶解度約 42 wt%（0 °C 約 37 wt%）${CI('evonik')}${T('ok')}；以同文件換算式 g/L = 0.1049·wt%² + 9.1501·wt% + 3.1347 換算約 572 g/L${T('der')}。本設計注入濃度 ${fmt(s.Cdes,1)} g/L${s.Cdes>s.ox.sol?'，<b>超過</b>溶解度上限，需調整注入體積或分次灌注':'，低於溶解度上限'}。溶液密度隨濃度增加（10 wt% 約 1.067 g/mL、20 wt% 約 1.146 g/mL）${CI('evonik')}${T('ok')}，高濃度灌注時應考量密度驅動下沉。</p>`;
     o+=`<p>活化方式：${act}${act==='未定'?`<span style="color:#991b1b">【活化方式尚未決定；本工具劑量未計入活化劑用量，須以處理性試驗決定】</span>`:act==='不適用'?'':T('site')+'；活化劑用量未計入本工具劑量，須另以處理性試驗決定'+T('nv')}。</p>`;
   }else if(s.ox.sol){o+=`<p>本設計注入濃度 ${fmt(s.Cdes,1)} g/L；${s.ox.name}溶解度約 ${s.ox.sol} g/L${T('nv')}。</p>`;}
   const chemW=s.A.filter(a=>/自由基|Fenton|MnO₂|溫低/.test(a[1]));
   if(chemW.length)o+=`<p>地下水化學提示：${chemW.map(a=>a[1].replace(/（.*?）/g,'')).join('；')}${T('asm')}。</p>`;
-  // 3
   o+=H2('三、藥劑劑量計算');
   o+=`<p>設計用量以總氧化劑需求量（TOD）計算，包含污染物需氧量（POD）、土壤天然需氧量（NOD）及氧化劑自身分解${CI('itrc','huling')}${T('part')}，本計畫採用：</p><p style="text-align:center">TOD = (POD + NOD + 地下水還原物質需求) ÷ (1 − DEO) × SF ${T('der')}</p>`;
   o+=`<p>POD 依電子當量化學計量（完全礦化）計算：kg 氧化劑/kg 污染物 = (n<sub>e,c</sub>/n<sub>e,ox</sub>)·(MW<sub>ox</sub>/MW<sub>c</sub>)${T('der')}。以 TCE 與過錳酸鉀為例，推得 2 mol KMnO₄/mol TCE，與實驗確認之計量比一致${CI('huang99')}${T('ok')}。</p>`;
-  const rows=s.pr.map(r=>[`POD－${r.c}`,`${fmt(r.m,2)} kg × ${fmt(r.ratio,2)}`,`${fmt(r.pod,1)} kg`,T('der')]);
-  rows.push(['POD 合計','Σ',`${fmt(s.pod,1)} kg`,T('der')]);
-  rows.push(['SOD',p.basis==='KMnO4'?`${p.sod} g/kg（KMnO₄ 當量）× ${fmt(s.ox.eq/OX.KMnO4.eq,3)}`:`${p.sod} g/kg`,`${fmt(s.sodOx,2)} g/kg`,sodTag+(p.basis==='KMnO4'?T('asm'):'')]);
-  rows.push(['NOD','SOD × 土壤乾重',`${fmt(s.nod,1)} kg`,T('der')]);
-  rows.push(['地下水還原物質','Fe²⁺、Mn²⁺、S²⁻ 化學計量 × PV',`${fmt(s.gwRed,2)} kg`,T('der')]);
-  rows.push(['自身分解 DEO',`${p.deo}`,`${fmt(s.deoKg,1)} kg`,DEF.deo===$('deo').value?T('def'):T('asm')]);
-  rows.push(['安全係數 SF',`${p.sf}`,`${fmt(s.sfKg,1)} kg`,T('asm')]);
-  rows.push(['<b>設計用量 TOD</b>','',`<b>${fmt(s.tod,1)} kg</b>`,T('der')]);
-  rows.push(['商品藥劑量',`TOD ÷ 純度 ${p.purity}%`,`${fmt(s.prod,1)} kg`,SV('purity')]);
-  o+=rtbl(['項目','計算','結果','查證狀態'],rows);
+  const rws=s.pr.map(r=>[`POD－${r.c}`,`${fmt(r.m,2)} kg × ${fmt(r.ratio,2)}`,`${fmt(r.pod,1)} kg`,T('der')]);
+  rws.push(['POD 合計','Σ',`${fmt(s.pod,1)} kg`,T('der')]);
+  rws.push(['SOD',p.basis==='KMnO4'?`${p.sod} g/kg（KMnO₄ 當量）× ${fmt(s.ox.eq/OX.KMnO4.eq,3)}`:`${p.sod} g/kg`,`${fmt(s.sodOx,2)} g/kg`,sodTag+(p.basis==='KMnO4'?T('asm'):'')]);
+  rws.push(['NOD','SOD × 土壤乾重',`${fmt(s.nod,1)} kg`,T('der')]);
+  rws.push(['地下水還原物質','Fe²⁺、Mn²⁺、S²⁻ 化學計量 × PV',`${fmt(s.gwRed,2)} kg`,T('der')]);
+  rws.push(['自身分解 DEO',`${p.deo}`,`${fmt(s.deoKg,1)} kg`,DEF.deo===$('deo').value?T('def'):T('asm')]);
+  rws.push(['安全係數 SF',`${p.sf}`,`${fmt(s.sfKg,1)} kg`,T('asm')]);
+  rws.push(['<b>設計用量 TOD</b>','',`<b>${fmt(s.tod,1)} kg</b>`,T('der')]);
+  rws.push(['商品藥劑量',`TOD ÷ 純度 ${p.purity}%`,`${fmt(s.prod,1)} kg`,SV('purity')]);
+  o+=rtbl(['項目','計算','結果','查證狀態'],rws);
   o+=`<p>SOD ${sodTxt}${sodTag}。${p.basis==='KMnO4'?`SOD 以 KMnO₄ 量測並依電子當量換算為${s.ox.name}需求，不同氧化劑對天然有機質之反應性不同，此換算屬假設${T('asm')}。`:''}計算結果：設計用量 TOD 為 <b>${fmt(s.tod,1)} kg</b>（商品量 ${fmt(s.prod,1)} kg），其中 POD 占 ${fmt(s.pod/s.base*100,1)}%、NOD 占 ${fmt(s.nod/s.base*100,1)}%（不含 DEO 與安全餘裕）${T('der')}。安全係數 ${p.sf} 用於涵蓋場址非均質性與 SOD 量測變異${T('asm')}。</p>`;
-  // 4
   o+=H2('四、灌注位置與範圍');
   o+=`<p>設計影響半徑 ROI = ${fmt(s.Rd,2)} m，${roiTxt}${roiTag}。依圓形覆蓋原則比較正方形與三角形配置，採用<b>${pat}配置共 ${s.nW} 口</b>灌注井，井距 ${fmt(s.use.dx,2)} m、排距 ${fmt(s.use.dy,2)} m，經網格逐點檢核處理區覆蓋率 ${(s.use.cov*100).toFixed(1)}%${T('der')}。灌注篩管設於地表下 ${fmt(ztop,1)}～${fmt(sb,1)} m${SV('bs')}。</p>`;
   o+=`<p>單井注入量採「${$('vctl').selectedOptions[0].text}」，為 ${fmt(s.Vw,2)} m³（全場合計 ${fmt(s.nW*s.Vw,1)} m³，約 ${fmt(s.nW*s.Vw/s.PVe*100,1)}% 有效孔隙體積），單井氧化劑 ${fmt(s.Mw,1)} kg，注入濃度 ${fmt(s.Cdes,1)} g/L${T('der')}。以注入流率 ${p.Q} L/min ${SV('Q')}計，單井注入時間約 ${fmt(s.tinj,1)} h。注入體積對應之徑向推移半徑 ${fmt(s.rFromV,2)} m（V = πr²bn<sub>e</sub>，假設均質柱塞流）${T('asm')}。</p>`;
   o+=`<p>依 Thiem 穩態徑向流估算注入水頭上升 Δh 約 ${fmt(s.dh,2)} m${T('std')}（以 ROI 作為影響半徑屬假設，可能低估${T('asm')}）${s.dh>p.dtw?`，高於地下水位深度，井口約需 ${fmt(s.Pwh,0)} kPa 加壓，應注意地表冒漿與沿井壁回流`:''}。以瞬時消耗假設推估 NOD 限制傳輸半徑 r<sub>ox</sub> = ${fmt(s.rox,2)} m${T('der')}${s.rox<s.Rd?`，<b>小於</b>設計 ROI，氧化劑可能未達 ROI 邊緣，建議提高劑量、加密井距或分次灌注`:''}。</p>`;
   o+=`<p>灌注井座標如下表（原點為處理區左下角，X 沿長邊 L、Y 沿寬邊 W；需轉換為場址座標系）：</p>`;
   o+=rtbl(['井號','X (m)','Y (m)','篩管深度 (m bgs)','注入量 (m³)','濃度 (g/L)','氧化劑 (kg)'],s.use.wells.map((w,i)=>[`IW-${String(i+1).padStart(2,'0')}`,w[0].toFixed(2),w[1].toFixed(2),`${fmt(ztop,1)}～${fmt(sb,1)}`,fmt(s.Vw,2),fmt(s.Cdes,1),fmt(s.Mw,1)]));
-  // 5
   o+=H2('五、地下水傳輸與下游影響');
   o+=`<p>縱向延散度採 Xu 與 Eckstein 尺度經驗式 α<sub>L</sub> = 0.83(log₁₀L)<sup>2.414</sup>${CI('xu95','epaos')}${T('ok')}；橫向與垂向延散度分別取 α<sub>L</sub> 之 ${p.aTr} 與 ${p.aVr} 倍${T('asm')}。氧化劑衰減常數 k<sub>d</sub> = ${s.kdOx} 1/d ${T('asm')}，衰減至 10% 約需 ${fmt(s.tPers,1)} d，期間隨地下水漂移約 ${fmt(s.drift,2)} m${T('der')}${s.drift>s.Lf?'，大於處理區流向長度，氧化劑可能流出處理區，應於下游設監測井':''}。</p>`;
   if(O.x!=null)o+=`<p>以一維 Ogata–Banks 解${CI('ogata')}${T('ok')}（含遲滯 R = ${fmt(O.R,2)}、一階衰減 λ = ${O.lam} 1/d）估算 ${O.sub} 自處理區下游邊界（C₀ = ${fmt(O.C0,2)} mg/L）傳輸至 ${O.x} m 處，${O.tEnd} d 時濃度約 ${O.obEnd<1e-6?'< 1×10⁻⁶':sci(O.obEnd)} mg/L${T('der')}；以 Domenico 穩態中心線解${CI('domenico')}${T('part')}估算 C/C₀ = ${sci(O.dom)}（C ≈ ${sci(O.dom*O.C0)} mg/L），平流到達時間約 ${fmt(O.tArr/365,1)} 年${T('der')}。受體距離 ${O.x} m ${SV('xr')}。</p>`;
-  // 6
   o+=H2('六、反應動力學預估');
   if(K.c){
     let kt='';
@@ -815,31 +870,442 @@ function renderReport(){
     else kt=`速率常數由處理性試驗 k<sub>obs</sub> = ${$('kobs').value} 1/d 反算${T('site')}。`;
     const eaTag=Math.abs(K.Ea-60)<1e-9?`${T('asm')}（TCE–過錳酸鹽文獻值為 35 kJ/mol${CI('huang99')}及 41.46 kJ/mol${CI('yan00')}${T('ok')}）`:T('site');
     o+=`<p>${kt}溫度以 Arrhenius 式修正至地下水溫 ${p.Tgw} °C，活化能 E<sub>a</sub> = ${K.Ea} kJ/mol ${eaTag}，修正係數 ${fmt(K.fT,3)}${T('std')}。${p.ox==='Na2S2O8'?`活化過硫酸鹽以自由基反應為主，速率受活化方式影響，應以處理性試驗 k<sub>obs</sub> 為準${T('nv')}。`:''}</p>`;
-    o+=`<p>以完全混合簡化模型（二階反應＋氧化劑衰減＋${K.ninj} 次灌注、間隔 ${K.itv} d＋脫附回補＋地下水流出）模擬${T('asm')}：${K.c} 由 ${$('kC0').value} mg/L ${K.tt!=null?`約於第 <b>${fmt(K.tt,1)} d</b> 降至目標 ${K.tg} mg/L`:`於 ${K.days} d 內<b>未達</b>目標 ${K.tg} mg/L`}，最低濃度 ${K.mn<1e-6?'< 1×10⁻⁶':sci(K.mn)} mg/L，期末濃度 ${K.end<1e-6?'< 1×10⁻⁶':sci(K.end)} mg/L${K.end>K.mn*1.5&&K.end>1e-6?'（有反彈）':''}${T('der')}。整治目標依據：${$('rStd').value.trim()||'<span style="color:#991b1b">【請填寫適用管制標準】</span>'}。本模擬僅供趨勢評估，實際成效以灌注後監測為準。</p>`;
+    o+=`<p>以完全混合簡化模型（二階反應＋氧化劑衰減＋${K.ninj} 次灌注、間隔 ${K.itv} d＋脫附回補＋地下水流出）模擬${T('asm')}：${K.c} 由 ${$('kC0').value} mg/L ${K.tt!=null?`約於第 <b>${fmt(K.tt,1)} d</b> 降至目標 ${K.tg} mg/L`:`於 ${K.days} d 內<b>未達</b>目標 ${K.tg} mg/L`}，最低濃度 ${K.mn<1e-6?'< 1×10⁻⁶':sci(K.mn)} mg/L，期末濃度 ${K.end<1e-6?'< 1×10⁻⁶':sci(K.end)} mg/L${K.end>K.mn*1.5&&K.end>1e-6?'（有反彈）':''}${T('der')}。整治目標依據：${esc($('rStd').value.trim())||'<span style="color:#991b1b">【請填寫適用管制標準】</span>'}。本模擬僅供趨勢評估，實際成效以灌注後監測為準。</p>`;
   }
-  // 7
   o+=H2('七、施工安全與材料相容性');
   const db=MAT[p.fenton?'H2O2':p.ox]||{};const sel=[...$('matPick').querySelectorAll('input:checked')].map(i=>i.dataset.m);
   const ng=sel.filter(m=>db[m]&&db[m][0]==='NG'),ca=sel.filter(m=>db[m]&&db[m][0]==='CAUTION'),okm=sel.filter(m=>db[m]&&db[m][0]==='OK');
   o+=`<p>依⑧安全檢查清單，所勾選管材中${okm.length?`可使用：${okm.join('、')}；`:''}${ca.length?`須注意：${ca.join('、')}；`:''}${ng.length?`<b>不可使用：${ng.join('、')}</b>；`:''}相容性資料來源為供應商相容性表${T('nv')}，施工前應以實際採購材料之供應商資料及 SDS 確認。PPE、儲存與緊急應變依專案 HSE 計畫辦理${T('nv')}。</p>`;
   if(p.ox==='H2O2'||p.fenton)o+=`<p>H₂O₂ 分解放熱約 98 kJ/mol（依標準生成焓推導${T('der')}），${$('hwt').value} wt% 注入液局部絕熱溫升可達約 ${fmt(Number($('hwt').value)*10/OX.H2O2.mw*98.25/4.18,1)} K，詳⑦放熱評估。</p>`;
-  // 8
   o+=H2('八、設計限制與假設');
   o+=`<ul><li>本設計為解析解與簡化模型之初步估算，未納入非均質性、優勢流路、密度流、不飽和層傳輸、自由基清除及 NAPL 溶解速率之詳細模擬${T('asm')}。</li><li>SOD、ROI、k<sub>d</sub>、DEO 及活化條件應以處理性試驗、注水／示蹤試驗與模場試驗確認後修正${CI('huling')}${T('part')}。</li><li>灌注後應監測殘餘氧化劑、ORP、pH、溫度、硫酸鹽（過硫酸鹽）或錳（過錳酸鹽）及目標污染物濃度，評估反彈情形${T('asm')}。</li></ul>`;
-  // refs
   ['itrc','huling'].forEach(k=>USED.add(k));
   const key=a=>a.apa.replace(/<[^>]+>/g,'').replace('(n.d.)','(0000)');const R=[...USED].map(k=>REFS[k]).sort((a,b)=>key(a).localeCompare(key(b)));
   o+=H2('參考文獻');
   o+=R.map(r=>`<p style="padding-left:2em;text-indent:-2em;margin:4px 0">${r.apa} <a href="${r.url}" target="_blank" rel="noopener">${r.url}</a>${r.note?`<br><small style="color:#92400e">〔註：${r.note}〕</small>`:''}</p>`).join('');
   o+=`<p class="note" style="margin-top:10px"><b>未核實之來源（未列入上方參考文獻，引用前請取得原文確認）：</b>${UREFS.join('；')}</p>`;
-  const nd=(o.match(/尚未以場址資料取代/g)||[]).length,nn=(o.match(/〔未查證〕/g)||[]).length,na=(o.match(/〔工程假設，未查證〕/g)||[]).length;
-  $('rpOut').innerHTML=(nd||nn?al('warn',`本草稿含 ${nd} 處〔工具預設值〕、${na} 處〔工程假設〕、${nn} 處〔未查證〕；提送前請以場址資料取代或補充依據。`):al('ok','未偵測到工具預設值或未查證標註。'))+o;
+  const nd=(o.match(/尚未以場址資料取代/g)||[]).length,nn=(o.match(/〔未查證〕/g)||[]).length,na=(o.match(/〔工程假設，未查證〕/g)||[]).length,nu=(o.match(/上傳資料自動擷取，請核對/g)||[]).length;
+  $('rpOut').innerHTML=(nd||nn||nu?al('warn',`本草稿含 ${nd} 處〔工具預設值〕、${nu} 處〔自動擷取待核對〕、${na} 處〔工程假設〕、${nn} 處〔未查證〕；提送前請以場址資料取代或補充依據。`):al('ok','未偵測到工具預設值或未查證標註。'))+o;
 }
 $('rGen').onclick=renderReport;
 $('rWhy').addEventListener('input',()=>{if(cur==='p11')renderReport();});
-$('rCopy').onclick=()=>{const r=document.createRange();r.selectNodeContents($('rpOut'));const sl=getSelection();sl.removeAllRanges();sl.addRange(r);let ok=false;try{ok=document.execCommand('copy');}catch(e){}sl.removeAllRanges();alert(ok?'已複製，可直接貼入 Word。':'瀏覽器不允許自動複製，請手動選取內容後按 Ctrl+C。');};
-$('rDoc').onclick=()=>{const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><title>ISCO 設計說明</title><style>body{font-family:"Microsoft JhengHei";font-size:11pt;line-height:1.6}table{border-collapse:collapse}td,th{border:1px solid #999;padding:3px}</style></head><body>${$('rpOut').innerHTML}</body></html>`;const b=new Blob(['\ufeff'+html],{type:'application/msword'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ISCO_灌注設計說明_報告草稿.doc';a.click();};
+$('rCopy').onclick=()=>copyEl($('rpOut'));
+function copyEl(el){const r=document.createRange();r.selectNodeContents(el);const sl=getSelection();sl.removeAllRanges();sl.addRange(r);let ok=false;try{ok=document.execCommand('copy');}catch(e){}sl.removeAllRanges();alert(ok?'已複製，可直接貼入 Word。':'瀏覽器不允許自動複製，請手動選取內容後按 Ctrl+C。');}
+function dlDoc(name,inner,land){const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><title>${name}</title><style>${land?'@page{size:841.9pt 595.3pt;mso-page-orientation:landscape;margin:2cm}':''}body{font-family:"Microsoft JhengHei";font-size:11pt;line-height:1.6}table{border-collapse:collapse}td,th{border:1px solid #999;padding:3px;vertical-align:top}</style></head><body>${inner}</body></html>`;const b=new Blob(['\ufeff'+html],{type:'application/msword'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name+'.doc';a.click();}
+$('rDoc').onclick=()=>dlDoc('ISCO_灌注設計說明_報告草稿',$('rpOut').innerHTML);
 $('rPrint').onclick=()=>{const w=window.open('','_blank');w.document.write(`<html><head><meta charset="utf-8"><title>ISCO 設計說明</title><style>body{font-family:"Microsoft JhengHei",sans-serif;font-size:12pt;line-height:1.7;margin:2cm}td,th{border:1px solid #999;padding:3px}table{border-collapse:collapse;width:100%}</style></head><body>${$('rpOut').innerHTML}</body></html>`);w.document.close();w.focus();w.print();};
+
+/* ============================================================
+   9. v5：資料匯入自動填入、QA／委員意見、報告檢核
+   （全部於瀏覽器本機執行，不上傳任何資料；為規則式比對，非 AI 生成）
+   ============================================================ */
+const cite=(...ks)=>'（'+ks.map(k=>`<a href="${REFS[k].url}" target="_blank" rel="noopener">${REFS[k].it}</a>`).join('；')+'）';
+const LBL={L:'長 L',W:'寬 W',H:'處理厚度 H',ztop:'處理區頂部深度',dtw:'地下水位深度',n:'總孔隙率 n',ne:'有效孔隙率 nₑ',rho:'乾總體密度 ρb',foc:'有機碳分率 f_oc',K:'水力傳導係數 K',grad:'水力梯度 i',Tgw:'地下水溫',pH:'pH',alk:'鹼度',cl:'氯離子',fe2:'亞鐵 Fe²⁺',mn2:'錳 Mn²⁺',s2:'硫化物 S²⁻',sod:'SOD',roi:'影響半徑 ROI',Q:'單井注入流率 Q',conc:'灌注濃度',purity:'藥劑純度',deo:'DEO',sf:'安全係數 SF',xr:'受體距離',bs:'篩管長度'};
+const UNIT={L:'m',W:'m',H:'m',ztop:'m bgs',dtw:'m bgs',n:'–',ne:'–',rho:'g/cm³',foc:'–',K:'m/d',grad:'–',Tgw:'°C',pH:'–',alk:'mg/L',cl:'mg/L',fe2:'mg/L',mn2:'mg/L',s2:'mg/L',sod:'g/kg',roi:'m',Q:'L/min',conc:'g/L',purity:'%'};
+/* ---------- 9.1 檔案讀取（ZIP／DOCX／XLSX／PPTX／PDF／TXT） ---------- */
+async function inflate(u8,fmt){
+  const ds=new DecompressionStream(fmt);const w=ds.writable.getWriter();w.write(u8).catch(()=>{});w.close().catch(()=>{});
+  const r=ds.readable.getReader();const ch=[];let n=0;
+  try{while(true){const{done,value}=await r.read();if(done)break;ch.push(value);n+=value.length;}}catch(e){}
+  const o=new Uint8Array(n);let p=0;for(const c of ch){o.set(c,p);p+=c.length;}return o;
+}
+async function unzip(buf){
+  const u8=new Uint8Array(buf),dv=new DataView(buf);let e=-1;
+  for(let i=u8.length-22;i>=Math.max(0,u8.length-66000);i--){if(dv.getUint32(i,true)===0x06054b50){e=i;break;}}
+  if(e<0)throw new Error('不是有效的 Office（ZIP）檔案');
+  const cnt=dv.getUint16(e+10,true);let p=dv.getUint32(e+16,true);const files={};const td=new TextDecoder();
+  for(let k=0;k<cnt;k++){if(dv.getUint32(p,true)!==0x02014b50)break;
+    const m=dv.getUint16(p+10,true),cs=dv.getUint32(p+20,true),nl=dv.getUint16(p+28,true),el=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),lo=dv.getUint32(p+42,true);
+    files[td.decode(u8.subarray(p+46,p+46+nl))]={m,cs,lo};p+=46+nl+el+cl;}
+  return{names:Object.keys(files),async get(name){const f=files[name];if(!f)return null;const ln=dv.getUint16(f.lo+26,true),le=dv.getUint16(f.lo+28,true);const st=f.lo+30+ln+le;const d=u8.subarray(st,st+f.cs);return new TextDecoder().decode(f.m===0?d:await inflate(d,'deflate-raw'));}};
+}
+const unent=s=>s.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&#(\d+);/g,(_,d)=>String.fromCodePoint(+d)).replace(/&#x([0-9a-f]+);/gi,(_,h)=>String.fromCodePoint(parseInt(h,16))).replace(/&amp;/g,'&');
+async function docxText(z){let x=(await z.get('word/document.xml'))||'';
+  x=x.replace(/<w:tc[ >][\s\S]*?<\/w:tc>/g,m=>m.replace(/<\/w:p>/g,' ')+'\t');
+  x=x.replace(/<\/w:tr>/g,'\n').replace(/<\/w:p>/g,'\n').replace(/<w:tab\/>/g,'\t').replace(/<w:br[^>]*\/>/g,'\n').replace(/<[^>]+>/g,'');
+  return unent(x);}
+async function xlsxText(z){const ss=[];const sx=await z.get('xl/sharedStrings.xml');
+  if(sx)for(const m of sx.matchAll(/<si>([\s\S]*?)<\/si>/g))ss.push(unent(m[1].replace(/<rPh[\s\S]*?<\/rPh>/g,'').replace(/<[^>]+>/g,'')));
+  let out='';const sh=z.names.filter(n=>/^xl\/worksheets\/sheet\d+\.xml$/.test(n)).sort((a,b)=>parseInt(a.match(/\d+/)[0])-parseInt(b.match(/\d+/)[0]));
+  for(const sn of sh){const x=await z.get(sn);out+=`\n# ${sn.split('/').pop()}\n`;
+    for(const r of x.matchAll(/<row[^>]*>([\s\S]*?)<\/row>/g)){const cells=[];
+      for(const c of r[1].matchAll(/<c ([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g)){const t=(c[1].match(/t="(\w+)"/)||[])[1],inner=c[2]||'';const vv=(inner.match(/<v>([\s\S]*?)<\/v>/)||[])[1];
+        cells.push(t==='s'?(ss[+vv]??''):t==='inlineStr'?unent(inner.replace(/<[^>]+>/g,'')):unent(vv||''));}
+      out+=cells.join('\t')+'\n';}}
+  return out;}
+async function pptxText(z){let out='';const sl=z.names.filter(n=>/^ppt\/slides\/slide\d+\.xml$/.test(n)).sort((a,b)=>parseInt(a.match(/\d+/)[0])-parseInt(b.match(/\d+/)[0]));
+  for(const n of sl){const x=await z.get(n);out+=`\n# ${n.split('/').pop()}\n`+unent(x.replace(/<\/a:p>/g,'\n').replace(/<\/a:tc>/g,'\t').replace(/<[^>]+>/g,''));}return out;}
+const hex16=h=>{if(h.length<=2)return String.fromCharCode(parseInt(h,16));let o='';for(let i=0;i+4<=h.length;i+=4)o+=String.fromCharCode(parseInt(h.substr(i,4),16));return o;};
+function parseCMap(t,map){
+  for(const b of t.matchAll(/beginbfchar([\s\S]*?)endbfchar/g))for(const m of b[1].matchAll(/<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>/g))map[m[1].toUpperCase()]=hex16(m[2]);
+  for(const b of t.matchAll(/beginbfrange([\s\S]*?)endbfrange/g))for(const m of b[1].matchAll(/<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>\s*(?:<([0-9A-Fa-f]+)>|\[([^\]]*)\])/g)){
+    const a=parseInt(m[1],16),z=parseInt(m[2],16),L=m[1].length;if(z-a>6000)continue;
+    if(m[3]){const d=parseInt(m[3],16);for(let c=a;c<=z;c++)map[c.toString(16).toUpperCase().padStart(L,'0')]=hex16((d+c-a).toString(16).padStart(m[3].length,'0'));}
+    else{const arr=[...m[4].matchAll(/<([0-9A-Fa-f]+)>/g)].map(x=>x[1]);for(let c=a;c<=z&&c-a<arr.length;c++)map[c.toString(16).toUpperCase().padStart(L,'0')]=hex16(arr[c-a]);}}
+}
+function a85(str){str=str.replace(/\s/g,'').replace(/^<~/,'');const e=str.indexOf('~>');if(e>=0)str=str.slice(0,e);const out=[];let i=0;while(i<str.length){if(str[i]==='z'){out.push(0,0,0,0);i++;continue;}let ch=str.slice(i,i+5);i+=5;const pad=5-ch.length;ch+='u'.repeat(pad);let v=0;for(const c of ch)v=v*85+(c.charCodeAt(0)-33);const b=[Math.floor(v/16777216)%256,Math.floor(v/65536)%256,Math.floor(v/256)%256,v%256];out.push(...b.slice(0,4-pad));}return new Uint8Array(out);}
+const hexB=h=>{h=h.replace(/\s/g,'');if(h.length%2)h+='0';let o='';for(let i=0;i<h.length;i+=2)o+=String.fromCharCode(parseInt(h.substr(i,2),16));return o;};
+const unLit=s=>s.replace(/\\([nrtbf()\\]|[0-7]{1,3}|\r?\n)/g,(m,c)=>({n:'\n',r:'\r',t:'\t',b:'\b',f:'\f','(':'(',')':')','\\':'\\'}[c]??(/^[0-7]/.test(c)?String.fromCharCode(parseInt(c,8)):'')));
+let UCS2=false;
+function decBytes(b,map,has2){
+  if(has2&&b.length%2===0){let o='',ok=0;for(let i=0;i<b.length;i+=2){const k=(b.charCodeAt(i)*256+b.charCodeAt(i+1)).toString(16).toUpperCase().padStart(4,'0');if(map[k]!=null){o+=map[k];ok++;}}if(ok>0&&ok>=b.length/4)return o;}
+  if(UCS2&&b.length%2===0&&b.length>0){let o='';for(let i=0;i<b.length;i+=2)o+=String.fromCharCode(b.charCodeAt(i)*256+b.charCodeAt(i+1));return o;}
+  let o='';for(const ch of b){const k=ch.charCodeAt(0).toString(16).toUpperCase().padStart(2,'0');o+=map[k]??ch;}return o;}
+function contentText(t,map,has2){let out='';const re=/\[((?:\\.|[^\]\\])*)\]\s*TJ|\(((?:\\.|[^\\)])*)\)\s*(?:Tj|'|")|<([0-9A-Fa-f\s]*)>\s*Tj|\b(T\*|Td|TD|Tm|ET)\b/g;let m;
+  while((m=re.exec(t))){
+    if(m[1]!=null){for(const q of m[1].matchAll(/\(((?:\\.|[^\\)])*)\)|<([0-9A-Fa-f\s]*)>|(-?\d+\.?\d*)/g)){if(q[1]!=null)out+=decBytes(unLit(q[1]),map,has2);else if(q[2]!=null)out+=decBytes(hexB(q[2]),map,has2);else if(+q[3]<-250)out+=' ';}}
+    else if(m[2]!=null)out+=decBytes(unLit(m[2]),map,has2);else if(m[3]!=null)out+=decBytes(hexB(m[3]),map,has2);else out+=(m[4]==='ET'||m[4]==='T*')?'\n':' ';}
+  return out;}
+async function pdfText(buf){
+  const u8=new Uint8Array(buf);const s=new TextDecoder('latin1').decode(u8);const st=[];let i=0;
+  while((i=s.indexOf('stream',i))>=0){if(i>=3&&s.slice(i-3,i)==='end'){i+=6;continue;}let a=i+6;if(s[a]==='\r')a++;if(s[a]!=='\n'){i+=6;continue;}a++;
+    const e=s.indexOf('endstream',a);if(e<0)break;st.push({dict:s.slice(Math.max(0,s.lastIndexOf('obj',i)),i),a,e});i=e+9;}
+  const dec=[];for(const x of st){if(/\/Subtype\s*\/Image|DCTDecode|JPXDecode/.test(x.dict))continue;let d=u8.subarray(x.a,x.e);
+    if(/ASCII85Decode/.test(x.dict))d=a85(new TextDecoder('latin1').decode(d));if(/FlateDecode/.test(x.dict))d=await inflate(d,'deflate');else if(/\/Filter/.test(x.dict)&&!/ASCII85Decode/.test(x.dict))continue;dec.push(new TextDecoder('latin1').decode(d));}
+  UCS2=/UCS2|UTF16/.test(s);const map={};dec.filter(t=>/begincmap/.test(t)).forEach(t=>parseCMap(t,map));const has2=Object.keys(map).some(k=>k.length===4);
+  return dec.filter(t=>/\bBT\b/.test(t)&&/T[jJ]/.test(t)).map(t=>contentText(t,map,has2)).join('\n');}
+async function readAny(file){
+  const ext=(file.name.split('.').pop()||'').toLowerCase();const buf=await file.arrayBuffer();
+  if(['docx','xlsx','xlsm','pptx'].includes(ext)){const z=await unzip(buf);return ext==='docx'?docxText(z):ext==='pptx'?pptxText(z):xlsxText(z);}
+  if(ext==='pdf')return pdfText(buf);
+  if(['doc','xls','ppt'].includes(ext))throw new Error('舊版 Office 格式（.doc/.xls/.ppt）無法讀取，請另存為 .docx/.xlsx/.pptx');
+  let t;try{t=new TextDecoder('utf-8',{fatal:true}).decode(buf);}catch(e){t=new TextDecoder('big5').decode(buf);}
+  if(/^html?$/.test(ext))t=unent(t.replace(/<(script|style)[\s\S]*?<\/\1>/gi,'').replace(/<\/(p|div|tr|li|h\d)>/gi,'\n').replace(/<\/t[dh]>/gi,'\t').replace(/<[^>]+>/g,''));
+  return t;}
+const textQuality=t=>{const n=t.length||1;const good=(t.match(/[\u4e00-\u9fffA-Za-z0-9\s.,:;()%\/\-+=~～、，。：；（）]/g)||[]).length;return good/n;};
+/* ---------- 9.2 數值與參數擷取 ---------- */
+const SUPD={'⁰':'0','¹':'1','²':'2','³':'3','⁴':'4','⁵':'5','⁶':'6','⁷':'7','⁸':'8','⁹':'9','⁻':'-'};
+const NUMRE=/(?<![\w.])(-?\d{1,3}(?:,\d{3})+(?:\.\d+)?|-?\d+(?:\.\d+)?)(?:\s*[×xX*]\s*10\s*((?:\^|\*\*)\s*[-−–]?\s*\d+|[-−–]\s*\d+|⁻?[⁰¹²³⁴⁵⁶⁷⁸⁹]+)|[eE]([-+]?\d+))?/g;
+function parseNum(m){let v=parseFloat(m[1].replace(/,/g,''));let ex=m[2]!=null?m[2].replace(/\^|\*\*|\s/g,'').replace(/[−–]/g,'-').replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹⁻]/g,c=>SUPD[c]):m[3];if(ex!=null&&ex!=='')v*=Math.pow(10,parseInt(ex));return v;}
+const FLAGRE=/管制標準|監測標準|標準值|限值|法規|基準值|放流水/;
+const U_=(re,f,lab)=>({re,f,lab});
+const M_=[U_(/^\s*(?:m|公尺|米)(?![\w\/²³])/i,x=>x,'m')];
+const MGL=[U_(/^\s*mg\/L/i,x=>x,'mg/L'),U_(/^\s*(?:µg|μg|ug)\/L/i,x=>x/1000,'µg/L→÷1000'),U_(/^\s*ppm/i,x=>x,'ppm≈mg/L')];
+const isPS=()=>$('ox').value==='Na2S2O8';
+const PDEF=[
+ {id:'K',syn:/水力傳導係數|透水係數|滲透係數|hydraulic conductivity/i,units:[U_(/^\s*(?:cm\/s|cm\/sec|cm·s⁻¹|cm s-1)/i,x=>x*864,'cm/s→×864'),U_(/^\s*(?:m\/s|m\/sec|m·s⁻¹)/i,x=>x*86400,'m/s→×86400'),U_(/^\s*(?:m\/d|m\/day|m\/天|公尺\/日|m·d⁻¹)/i,x=>x,'m/d'),U_(/^\s*cm\/d/i,x=>x/100,'cm/d→÷100'),U_(/^\s*ft\/d/i,x=>x*0.3048,'ft/d→×0.3048')],need:1,rng:[1e-7,2000]},
+ {id:'ne',syn:/有效孔隙率|effective porosity/i,units:[U_(/^\s*%/,x=>x/100,'%→÷100')],nu:x=>x>1?x/100:x,rng:[0.01,0.7]},
+ {id:'n',syn:/(?<!有效)(?:總)?孔隙率|(?<!effective )porosity/i,units:[U_(/^\s*%/,x=>x/100,'%→÷100')],nu:x=>x>1?x/100:x,rng:[0.02,0.75]},
+ {id:'rho',syn:/乾(?:總體)?密度|總體密度|乾單位重|bulk density|dry density/i,units:[U_(/^\s*(?:g\/cm3|g\/cm³|g\/cc|g\/mL|t\/m3|t\/m³|公噸\/立方公尺)/i,x=>x,'g/cm³'),U_(/^\s*(?:kg\/m3|kg\/m³)/i,x=>x/1000,'kg/m³→÷1000'),U_(/^\s*(?:kN\/m3|kN\/m³)/i,x=>x/9.81,'kN/m³→÷9.81（以單位重近似）')],nu:x=>x>100?x/1000:x,rng:[0.8,2.7]},
+ {id:'foc',syn:/有機碳(?:含量|分率)?|\bf_?oc\b|總有機碳|\bTOC\b/i,units:[U_(/^\s*%/,x=>x/100,'%→÷100'),U_(/^\s*mg\/kg/i,x=>x/1e6,'mg/kg→÷10⁶'),U_(/^\s*g\/kg/i,x=>x/1000,'g/kg→÷1000'),U_(/^\s*mg\/L/i,x=>NaN,'')],nu:x=>x<0.3?x:NaN,rng:[1e-6,0.3]},
+ {id:'grad',syn:/水力梯度|hydraulic gradient/i,units:[U_(/^\s*‰/,x=>x/1000,'‰→÷1000')],nu:x=>x,rng:[1e-6,0.5]},
+ {id:'dtw',syn:/地下水位(?:深度)?|水位深度|靜水位|depth to (?:ground)?water/i,skip:/標高|EL\.|高程/,units:M_,need:1,abs:1,rng:[0,100]},
+ {id:'Tgw',syn:/地下水溫(?:度)?|水溫/,units:[U_(/^\s*(?:°C|℃|度|oC)/,x=>x,'°C')],nu:x=>x,rng:[0,60]},
+ {id:'pH',syn:/\bpH\b(?:值)?/,units:[],nu:x=>x,rng:[1,14]},
+ {id:'alk',syn:/鹼度|alkalinity/i,units:[U_(/^\s*mg\/L/i,x=>x,'mg/L as CaCO₃')],nu:x=>x,rng:[0,10000]},
+ {id:'cl',syn:/氯鹽|氯離子|氯化物|chloride/i,units:MGL,nu:x=>x,rng:[0,100000]},
+ {id:'fe2',syn:/亞鐵|二價鐵|ferrous|Fe\s*(?:2\+|²⁺|\(II\))/i,units:MGL,nu:x=>x,rng:[0,1000]},
+ {id:'mn2',syn:/(?<!過)錳(?!酸)|manganese|\bMn\s*(?:2\+|²⁺|\(II\))/i,units:MGL,nu:x=>x,rng:[0,1000]},
+ {id:'s2',syn:/硫化物|sulfide|sulphide/i,units:MGL,nu:x=>x,rng:[0,1000]},
+ {id:'sod',syn:/\bSOD\b|\bNOD\b|土壤氧化劑需求量?|天然(?:氧化劑)?需(?:氧|求)量|(?:soil|natural) oxidant demand/i,units:[U_(/^\s*(?:g\/kg|g\/kg-?dry|g\s*\/\s*kg)/i,x=>x,'g/kg'),U_(/^\s*mg\/kg/i,x=>x/1000,'mg/kg→÷1000'),U_(/^\s*mg\/g/i,x=>x,'mg/g=g/kg')],need:1,rng:[0.001,300]},
+ {id:'roi',syn:/影響半徑|\bROI\b|radius of influence/i,units:M_,need:1,rng:[0.2,50]},
+ {id:'Q',syn:/(?:注入|灌注|注藥)(?:流率|速率|流量)|injection (?:rate|flow)/i,units:[U_(/^\s*(?:L\/min|LPM|公升\/分)/i,x=>x,'L/min'),U_(/^\s*(?:m3\/h|m³\/h|m3\/hr|m³\/hr|CMH)/i,x=>x*1000/60,'m³/h→×16.67'),U_(/^\s*(?:m3\/d|m³\/d|CMD)/i,x=>x/1.44,'m³/d→÷1.44'),U_(/^\s*gpm/i,x=>x*3.785,'gpm→×3.785')],need:1,rng:[0.05,1000]},
+ {id:'conc',syn:/(?:灌注|注入|注藥|藥劑)(?:溶液)?濃度|injection concentration/i,units:[U_(/^\s*g\/L/i,x=>x,'g/L'),U_(/^\s*mg\/L/i,x=>x/1000,'mg/L→÷1000'),U_(/^\s*(?:wt\s*%|%)/i,x=>isPS()?0.1049*x*x+9.1501*x+3.1347:x*10,'wt%→g/L（過硫酸鈉用 Evonik 換算式，其他以 ×10 近似）')],need:1,rng:[0.1,700]},
+ {id:'purity',syn:/純度|purity/i,units:[U_(/^\s*%/,x=>x,'%')],need:1,rng:[30,100]},
+ {id:'H',syn:/處理厚度|整治厚度/,units:M_,need:1,rng:[0.1,50]},
+ {id:'_depth',syn:/處理深度|污染深度|整治深度|污染範圍深度|treatment depth/i,spec:'depth'},
+ {id:'_area',syn:/處理範圍|整治範圍|處理區(?:範圍)?|treatment area/i,spec:'area'},
+];
+const CALIAS=[['PCE',/四氯乙烯|\bPCE\b|tetrachloroeth(?:yl)?ene/i],['TCE',/三氯乙烯|\bTCE\b|trichloroeth(?:yl)?ene/i],['cis-1,2-DCE',/順-?1,2-二氯乙烯|cis-?1,2-?DCE|cis-1,2-dichloroeth(?:yl)?ene/i],['VC',/(?<![二三四])氯乙烯|\bVC\b|vinyl chloride/i],['1,1,1-TCA',/1,1,1-三氯乙烷|1,1,1-TCA|1,1,1-trichloroethane/i],['1,2-DCA',/1,2-二氯乙烷|1,2-DCA|1,2-dichloroethane/i],['Benzene',/(?<![甲乙二氯硝萘聯])苯(?![乙胺酚甲並])|\bbenzene\b/i],['Toluene',/(?<!二)甲苯|\btoluene\b/i],['Ethylbenzene',/乙苯|ethylbenzene/i],['Xylene (o-)',/二甲苯|\bxylenes?\b/i],['MTBE',/MTBE|甲基第三丁基醚/],['Naphthalene',/萘|naphthalene/i],['1,4-Dioxane',/1,4-二(?:氧陸圜|噁烷|氧六環)|1,4-dioxane/i],['Chlorobenzene',/(?<![二三])氯苯|chlorobenzene/i],['TPH (as C10H22)',/總石油碳氫化合物|\bTPH\b/i]];
+function cMedium(after){if(/^\s*mg\/L/i.test(after))return['gw',1,''];if(/^\s*(?:µg|μg|ug)\/L/i.test(after))return['gw',1e-3,'µg/L→÷1000'];if(/^\s*mg\/kg/i.test(after))return['soil',1,''];if(/^\s*(?:µg|μg|ug)\/kg/i.test(after))return['soil',1e-3,'µg/kg→÷1000'];return null;}
+function extractAll(text,src){
+  const lines=text.split(/\r?\n/);const C={};const add=(id,c)=>(C[id]=C[id]||[]).push(c);
+  lines.forEach((raw,li)=>{const ln=raw.length>3000?raw.slice(0,3000):raw;if(!ln.trim())return;const snip=ln.replace(/\s+/g,' ').trim().slice(0,170),flag=FLAGRE.test(ln)?'可能為法規標準或限值':'';
+    for(const d of PDEF){const m=ln.match(d.syn);if(!m)continue;if(d.skip&&d.skip.test(ln))continue;
+      const tail=ln.slice(m.index+m[0].length,m.index+m[0].length+(d.spec?90:70));
+      if(d.spec==='depth'){const r=tail.match(/(\d+(?:\.\d+)?)\s*(?:m|公尺)?\s*[~～\-–至到]\s*(\d+(?:\.\d+)?)\s*(?:m|公尺)/);if(r&&+r[2]>+r[1]){add('ztop',{v:+r[1],conv:'範圍上限',snip,src,line:li+1,flag});add('H',{v:+r[2]-+r[1],conv:'範圍差值',snip,src,line:li+1,flag});}continue;}
+      if(d.spec==='area'){const r=tail.match(/(\d+(?:\.\d+)?)\s*(?:m|公尺)?\s*[×xX*]\s*(\d+(?:\.\d+)?)\s*(?:m|公尺)/);if(r){add('L',{v:+r[1],conv:'',snip,src,line:li+1,flag});add('W',{v:+r[2],conv:'',snip,src,line:li+1,flag});}continue;}
+      NUMRE.lastIndex=0;let nm;
+      while((nm=NUMRE.exec(tail))){const after=tail.slice(nm.index+nm[0].length);let v=parseNum(nm),conv='';const u=(d.units||[]).find(x=>x.re.test(after));
+        if(u){v=u.f(v);conv=u.lab;}else if(d.need)continue;else if(d.nu)v=d.nu(v);
+        if(d.abs)v=Math.abs(v);if(!(v>=d.rng[0]&&v<=d.rng[1]))continue;
+        const meta={};if(d.id==='sod')meta.basis=/KMnO|過錳酸/.test(ln)?'KMnO4':/過硫酸|persulfate|Na2S2O8/i.test(ln)?'self':'';
+        add(d.id,{v,conv,snip,src,line:li+1,flag,meta});break;}}
+    for(const[k,re]of CALIAS){const m=ln.match(re);if(!m)continue;let tail=ln.slice(m.index+m[0].length,m.index+m[0].length+90).replace(/(?:\d+,)+\d+-[A-Za-z\u4e00-\u9fff]+/g,' ').replace(/(?<![\d.])\d+-(?=[A-Za-z\u4e00-\u9fff])/g,' ');{let cut=tail.length;for(const[,re2]of CALIAS){const q=tail.match(re2);if(q&&q.index<cut)cut=q.index;}tail=tail.slice(0,cut);}NUMRE.lastIndex=0;let nm,got=0;
+      while((nm=NUMRE.exec(tail))){const after=tail.slice(nm.index+nm[0].length);const md=cMedium(after);const v=parseNum(nm);if(md&&v>=0&&v<1e6){add(`C|${k}|${md[0]}`,{v:v*md[1],conv:md[2],snip,src,line:li+1,flag});got++;}}}
+  });
+  tableScan(lines,src,add);
+  return C;}
+function tableScan(lines,src,add){let i=0;
+  while(i<lines.length){if(lines[i].split('\t').length<3){i++;continue;}let j=i;while(j<lines.length&&lines[j].split('\t').length>=3)j++;
+    const blk=lines.slice(i,j).map(l=>l.split('\t'));const hdr=blk[0];const cols=[];
+    hdr.forEach((h,c)=>{for(const[k,re]of CALIAS){const m=h.match(re);if(!m)continue;const md=cMedium(h.slice(h.search(/mg\/L|µg\/L|μg\/L|ug\/L|mg\/kg|µg\/kg|μg\/kg|ug\/kg/i)));if(md&&h.search(/mg\/|µg\/|μg\/|ug\//i)>=0)cols.push({c,id:`C|${k}|${md[0]}`,f:x=>x*md[1],conv:'表格欄位'+(md[2]?'；'+md[2]:'')});break;}
+      for(const d of PDEF){if(d.spec)continue;const m=h.match(d.syn);if(!m)continue;const rest=h.slice(m.index+m[0].length).replace(/^[\s(（]*/,'');const u=(d.units||[]).find(x=>x.re.test(rest));if(u||!d.need)cols.push({c,id:d.id,f:x=>{let v=u?u.f(x):(d.nu?d.nu(x):x);if(d.abs)v=Math.abs(v);return v>=d.rng[0]&&v<=d.rng[1]?v:NaN;},conv:'表格欄位'+(u?'；'+u.lab:'')});break;}});
+    if(cols.length)blk.slice(1).forEach((row,r)=>{const rowTxt=row.join(' ');const flag=FLAGRE.test(rowTxt)?'可能為法規標準或限值':'';cols.forEach(col=>{const cell=(row[col.c]||'').trim();NUMRE.lastIndex=0;const nm=NUMRE.exec(cell);if(!nm||/^\s*(ND|N\.D\.|<)/i.test(cell))return;const v=col.f(parseNum(nm));if(!isFinite(v)||v<0)return;
+      add(col.id,{v,conv:col.conv,snip:(hdr[col.c].trim()+'｜'+rowTxt).replace(/\s+/g,' ').slice(0,170),src,line:i+r+2,flag});});});
+    i=j;}}
+/* ---------- 9.3 匯入介面 ---------- */
+let IMP={files:[],C:{}};
+function mergeC(C){for(const k in C)(IMP.C[k]=IMP.C[k]||[]).push(...C[k]);}
+async function handleFiles(fl){
+  for(const f of fl){const rec={name:f.name,size:f.size,status:'讀取中…',text:''};IMP.files.push(rec);renderImpFiles();
+    try{const t=await readAny(f);rec.text=t;const q=textQuality(t);rec.status=`已讀取 ${t.length.toLocaleString()} 字`+(/\.pdf$/i.test(f.name)&&(t.length<200||q<0.6)?'；⚠ PDF 文字擷取品質不佳（可能為掃描檔或特殊字型），建議改用 Word／Excel 或貼上文字':'');
+      mergeC(extractAll(t,f.name));}
+    catch(e){rec.status='⛔ '+e.message;}
+    renderImpFiles();}
+  renderCands();}
+function renderImpFiles(){$('imFiles').innerHTML=IMP.files.length?tbl(['檔案','狀態','內容預覽'],IMP.files.map(r=>[esc(r.name),esc(r.status),r.text?`<details><summary>展開</summary><pre style="white-space:pre-wrap;max-height:240px;overflow:auto;font-size:11px">${esc(r.text.slice(0,4000))}</pre></details>`:''])):'<p class="note">尚未匯入任何檔案。</p>';}
+function pickDefault(arr,mode){const ok=arr.filter(c=>!c.flag);const base=ok.length?ok:arr;if(mode==='max')return base.reduce((a,b)=>b.v>a.v?b:a);
+  const cnt={};base.forEach(c=>{const k=+c.v.toPrecision(4);cnt[k]=(cnt[k]||0)+1;});const best=+Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0][0];return base.find(c=>+c.v.toPrecision(4)===best);}
+const nfmt=x=>Math.abs(x)>=1e4||(Math.abs(x)<1e-3&&x!==0)?x.toExponential(3):String(+x.toPrecision(5));
+function renderCands(){
+  const C=IMP.C;const pids=['L','W','ztop','H','dtw','K','grad','n','ne','rho','foc','Tgw','pH','alk','cl','fe2','mn2','s2','sod','roi','Q','conc','purity'].filter(id=>C[id]);
+  const row=(id,lab,curv,arr,mode)=>{const d=pickDefault(arr,mode);const idx=arr.indexOf(d);const uniq=new Set(arr.map(c=>+c.v.toPrecision(4))).size;
+    return `<tr data-id="${id}"><td><input type="checkbox" class="ck" ${arr.some(c=>!c.flag)?'checked':''}></td><td>${lab}</td><td class="r">${curv}</td>
+    <td><select class="inp sel" style="min-width:180px">${arr.map((c,i)=>`<option value="${i}" ${i===idx?'selected':''}>${nfmt(c.v)}｜${esc(c.src)} 第${c.line}行${c.flag?'｜⚠':''}</option>`).join('')}</select></td>
+    <td><input class="inp iv" type="number" value="${nfmt(d.v)}" style="width:110px"></td>
+    <td class="note cv">${esc(d.conv||'')}${uniq>1?`<br><b style="color:#b45309">共 ${arr.length} 筆、${uniq} 種數值，請確認</b>`:''}</td>
+    <td class="note sn">${esc(d.snip)}${d.flag?`<br><span style="color:#b91c1c">⚠ ${d.flag}</span>`:''}</td></tr>`;};
+  let h='';
+  if(pids.length)h+=`<h3>場址與設計參數（${pids.length} 項）</h3><table id="imTab"><thead><tr><th>套用</th><th>參數</th><th class="r">目前值</th><th>擷取候選（來源）</th><th>填入值（可修改）</th><th>單位換算／提示</th><th>原文片段</th></tr></thead><tbody>${pids.map(id=>row(id,`${LBL[id]||id} <small>(${UNIT[id]||''})</small>`,esc($(id).value),C[id],'mode')).join('')}</tbody></table>`;
+  const ck=Object.keys(C).filter(k=>k.startsWith('C|'));
+  if(ck.length)h+=`<h3>污染物濃度（${ck.length} 項；預設取未標示警示之最大值，偏保守）</h3><div style="margin:4px 0"><label class="note"><input type="radio" name="cmode" value="merge" checked> 合併至現有污染物表</label>　<label class="note"><input type="radio" name="cmode" value="replace"> 取代現有污染物表</label></div><table id="imCTab"><thead><tr><th>套用</th><th>污染物／介質</th><th class="r">目前值</th><th>擷取候選（來源）</th><th>填入值（可修改）</th><th>單位換算／提示</th><th>原文片段</th></tr></thead><tbody>${ck.map(k=>{const[,c,md]=k.split('|');const r=rows.find(x=>x.c===c);return row(k,`${c}｜${md==='gw'?'地下水 (mg/L)':'土壤 (mg/kg)'}`,r?esc(r[md]):'—',C[k],'max');}).join('')}</tbody></table>`;
+  if(C.sod&&C.sod.some(c=>c.meta&&c.meta.basis))h+=al('info','SOD 原文片段含氧化劑種類，套用時將自動設定「SOD 量測基準」（含 KMnO₄ 字樣→以 KMnO₄ 當量表示）。');
+  $('imCands').innerHTML=h||(IMP.files.length?al('warn','未擷取到可辨識的參數。可能原因：檔案為掃描影像、表格單位寫在表頭以外位置，或用語不在辨識清單內。可改用「貼上文字」或手動輸入。'):'');
+  $('imApply').disabled=!h;
+  $('imCands').querySelectorAll('select.sel').forEach(se=>se.onchange=()=>{const tr=se.closest('tr'),c=IMP.C[tr.dataset.id][+se.value];tr.querySelector('.iv').value=nfmt(c.v);tr.querySelector('.cv').textContent=c.conv||'';tr.querySelector('.sn').innerHTML=esc(c.snip)+(c.flag?`<br><span style="color:#b91c1c">⚠ ${c.flag}</span>`:'');});
+}
+function markAuto(el,src,snip){el.classList.remove('autoed');el.classList.add('auto');el.title=`由上傳資料自動填入：${src}\n原文：${snip}\n（可直接修改；修改後標註改為使用者輸入）`;}
+function applyCands(){const log=[];
+  document.querySelectorAll('#imTab tr[data-id]').forEach(tr=>{if(!tr.querySelector('.ck').checked)return;const id=tr.dataset.id,val=parseFloat(tr.querySelector('.iv').value);if(!isFinite(val))return;
+    const c=IMP.C[id][+tr.querySelector('.sel').value];const el=$(id);AUTO[id]={src:c.src,snip:c.snip,line:c.line,orig:el.value,ed:false};el.value=+val.toPrecision(6);markAuto(el,c.src,c.snip);log.push(`${LBL[id]||id} = ${el.value}（${c.src} 第${c.line}行）`);
+    if(id==='sod'&&c.meta&&c.meta.basis){$('basis').value=c.meta.basis;}});
+  if(AUTO.H&&!AUTO.H.ed)$('bs').value=$('H').value;
+  if(AUTO.sod&&$('rSod').value==='def')$('rSod').value='doc';
+  const crs=[...document.querySelectorAll('#imCTab tr[data-id]')].filter(tr=>tr.querySelector('.ck').checked);
+  if(crs.length){const mode=(document.querySelector('input[name=cmode]:checked')||{}).value||'merge';if(mode==='replace')rows=[];
+    crs.forEach(tr=>{const[,c,md]=tr.dataset.id.split('|');const val=parseFloat(tr.querySelector('.iv').value);if(!isFinite(val))return;const cd=IMP.C[tr.dataset.id][+tr.querySelector('.sel').value];
+      let r=rows.find(x=>x.c===c);if(!r){r={c,soil:0,gw:0,napl:0,koc:''};rows.push(r);}r[md]=+val.toPrecision(6);r.auto={src:cd.src,snip:cd.snip,ed:false};log.push(`${c} ${md==='gw'?'地下水':'土壤'} = ${r[md]}（${cd.src} 第${cd.line}行）`);});}
+  renderRows();calcAll();
+  $('imLog').innerHTML=log.length?al('ok',`已填入 ${log.length} 項，欄位以<b style="color:#c2410c">橘色外框</b>標示，可直接修改：<br>`+log.map(esc).join('<br>')):al('warn','未勾選任何項目。');}
+function clearAuto(){for(const id in AUTO){const el=$(id);if(el){el.classList.remove('auto','autoed');el.title='';}delete AUTO[id];}rows.forEach(r=>delete r.auto);renderRows();calcAll();$('imLog').innerHTML=al('info','已清除自動填入標記（數值保留）。');}
+document.addEventListener('input',e=>{const t=e.target;if(t.id&&AUTO[t.id]&&!AUTO[t.id].ed){AUTO[t.id].ed=true;t.classList.remove('auto');t.classList.add('autoed');t.title=`原為自動填入（${AUTO[t.id].src}），已由使用者修改`;}
+  if(t.dataset&&t.dataset.i!==undefined&&t.closest('#ctab')){const r=rows[+t.dataset.i];if(r&&r.auto)r.auto.ed=true;}},true);
+/* ---------- 9.4 設計檢核規則與知識庫 ---------- */
+const dflt=id=>DEF[id]===$(id).value&&!AUTO[id];
+const sevTag=s=>`<span class="sev ${s}">${{high:'高',mid:'中',low:'低'}[s]}</span>`;
+function qaRules(){renderKin();renderOB();const s=S,p=s.p,K=window.KIN||{},O=window.OBR||{};const R=[];const add=(sev,cat,find,sug,cm,resp,sec)=>R.push({sev,cat,find,sug,cm,resp,sec});
+  const PS=p.ox==='Na2S2O8',MN=/MnO4/.test(p.ox),HP=p.ox==='H2O2'||p.fenton;
+  const dl=['L','W','H','ztop','dtw','n','ne','rho','foc','K','grad','sod','roi','Q','pH','alk','cl','fe2','mn2'].filter(dflt);
+  if(dl.length)add('high','參數來源',`${dl.length} 項參數仍為工具預設值：${dl.map(i=>LBL[i]).join('、')}`,'以場址調查、處理性試驗、注水試驗數據取代；可於⑫匯入調查報告自動擷取。','設計參數多項未見場址實測依據，請列表說明各參數數值與來源。','感謝委員意見。已將設計參數改以本場址調查與試驗結果為依據，並於報告表○列明各參數數值、來源文件（報告名稱、日期、頁碼）與查證狀態。','第三章 場址條件');
+  if(dflt('sod'))add('high','劑量依據','SOD 仍為工具預設值（5 g/kg），NOD 占需氧量主要部分時，劑量不確定性極大。','以本場址代表性土樣進行批次試驗測定 SOD（含接觸時間與氧化劑濃度條件）。','劑量計算採用之 SOD 依據為何？是否經本場址土樣試驗？請補充試驗方法與結果。',`感謝委員意見。本計畫 SOD 係以場址○處代表性土樣進行批次試驗求得○ g/kg（試驗方法、氧化劑種類、濃度與接觸時間詳附錄○），據以計算 NOD 約 ${fmt(s.nod,0)} kg，設計總用量 ${fmt(s.tod,0)} kg。`,'第四章 劑量計算');
+  if(p.basis==='KMnO4'&&!MN)add('mid','劑量依據',`SOD 以 KMnO₄ 量測，依電子當量換算為${s.ox.name}（×${fmt(s.ox.eq/OX.KMnO4.eq,2)}）。`,'不同氧化劑對天然有機質反應性不同，建議以實際採用之氧化劑直接測定 SOD。',`SOD 以過錳酸鉀測定，換算為${s.ox.name}需求之合理性為何？`,`感謝委員意見。本計畫以電子當量換算（換算係數 ${fmt(s.ox.eq/OX.KMnO4.eq,2)}），惟不同氧化劑對天然有機質之反應性不同，此換算屬假設；後續將以${s.ox.name}直接進行 SOD 批次試驗確認，並依結果修正劑量。`,'第四章 劑量計算');
+  if(dflt('roi'))add('high','灌注範圍','ROI 仍為工具預設值（3 m），未經現地試驗確認。','以注水試驗、示蹤試驗或模場試驗求得 ROI，並說明判定指標（如導電度、殘留氧化劑、ORP）。','影響半徑如何決定？是否有現地注入試驗佐證？','感謝委員意見。ROI 係依模場（注水／示蹤）試驗結果決定：於距灌注井○ m、○ m 之監測井觀測導電度／殘留氧化劑變化，判定有效影響半徑為○ m，設計採折減後○ m（詳第○章）。','第五章 灌注井配置');
+  if(s.rox<s.Rd)add('high','灌注範圍',`NOD 限制傳輸半徑 r_ox = ${fmt(s.rox,2)} m 小於設計 ROI ${fmt(s.Rd,2)} m。`,'提高單井藥劑量、加密井距或採分次灌注，並以模場試驗確認氧化劑實際到達範圍。','依土壤需氧量推估，氧化劑可能無法到達設計影響半徑邊緣，請說明對策。',`感謝委員意見。經檢核單井藥劑量 ${fmt(s.Mw,0)} kg 於 SOD ${fmt(s.sodOx,1)} g/kg 下之消耗半徑約 ${fmt(s.rox,2)} m，已調整為【加密井距／提高劑量／分○次灌注】，並於模場試驗監測殘留氧化劑以確認到達範圍。`,'第五章 灌注井配置');
+  if(s.Cdes<s.demC)add('mid','劑量依據',`設計注入濃度 ${fmt(s.Cdes,1)} g/L 低於孔隙水當量 NOD 濃度 ${fmt(s.demC,1)} g/L。`,'單次注入可能不足以滿足 NOD，建議分次灌注並監測殘留氧化劑。','單次灌注濃度是否足以克服土壤需氧量？','感謝委員意見。已評估單次注入濃度與土壤需氧量之關係，規劃分○次灌注，並以每次灌注後殘留氧化劑濃度作為追加灌注之判定依據。','第四章／第六章');
+  if(s.ox.sol&&s.Cdes>s.ox.sol)add('high','藥劑配製',`設計注入濃度 ${fmt(s.Cdes,1)} g/L 超過溶解度（約 ${s.ox.sol} g/L）。`,'增加注入體積或分次灌注。','藥劑濃度超過溶解度，現場如何配製？','感謝委員意見。已修正注入體積與灌注次數，使注入濃度低於溶解度上限，並考量現場水溫對溶解度之影響。','第四章 劑量計算');
+  const pvr=s.nW*s.Vw/s.PVe;
+  if(pvr>1)add('mid','注入量',`全場注入量 ${fmt(s.nW*s.Vw,1)} m³，約 ${fmt(pvr*100,0)}% 有效孔隙體積。`,'注入量大於孔隙體積可能推移污染地下水至處理範圍外並造成水位隆起；建議分次灌注、下游監測，必要時搭配抽水控制。','灌注量大於處理區孔隙體積，是否會將污染團推出處理範圍？',`感謝委員意見。全場注入量約為有效孔隙體積之 ${fmt(pvr,1)} 倍，將採分次灌注並於下游及側向設置監測井，監測水位、導電度與目標污染物，必要時以抽水井進行水力控制。`,'第五章／第七章 監測');
+  else if(pvr<0.1)add('low','注入量',`全場注入量僅約 ${fmt(pvr*100,1)}% 有效孔隙體積。`,'注入量偏低時藥劑分布可能不足，請確認濃度與 ROI 設定。','注入體積偏低，藥劑分布是否足夠？','感謝委員意見。已檢核注入體積與 ROI 之對應關係，並補充藥劑分布之驗證方式。','第五章');
+  if(s.dh>p.dtw)add('high','施工風險',`Thiem 估算注入水頭上升 ${fmt(s.dh,2)} m，大於地下水位深度 ${p.dtw} m（井口約需 ${fmt(s.Pwh,0)} kPa）。`,'降低注入流率、設定壓力上限、井體止水（皂土封層），並規劃地表冒漿巡查與應變。','灌注壓力與地表冒漿、沿井壁回流之防範措施為何？',`感謝委員意見。已依估算結果將單井注入流率設定為○ L/min、井口壓力上限○ kPa，灌注井採皂土及水泥漿封層，灌注期間每○小時巡查地表及鄰近井孔，發現冒漿即停止灌注並啟動應變程序。`,'第五章／第八章 安全');
+  if(s.drift>s.Lf)add('mid','藥劑擴散',`氧化劑存留期間漂移約 ${fmt(s.drift,1)} m，大於處理區流向長度 ${s.Lf} m。`,'於下游設監測井監測殘留氧化劑、ORP 及硫酸鹽／錳。','藥劑是否會隨地下水流出處理範圍？對下游之影響如何監測？',`感謝委員意見。依流速 ${sci(s.vel)} m/d 及氧化劑衰減估算漂移距離約 ${fmt(s.drift,1)} m，已於處理區下游○ m 設置監測井，監測殘留氧化劑、ORP、pH${PS?'、硫酸鹽':MN?'、錳':''}。`,'第七章 監測');
+  if(s.unsat>0)add('mid','水文地質',`處理區上方 ${fmt(s.unsat,2)} m 位於地下水位以上。`,'不飽和層藥劑分布機制不同，建議另行設計（如直接推注、淺層混拌）。','處理區部分位於不飽和層，灌注方式是否適用？','感謝委員意見。不飽和層部分將另以【直接推注／淺層混拌】方式處理，並補充其藥劑量與驗證方式。','第五章');
+  if(p.K<0.1)add('high','水文地質',`K = ${sci(p.K)} m/d，屬低滲透性。`,'低滲透地層藥劑難以分布，評估直接推注、壓裂或土壤混拌。','低滲透地層之灌注可行性？','感謝委員意見。已補充低滲透地層之灌注可行性評估，並規劃【直接推注／壓裂輔助】，以模場試驗確認分布範圍。','第三章／第五章');
+  if(p.khkv>10)add('mid','水文地質',`Kh/Kv = ${p.khkv}，層狀異向性明顯。`,'建議分層灌注（多段篩管或 DPT 分段注入）。','地層非均質性對藥劑分布之影響？','感謝委員意見。已依鑽探柱狀圖劃分高、低透水層，採分段灌注並於不同深度設置監測點。','第五章');
+  s.pr.forEach(r=>{if(r.Csat&&r.soil>r.Csat)add('high','污染特性',`${r.c} 土壤濃度 ${r.soil} mg/kg 大於 Csat ${fmt(r.Csat,0)} mg/kg，可能存在 NAPL。`,'估計 NAPL 質量納入 POD，並評估反彈與多次灌注。',`${r.c} 是否存在 NAPL？劑量是否已納入？`,`感謝委員意見。依土壤濃度與飽和濃度比較，${r.c} 可能存在 NAPL，已估計 NAPL 質量約○ kg 並納入 POD，同時規劃反彈監測與追加灌注機制。`,'第三章／第四章');
+    if(r.koc==null)add('low','參數來源',`${r.c} 之 Koc 未建資料，遲滯因子以 1 計算。`,'輸入文獻 Koc 並註明出處。',`${r.c} 遲滯與吸附相質量如何估算？`,`感謝委員意見。已補充 ${r.c} 之 Koc 文獻值（出處：○），並重新估算吸附相質量。`,'第三章');});
+  if(PS&&$('rAct').value==='未定')add('high','藥劑選擇','過硫酸鈉活化方式未定，劑量未含活化劑。','依處理性試驗比較鹼、熱、鐵螯合、H₂O₂ 等活化方式並計算活化劑用量。','過硫酸鈉之活化方式為何？活化劑用量是否已納入？','感謝委員意見。依處理性試驗結果採【○○活化】，活化劑用量為○ kg（計算方式詳第○章），已納入藥劑採購與配製規劃。','第四章 藥劑選擇');
+  if(PS&&$('kmode').value==='lit'&&Math.abs(v('k2')-0.67)<1e-9)add('high','動力學','過硫酸鈉情境仍使用 TCE–過錳酸鹽之 k₂（0.67 M⁻¹s⁻¹）。','改用處理性試驗 k_obs。','反應速率常數之依據？是否適用於所選藥劑？','感謝委員意見。已改以本場址處理性試驗求得之擬一階速率常數 k_obs = ○ d⁻¹ 進行模擬，並於報告中說明試驗條件。','第六章');
+  if(Math.abs(v('Ea')-60)<1e-9)add('mid','動力學','活化能 Ea 採工具假設值 60 kJ/mol。',`TCE–過錳酸鹽文獻值為 35 kJ/mol 與 41.46 kJ/mol${cite('huang99','yan00')}。`,'溫度修正採用之活化能依據？','感謝委員意見。已改採文獻活化能（出處見參考文獻），或以不同溫度之處理性試驗求得。','第六章');
+  if(K.c){if(K.tt==null)add('mid','整治期程',`模擬 ${K.days} d 內 ${K.c} 未達目標 ${K.tg} mg/L。`,'增加灌注次數或劑量、評估整治期程。','預估整治期程與可達成性為何？','感謝委員意見。依模擬結果規劃灌注○次、間隔○日，預估○個月內可達整治目標，並以監測結果滾動調整。','第六章');
+    else if(K.end>K.mn*1.5&&K.end>1e-6)add('mid','反彈',`${K.c} 模擬期末濃度回升（反彈）。`,'規劃反彈監測與追加灌注判定條件。','灌注後濃度反彈之評估與對策？','感謝委員意見。已設定反彈判定條件（連續○次監測高於目標值），屆時啟動追加灌注，並延長監測至○個月。','第六章／第七章');}
+  if(s.pod/s.base<0.2)add('low','劑量依據',`POD 僅占需氧量 ${fmt(s.pod/s.base*100,0)}%，劑量主要由 NOD 決定。`,'報告應特別說明 SOD 試驗之代表性。','劑量主要由土壤需氧量決定，SOD 樣品是否具代表性？','感謝委員意見。SOD 試驗樣品取自處理區○處、○深度，涵蓋主要地層，試驗結果範圍○～○ g/kg，設計採○值。','第四章');
+  if(dflt('sf')||dflt('deo'))add('mid','劑量依據',`安全係數 ${p.sf}、自身分解比例 ${p.deo} 為工具預設值。`,'說明考量之不確定性並引用試驗或文獻。','安全係數與藥劑自身分解比例之依據？','感謝委員意見。安全係數係考量 SOD 量測變異（○%）與地層非均質性訂定；自身分解比例依處理性試驗氧化劑殘留曲線估算。','第四章');
+  const db=MAT[p.fenton?'H2O2':p.ox]||{};const ng=[...$('matPick').querySelectorAll('input:checked')].map(i=>i.dataset.m).filter(m=>db[m]&&db[m][0]==='NG');
+  if(ng.length)add('high','施工安全',`勾選之管材含不相容材料：${ng.join('、')}。`,'更換為相容材料並以供應商相容性資料確認。','管線材質與藥劑相容性？','感謝委員意見。已將輸送管線改為【316 不鏽鋼／HDPE／PVDF】，並檢附供應商相容性資料。','第八章 安全');
+  if(HP&&v('hwt')>=11)add('high','施工安全',`H₂O₂ 濃度 ${v('hwt')} wt%，注入液絕熱溫升可能達沸點。`,'降低濃度或分段注入，並監測溫度。','過氧化氫放熱與氣體產生之安全措施？','感謝委員意見。已將 H₂O₂ 注入濃度調降為○%，並於監測井設置溫度與 VOC 監測，訂定停止灌注條件。','第八章 安全');
+  if(PS&&(p.cl>500||p.alk>300))add('mid','地下水化學',`Cl⁻ ${p.cl} mg/L、鹼度 ${p.alk} mg/L，可能清除自由基。`,'以處理性試驗確認實際地下水基質下之去除效率。','地下水氯鹽與鹼度對活化過硫酸鹽之影響？','感謝委員意見。處理性試驗已採用場址地下水進行，結果已反映基質效應（詳附錄○）。','第四章');
+  if(p.fenton&&p.pH>5)add('mid','地下水化學',`地下水 pH ${p.pH}，高於 Fenton 常見範圍。`,'評估酸化或改用螯合鐵。','Fenton 反應 pH 條件如何控制？','感謝委員意見。已評估土壤緩衝能力，採【酸化／螯合鐵】方式，並監測 pH。','第四章');
+  if(O.spc==='c'&&O.dom*O.C0>v('ktg'))add('mid','下游影響',`下游 ${O.x} m 處穩態濃度估算 ${sci(O.dom*O.C0)} mg/L，高於目標 ${v('ktg')} mg/L。`,'評估下游受體與監測。','整治後殘餘污染對下游受體之影響？','感謝委員意見。已補充下游受體調查與傳輸評估，並於下游設置監測井定期監測。','第七章');
+  if(PS)add('low','二次影響','過硫酸鈉反應產生硫酸鹽並可能使 pH 下降。',`報告應說明硫酸鹽、pH、重金屬溶出之監測${cite('huling')}（Section III.F.4 Geochemical Impacts）。`,'灌注後硫酸鹽增加、pH 變化及重金屬溶出之影響與監測？',`感謝委員意見。依理論最大硫酸鹽增量估算（${s.ox.name} ${fmt(s.tod,0)} kg），將於處理區與下游監測硫酸鹽、pH 及重金屬（○、○），並與背景值比較。`,'第七章 監測');
+  if(MN)add('low','二次影響','過錳酸鹽反應生成 MnO₂ 並殘留錳。',`說明錳、色度及透水性變化之監測${cite('huling')}。`,'灌注後錳殘留與 MnO₂ 沉澱對透水性之影響？','感謝委員意見。將監測地下水錳濃度與色度，並以灌注前後微水試驗評估透水性變化。','第七章 監測');
+  if(!$('rStd').value.trim())add('mid','整治目標','⑪報告產出未填寫整治目標依據。','填寫適用管制標準與驗證方式。','整治目標與完成驗證方式為何？','感謝委員意見。本計畫整治目標為【○○管制標準】，完成驗證依【○○規定】辦理採樣與分析。','第二章 整治目標');
+  return R;}
+const KB=[
+ {t:'藥劑選擇依據',kw:['藥劑','氧化劑','選用','選擇','過硫酸','過錳酸','芬頓','Fenton','臭氧','persulfate','permanganate'],
+  a:s=>`目前設定為${s.ox.name}${s.p.fenton?'（Fenton）':''}。藥劑選擇應綜合污染物反應性、地下水化學、需氧量、輸送方式與安全性，並以批次試驗及模場試驗確認${cite('itrc','huling')}${T('part')}。報告中請以處理性試驗結果（去除率、SOD、殘留時間）比較候選藥劑。`,
+  r:s=>`感謝委員意見。本計畫依處理性試驗比較○種氧化劑對目標污染物之去除率與土壤需氧量，${s.ox.name}之去除率○%、SOD ○ g/kg，綜合考量地下水化學、施工安全與成本後選用（詳第○章表○）。`},
+ {t:'劑量計算與 SOD',kw:['劑量','用量','SOD','NOD','需氧量','安全係數','TOD','計算','藥量'],
+  a:s=>`TOD = (POD + NOD + 地下水還原物質) ÷ (1 − DEO) × SF${T('der')}。目前 POD ${fmt(s.pod,0)} kg、NOD ${fmt(s.nod,0)} kg、TOD ${fmt(s.tod,0)} kg；NOD 占比 ${fmt(s.nod/s.base*100,0)}%。SOD ${dflt('sod')?'仍為預設值'+T('def'):AUTO.sod?'自上傳資料擷取'+T('auto'):'為使用者輸入'+T('site')}。`,
+  r:s=>`感謝委員意見。設計用量依 TOD = POD + NOD + 自身分解計算，POD 依電子當量化學計量求得 ${fmt(s.pod,0)} kg，NOD 依場址土樣 SOD 試驗值○ g/kg 計算為 ${fmt(s.nod,0)} kg，考量安全係數 ${s.p.sf} 後設計用量為 ${fmt(s.tod,0)} kg（計算表詳第○章）。`},
+ {t:'影響半徑 ROI 如何決定',kw:['影響半徑','ROI','擴散範圍','注入試驗','示蹤','分布範圍'],
+  a:s=>`目前 ROI = ${fmt(s.Rd,2)} m ${AUTO.roi?T('auto'):dflt('roi')?T('def'):T('site')}。ROI 應以注水／示蹤或模場試驗觀測導電度、殘留氧化劑或 ORP 決定；工具另以 NOD 消耗估算 r_ox = ${fmt(s.rox,2)} m 作為檢核${T('der')}。`,
+  r:s=>`感謝委員意見。ROI 係依模場試驗於距灌注井不同距離之監測井觀測導電度與殘留氧化劑決定為○ m，設計採 ${fmt(s.Rd,2)} m；並以土壤需氧量檢核氧化劑消耗半徑約 ${fmt(s.rox,2)} m。`},
+ {t:'灌注井配置與井數',kw:['井位','井距','配置','井數','灌注井','覆蓋','排列'],
+  a:s=>`採${s.use===s.lay.tr?'三角形':'正方形'}配置 ${s.nW} 口，井距 ${fmt(s.use.dx,2)} m、排距 ${fmt(s.use.dy,2)} m，網格檢核覆蓋率 ${(s.use.cov*100).toFixed(1)}%${T('der')}；理論下限 ${s.lay.tmin} 口。`,
+  r:s=>`感謝委員意見。灌注井依影響半徑 ${fmt(s.Rd,2)} m 以${s.use===s.lay.tr?'三角形交錯':'正方形'}配置，共 ${s.nW} 口，經檢核可完整覆蓋處理範圍（覆蓋率 ${(s.use.cov*100).toFixed(0)}%），配置圖詳圖○。`},
+ {t:'灌注壓力、冒漿與回流',kw:['壓力','冒漿','回流','水頭','地表','湧出','裂隙','冒出'],
+  a:s=>`Thiem 估算 Δh = ${fmt(s.dh,2)} m${T('std')}（以 ROI 當影響半徑，可能低估${T('asm')}）；地下水位深 ${s.p.dtw} m，${s.dh>s.p.dtw?`需加壓約 ${fmt(s.Pwh,0)} kPa，有冒漿風險`:'理論上不需加壓'}。`,
+  r:s=>`感謝委員意見。灌注流率設定為 ${s.p.Q} L/min，並設定井口壓力上限○ kPa；灌注井以皂土與水泥漿封層，灌注期間定時巡查地表及鄰近井孔，如有冒漿即停止灌注並清理。`},
+ {t:'藥劑擴散至處理範圍外',kw:['下游','範圍外','擴散','遷移','傳輸','受體','鄰地','流出'],
+  a:s=>`地下水流速 ${sci(s.vel)} m/d；氧化劑衰減至 10% 約 ${fmt(s.tPers,0)} d，漂移約 ${fmt(s.drift,1)} m${T('der')}。下游傳輸以 Ogata–Banks 與 Domenico 解估算${cite('ogata','domenico')}。`,
+  r:s=>`感謝委員意見。依地下水流速與氧化劑衰減估算漂移距離約 ${fmt(s.drift,1)} m，已於下游設置監測井監測殘留氧化劑與 ORP，並設定超過背景值○倍時之應變措施。`},
+ {t:'二次污染與副產物',kw:['二次污染','副產物','硫酸鹽','重金屬','溶出','錳','殘留','pH','色度'],
+  a:s=>`${s.p.ox==='Na2S2O8'?'過硫酸鹽反應產生硫酸鹽、可能降低 pH':/MnO4/.test(s.p.ox)?'過錳酸鹽生成 MnO₂ 沉澱並殘留錳':'H₂O₂ 分解放熱並產生氣體'}；地化影響可參考 Huling 與 Pivetz 之 Geochemical Impacts 章節${cite('huling')}${T('part')}。`,
+  r:s=>`感謝委員意見。將於灌注前後監測${s.p.ox==='Na2S2O8'?'硫酸鹽、pH':/MnO4/.test(s.p.ox)?'錳、色度':'溫度、溶氧'}及重金屬（○、○），並與背景值比較，評估二次影響。`},
+ {t:'反彈評估',kw:['反彈','rebound','脫附','NAPL','殘留源','回升'],
+  a:s=>`反彈多來自吸附相或 NAPL 脫附；工具以 k_des 集總參數近似${T('asm')}。${(window.KIN&&window.KIN.tt!=null)?`目前模擬約 ${fmt(window.KIN.tt,1)} d 達標`:'目前模擬未達標'}。`,
+  r:s=>`感謝委員意見。已設定灌注後監測期○個月，若連續○次監測濃度高於目標值即啟動追加灌注；並於報告補充吸附相質量估算。`},
+ {t:'監測計畫',kw:['監測','採樣','頻率','ORP','監測井','追蹤'],
+  a:s=>`建議監測：殘留氧化劑、ORP、pH、導電度、溫度、${s.p.ox==='Na2S2O8'?'硫酸鹽、':/MnO4/.test(s.p.ox)?'錳、':''}目標污染物，處理區內、下游與背景井各設點${T('asm')}。`,
+  r:s=>`感謝委員意見。已補充監測計畫：監測井○口（處理區○、下游○、背景○），項目含殘留氧化劑、ORP、pH、導電度、溫度${s.p.ox==='Na2S2O8'?'、硫酸鹽':''}及目標污染物，頻率為灌注後第 1、2、4 週及每月一次，持續○個月。`},
+ {t:'施工安全',kw:['安全','放熱','溫度','PPE','儲存','SDS','職安','爆炸','防護'],
+  a:s=>`請見⑧安全檢查清單與⑦放熱評估。材料相容性與 PPE 應以供應商 SDS 確認${T('nv')}。`,
+  r:s=>`感謝委員意見。已補充施工安全衛生計畫：藥劑分區儲存、配藥 PPE、管材相容性檢核、緊急沖淋設備及停止灌注條件（詳第○章）。`},
+ {t:'整治目標與期程',kw:['目標','期程','管制標準','驗證','達成','完成','時程'],
+  a:s=>`整治目標：${esc($('rStd').value)||'尚未填寫'}；目標濃度 ${$('ktg').value} mg/L。${(window.KIN&&window.KIN.tt!=null)?`模擬約 ${fmt(window.KIN.tt,1)} d 達標${T('der')}`:'模擬期間未達標'}。`,
+  r:s=>`感謝委員意見。本計畫整治目標為○○，預估灌注○次、○個月內達成，完成後依規定辦理驗證採樣。`},
+ {t:'低滲透與非均質地層',kw:['滲透','非均質','黏土','透水','分層','異向'],
+  a:s=>`K = ${sci(s.p.K)} m/d、Kh/Kv = ${s.p.khkv}；${s.p.K<0.1?'屬低滲透，需評估推注或壓裂':'可採一般灌注'}${s.p.khkv>10?'，建議分層灌注':''}。`,
+  r:s=>`感謝委員意見。已依柱狀圖劃分透水層，於低透水層採【直接推注／分段灌注】，並以不同深度監測點確認分布。`},
+ {t:'過硫酸鹽活化方式',kw:['活化','鹼活化','熱活化','鐵','螯合','activation'],
+  a:s=>s.p.ox==='Na2S2O8'?`活化方式：${$('rAct').value}；工具劑量未含活化劑${T('nv')}，須以處理性試驗決定。`:'目前藥劑非過硫酸鈉。',
+  r:s=>`感謝委員意見。依處理性試驗比較結果採○○活化，活化劑用量○ kg，已納入配藥規劃。`},
+ {t:'反應速率常數與動力學參數',kw:['速率常數','動力學','反應速率','半衰期','k2','k₂','活化能','kobs'],
+  a:s=>`TCE–過錳酸鹽 k₂ = 0.65–0.68 M⁻¹s⁻¹（21 °C）${cite('yan99','yan00')}${T('ok')}；Ea 文獻 35 kJ/mol${cite('huang99')}、41.46 kJ/mol${cite('yan00')}。其他組合應用處理性試驗 k_obs。`,
+  r:s=>`感謝委員意見。反應速率常數採【文獻值（出處）／處理性試驗求得 k_obs = ○ d⁻¹】，溫度修正採活化能○ kJ/mol，參數來源已列於表○。`},
+ {t:'參數來源與文獻引用',kw:['文獻','出處','引用','依據','來源','參考'],
+  a:s=>`各分頁底部「📑 來源」表列出每個數字的出處與查證狀態；⑩列出已核實之 APA 參考文獻。`,
+  r:s=>`感謝委員意見。已於報告表○列明各參數之來源與查證狀態，引用文獻依 APA 格式列於參考文獻，並附 DOI 或連結。`},
+ {t:'灌注次數與注入量',kw:['次數','分次','灌注量','注入量','體積','孔隙體積','PV'],
+  a:s=>`單井 ${fmt(s.Vw,2)} m³、全場 ${fmt(s.nW*s.Vw,1)} m³（${fmt(s.nW*s.Vw/s.PVe*100,0)}% 有效 PV），灌注 ${$('ninj').value} 次、間隔 ${$('itv').value} d${T('der')}。`,
+  r:s=>`感謝委員意見。全場注入量 ${fmt(s.nW*s.Vw,1)} m³，分 ${$('ninj').value} 次灌注、間隔 ${$('itv').value} 日，每次灌注後依殘留氧化劑監測結果決定是否追加。`},
+];
+function kbMatch(q){const ql=q.toLowerCase();return KB.map(k=>({k,sc:k.kw.reduce((a,w)=>a+(ql.includes(w.toLowerCase())?(w.length>=3?2:1):0),0)})).filter(x=>x.sc>0).sort((a,b)=>b.sc-a.sc);}
+/* ---------- 9.5 委員意見表 ---------- */
+let CMTS=[];try{CMTS=JSON.parse(localStorage.getItem('isco_cmts_v5')||'[]');}catch(e){}
+const saveC=()=>{try{localStorage.setItem('isco_cmts_v5',JSON.stringify(CMTS));}catch(e){}};
+function addCmt(o){if(CMTS.some(c=>c.cm===o.cm))return 0;CMTS.push({who:'',src:'預期',sec:'',st:o.resp&&!/【請補充具體/.test(o.resp)?'已擬答':'待處理',...o});return 1;}
+function renderCmts(){
+  $('cmTab').innerHTML=CMTS.length?`<table><thead><tr><th>#</th><th>委員／來源</th><th style="width:30%">審查意見</th><th style="width:38%">答覆說明（可編輯）</th><th>修正處</th><th>狀態</th><th></th></tr></thead><tbody>${CMTS.map((c,i)=>`<tr data-i="${i}">
+  <td>${i+1}</td><td><input class="inp cw" value="${esc(c.who)}" placeholder="委員姓名"><small class="note">${esc(c.src)}</small></td>
+  <td><textarea class="inp cc" rows="4">${esc(c.cm)}</textarea></td><td><textarea class="inp cr" rows="4">${esc(c.resp)}</textarea></td>
+  <td><input class="inp cs" value="${esc(c.sec)}"></td><td><select class="inp ct">${['待處理','已擬答','已修正','不採納（已說明）'].map(x=>`<option ${x===c.st?'selected':''}>${x}</option>`).join('')}</select></td>
+  <td><button class="btn" data-x="${i}">✕</button></td></tr>`).join('')}</tbody></table>`:'<p class="note">尚無意見。可由下方按鈕產生預期意見，或貼上實際委員意見。</p>';
+  $('cmCnt').textContent=`共 ${CMTS.length} 則；待處理 ${CMTS.filter(c=>c.st==='待處理').length} 則`;}
+$('cmTab')||0;
+function cmtEvents(){const tb=$('cmTab');
+  tb.addEventListener('input',e=>{const tr=e.target.closest('tr[data-i]');if(!tr)return;const c=CMTS[+tr.dataset.i];const t=e.target;
+    if(t.classList.contains('cw'))c.who=t.value;if(t.classList.contains('cc'))c.cm=t.value;if(t.classList.contains('cr')){c.resp=t.value;if(c.st==='待處理')c.st='已擬答';}if(t.classList.contains('cs'))c.sec=t.value;if(t.classList.contains('ct'))c.st=t.value;saveC();$('cmCnt').textContent=`共 ${CMTS.length} 則；待處理 ${CMTS.filter(c=>c.st==='待處理').length} 則`;});
+  tb.addEventListener('change',e=>{if(e.target.classList.contains('ct')){const tr=e.target.closest('tr[data-i]');CMTS[+tr.dataset.i].st=e.target.value;saveC();}});
+  tb.addEventListener('click',e=>{const x=e.target.dataset.x;if(x!==undefined){CMTS.splice(+x,1);saveC();renderCmts();}});}
+function splitComments(t){t=t.replace(/\r/g,'').trim();if(!t)return[];
+  let parts=t.split(/\n(?=\s*(?:\d{1,2}\s*[\.、．)）]|[（(]\s*\d{1,2}\s*[)）]|[一二三四五六七八九十]{1,3}\s*[、．.]))/);
+  if(parts.length<2)parts=t.split(/\n+/);
+  return parts.map(x=>x.replace(/^\s*(?:\d{1,2}\s*[\.、．)）]|[（(]\s*\d{1,2}\s*[)）]|[一二三四五六七八九十]{1,3}\s*[、．.])\s*/,'').replace(/\s*\n\s*/g,'').trim()).filter(x=>x.length>3);}
+function importComments(){const who=$('cmWho').value.trim();const arr=splitComments($('cmPaste').value);let n=0;
+  arr.forEach(cm=>{const m=kbMatch(cm);const resp=m.length?m[0].k.r(S):'感謝委員意見。將依意見補充說明於報告第○章○節。【請補充具體回覆內容】';n+=addCmt({who,src:'實際意見'+(m.length?`（自動對應：${m[0].k.t}）`:'（無對應範本）'),cm,resp,sec:'',st:m.length?'已擬答':'待處理'});});
+  saveC();renderCmts();$('cmMsg').innerHTML=al(n?'ok':'warn',n?`已匯入 ${n} 則並自動擬答（回覆為範本草稿，〔○〕處需填入實際數據）。`:'未辨識到意見，請確認格式（每則一行，或以 1.、(1)、一、編號）。');}
+function cmtTableHTML(){return `<h3 style="text-align:center">審查意見及答覆說明對照表</h3><p>計畫名稱：${esc($('rSite').value)||'○○○'}</p><table style="width:100%;border-collapse:collapse"><tr><th style="width:5%">項次</th><th style="width:10%">委員</th><th style="width:35%">審查意見</th><th style="width:40%">答覆說明</th><th style="width:10%">修正處</th></tr>${CMTS.map((c,i)=>`<tr><td>${i+1}</td><td>${esc(c.who)}</td><td>${esc(c.cm)}</td><td>${esc(c.resp)}</td><td>${esc(c.sec)}</td></tr>`).join('')}</table>`;}
+/* ---------- 9.6 QA 分頁渲染 ---------- */
+function renderQA(){const R=qaRules();window.QAR=R;const cnt={high:0,mid:0,low:0};R.forEach(r=>cnt[r.sev]++);
+  $('qaSum').innerHTML=al(cnt.high?'warn':'ok',`依目前輸入值檢核：高 ${cnt.high}、中 ${cnt.mid}、低 ${cnt.low} 項。檢核為規則式比對（非 AI 判斷），建議與規則內容僅供參考。`);
+  $('qaTab').innerHTML=R.length?tbl(['嚴重度','類別','發現','建議','預期委員意見','報告章節'],R.map(r=>[sevTag(r.sev),r.cat,r.find,r.sug,`<span class="note">${r.cm}</span>`,`<span class="note">${r.sec}</span>`])):al('ok','未觸發任何檢核規則。');
+  renderCmts();}
+function askQA(){const q=$('qaQ').value.trim();if(!q){$('qaA').innerHTML='';return;}const m=kbMatch(q).slice(0,3);
+  $('qaA').innerHTML=m.length?m.map(x=>`<div class="card" style="margin:6px 0;padding:10px"><b>${x.k.t}</b><p style="margin:6px 0">${x.k.a(S)}</p><details><summary class="note">委員若問到此題，回覆範本</summary><p class="note">${esc(x.k.r(S))}</p><button class="btn" data-add="${KB.indexOf(x.k)}">＋ 加入委員意見表</button></details></div>`).join('')
+   :al('info','查無對應問答。可改用關鍵字，例如：劑量、SOD、影響半徑、井距、冒漿、下游、硫酸鹽、反彈、監測、活化、速率常數。');}
+/* ---------- 9.7 報告檢核 ---------- */
+const SECS=[
+ ['場址背景與污染範圍',/污染範圍|污染概況|場址(?:背景|概述|現況|概況)|污染物(?:種類|濃度)/,'請補充污染範圍圖、各污染物濃度分布與調查依據（調查報告名稱與日期）。'],
+ ['水文地質參數',/水力傳導|透水係數|地下水流向|水力梯度|孔隙率/,'請補充水力傳導係數、孔隙率、地下水流向與梯度及其試驗方法。'],
+ ['處理性試驗／SOD',/處理性試驗|批次試驗|\bSOD\b|土壤氧化劑需求|天然需氧量|\bNOD\b/,'請補充土樣批次試驗（SOD）方法、樣品代表性與結果，作為劑量依據。'],
+ ['藥劑選擇理由',/(?:藥劑|氧化劑)(?:之)?(?:選擇|選用|比較|篩選)|選用.{0,12}(?:過硫酸|過錳酸|過氧化氫|芬頓|Fenton)/,'請以處理性試驗結果比較候選藥劑並說明選用理由。'],
+ ['劑量計算',/劑量計算|用量計算|藥劑量計算|\bTOD\b|\bPOD\b|需氧量/,'請補充藥劑量計算式、各項參數數值與來源。'],
+ ['灌注井配置與影響半徑',/影響半徑|\bROI\b|井距|灌注井(?:配置|位置|佈設|布設)/,'請說明 ROI 決定方式（注水／示蹤／模場試驗）與井位配置圖。'],
+ ['注入量、濃度與壓力',/(?:注入|灌注)(?:量|體積|濃度|壓力|流率)/,'請補充單井注入量、濃度、流率與壓力控制值。'],
+ ['灌注次數與期程',/灌注次數|分次灌注|第[一二三四1-4]次灌注|灌注期程|灌注頻率/,'請說明灌注次數、間隔與追加灌注判定條件。'],
+ ['監測計畫',/監測計畫|監測項目|監測頻率|監測井/,'請補充監測井位置、項目與頻率。'],
+ ['殘留氧化劑與 ORP',/殘留(?:氧化劑|藥劑)|\bORP\b|氧化還原電位/,'請將殘留氧化劑與 ORP 納入監測項目。'],
+ ['副產物與二次影響',/硫酸鹽|二次污染|副產物|重金屬|溶出/,'請評估硫酸鹽、pH 及重金屬溶出等二次影響並納入監測。'],
+ ['反彈評估',/反彈|rebound/i,'請說明濃度反彈之監測期與追加灌注條件。'],
+ ['冒漿／回流防範',/冒漿|回流|湧出|地表(?:冒|溢)|封井|封層/,'請補充灌注壓力上限、井體封層與冒漿應變措施。'],
+ ['施工安全衛生',/安全衛生|\bSDS\b|個人防護|\bPPE\b|職業安全|安全資料表/,'請補充藥劑儲存、配藥防護、材料相容性與緊急應變。'],
+ ['整治目標與驗證',/整治目標|管制標準|驗證採樣|完成驗證|整治基準/,'請明確整治目標、適用標準與驗證方式。'],
+ ['參考文獻',/參考文獻|References|參考資料/i,'請於文末列出參考文獻並於內文對應引用。'],
+];
+const NUMS='(\\d[\\d,]*(?:\\.\\d+)?)';
+function consChecks(t){const s=S,p=s.p;const out=[];
+  const run=(name,re,conv,tools,lab,tol=0.1)=>{const hits=[];for(const m of t.matchAll(re)){const raw=m.slice(1).find(x=>x&&/\d/.test(x));if(!raw)continue;const u=m[0];const val=conv(parseFloat(raw.replace(/,/g,'')),u);if(!isFinite(val))continue;hits.push({val,ctx:u.replace(/\s+/g,' ').slice(0,80)});}
+    if(!hits.length){out.push({name,status:'na',txt:'報告中未找到對應數值',tool:lab});return;}
+    hits.slice(0,4).forEach(h=>{const d=Math.min(...tools.map(tv=>Math.abs(h.val-tv)/Math.max(Math.abs(tv),1e-9)));out.push({name,status:d<=tol+1e-9?'ok':'diff',txt:`${nfmt(h.val)}（「${esc(h.ctx)}」）`,tool:lab,d});});};
+  run('氧化劑用量（kg）',new RegExp(`(?:過硫酸鈉|過錳酸鉀|過錳酸鈉|過氧化氫|氧化劑|藥劑)[^\\n。]{0,25}?(?:用量|使用量|總量|需求量|設計量)[^\\n\\d。]{0,15}?${NUMS}\\s*(?:公斤|kg|公噸|噸|t)(?![a-z])`,'gi'),(x,u)=>/公噸|噸|\dt(?![a-z])|\st(?![a-z])/i.test(u.slice(-6))?x*1000:x,[s.tod,s.prod],`TOD ${fmt(s.tod,0)}／商品量 ${fmt(s.prod,0)} kg`);
+  run('灌注井數（口）',/(?:灌注井|注入井|注藥井)[^\n。\d]{0,15}?(\d+)\s*(?:口|支|座)|(\d+)\s*(?:口|支)\s*(?:灌注井|注入井|注藥井)/g,x=>x,[s.nW],`${s.nW} 口`,0);
+  run('影響半徑 ROI（m）',new RegExp(`(?:影響半徑|ROI)[^\\n\\d。]{0,12}?${NUMS}\\s*(?:m|公尺)(?![²³\\w])`,'gi'),x=>x,[s.Rd],`${fmt(s.Rd,2)} m`);
+  run('注入濃度（g/L）',new RegExp(`(?:灌注|注入|注藥)(?:溶液)?濃度[^\\n\\d。]{0,12}?${NUMS}\\s*(g/L|wt\\s*%|%)`,'gi'),(x,u)=>/%/.test(u)?(isPS()?0.1049*x*x+9.1501*x+3.1347:x*10):x,[s.Cdes,p.conc],`設計 ${fmt(s.Cdes,1)}／劑量計算 ${p.conc} g/L`);
+  run('單井注入量（m³）',new RegExp(`單井(?:注入|灌注)(?:量|體積)[^\\n\\d。]{0,12}?${NUMS}\\s*(m3|m³|立方公尺|公噸|噸|L|公升)`,'gi'),(x,u)=>/(?<!立方公)\bL$|公升$/.test(u.trim())?x/1000:x,[s.Vw],`${fmt(s.Vw,2)} m³`);
+  run('處理體積（m³）',new RegExp(`處理(?:土方|體積|量體|土體|範圍體積)[^\\n\\d。]{0,12}?${NUMS}\\s*(?:m3|m³|立方公尺)`,'gi'),x=>x,[s.V],`${fmt(s.V,0)} m³`);
+  run('處理面積（m²）',new RegExp(`處理(?:面積|範圍面積)[^\\n\\d。]{0,12}?${NUMS}\\s*(?:m2|m²|平方公尺)`,'gi'),x=>x,[p.L*p.W],`${fmt(p.L*p.W,0)} m²`);
+  return out;}
+const normAu=a=>{a=String(a).replace(/&amp;/g,'&').replace(/U\.S\.\s*Environmental Protection Agency(?:\s*\[U\.S\. EPA\])?/i,'U.S. EPA').replace(/Interstate Technology (?:&|and) Regulatory Council(?:\s*\[ITRC\])?/i,'ITRC').trim();
+  if(/^[\u4e00-\u9fff]/.test(a))return(a.match(/^[\u4e00-\u9fff]+/)[0]).replace(/等$/,'').slice(0,4);const m=a.match(/[A-Za-z][A-Za-z'\-\.]*/);return(m?m[0]:a).toLowerCase().replace(/\.$/,'').replace(/\./g,'');};
+const UNV=[['miletiev','2012'],['陳凱',''],['brown','2003'],['gelhar','1971'],['gelhar','1992'],['schulze-makuch','2005'],['kershner','1939'],['karickhoff','1979'],['van','1982'],['freeze','1979'],['fetter',''],['thiem','1906'],['press','1992']];
+function citeCheck(t){
+  const hd=[...t.matchAll(/(?:^|\n)\s*(?:參考文獻|參考資料|References|Bibliography)\s*(?=\n|$)/gi)];const rs=hd.length?hd[hd.length-1].index:-1;
+  const body=rs>=0?t.slice(0,rs):t,refs=rs>=0?t.slice(rs):'';const IT=new Map();
+  const addIt=(au,yr,disp)=>{const k=normAu(au)+'|'+yr;const e=IT.get(k)||{disp,n:0,au:normAu(au),yr};e.n++;IT.set(k,e);};
+  for(const m of body.matchAll(/[（(]([^（）()]{2,220}?(?:\d{4}[a-z]?|n\.d\.))[)）]/g))for(const part of m[1].split(/[；;]/)){
+    const mm=part.match(/^\s*(?:e\.g\.,?\s*|參見|見|引自)?(.+?)[，,]\s*((?:\d{4}[a-z]?|n\.d\.)(?:\s*[,，]\s*\d{4}[a-z]?)*)\s*$/);if(!mm)continue;const au=mm[1].trim();
+    if(!/[A-Za-z\u4e00-\u9fff]/.test(au)||au.length>90||/^\d/.test(au))continue;for(const y of mm[2].split(/[,，]/))addIt(au,y.trim(),`${au}, ${y.trim()}`);}
+  for(const m of body.matchAll(/([A-Z][A-Za-z'\-]+(?:\s+(?:et al\.|(?:&|and)\s+[A-Z][A-Za-z'\-]+))?)\s*[（(](\d{4}[a-z]?)[)）]/g))addIt(m[1],m[2],`${m[1]} (${m[2]})`);
+  for(const m of body.matchAll(/([\u4e00-\u9fff]{2,4}(?:等(?:人)?)?)\s*[（(](\d{4})[)）]/g))addIt(m[1],m[2],`${m[1]}（${m[2]}）`);
+  const RE=[];refs.split(/\n+/).slice(1).forEach(l=>{l=l.trim();if(l.length<12)return;const y=(l.match(/[（(]\s*(\d{4}[a-z]?|n\.d\.)\s*[)）]/)||l.match(/\b(1[89]\d{2}|20\d{2})\b/)||[])[1];if(!y)return;RE.push({au:normAu(l),yr:y,line:l,link:/doi\.org|10\.\d{4,}\/|https?:\/\//i.test(l)});});
+  const VK=Object.values(REFS).map(r=>{const i=r.it.lastIndexOf(', ');return{au:normAu(r.it.slice(0,i)),yr:r.it.slice(i+2),r};});
+  const status=(au,yr)=>{const v=VK.find(x=>x.au===au&&x.yr===yr);if(v)return['ok',v.r.note?`已核實（${v.r.note}）`:'已核實'];if(UNV.some(([a,y])=>a===au&&(!y||y===yr)))return['nv','工具標示為未核實來源'];return['unk','工具未建資料，請自行查證'];};
+  const its=[...IT.values()].map(e=>{const inRef=RE.some(r=>r.au===e.au&&r.yr===e.yr);const[st,txt]=status(e.au,e.yr);return{...e,inRef,st,txt};});
+  const uncited=RE.filter(r=>!its.some(e=>e.au===r.au&&e.yr===r.yr));const nolink=RE.filter(r=>!r.link);
+  return{its,RE,uncited,nolink,hasRef:rs>=0};}
+let RC=null;
+function runCheck(){const t=($('rcText').value||'').trim();if(t.length<50){$('rcOut').innerHTML=al('warn','請先上傳報告或貼上報告文字（至少 50 字）。');return;}
+  const s=S,p=s.p;const I=[];const addI=(sev,cat,find,sug,cm,resp,sec)=>I.push({sev,cat,find,sug,cm,resp:resp||'感謝委員意見。已依意見於報告第○章○節補充說明。',sec:sec||''});
+  let h='';
+  const secR=SECS.map(([n,re,sug])=>{const m=t.match(re);return{n,ok:!!m,ctx:m?t.slice(Math.max(0,m.index-30),m.index+60).replace(/\s+/g,' '):'',sug};});
+  const actNeed=/過硫酸/.test(t)||p.ox==='Na2S2O8';if(actNeed){const m=t.match(/活化/);secR.splice(4,0,{n:'過硫酸鹽活化方式',ok:!!m,ctx:m?t.slice(Math.max(0,m.index-30),m.index+60).replace(/\s+/g,' '):'',sug:'請說明活化方式與活化劑用量。'});}
+  secR.filter(x=>!x.ok).forEach(x=>addI(['處理性試驗／SOD','劑量計算','監測計畫','灌注井配置與影響半徑','過硫酸鹽活化方式'].includes(x.n)?'high':'mid','章節完整性',`報告未見「${x.n}」相關內容`,x.sug,`報告未見${x.n}之說明，${x.sug}`,null,''));
+  h+=`<h3>A. 章節完整性（${secR.filter(x=>x.ok).length}/${secR.length}）</h3>`+tbl(['項目','結果','報告片段／建議'],secR.map(x=>[x.n,x.ok?'<span style="color:#166534">✅ 有</span>':'<span style="color:#b91c1c">⛔ 未見</span>',x.ok?`<span class="note">…${esc(x.ctx)}…</span>`:`<span class="note">${x.sug}</span>`]));
+  const cs=consChecks(t);cs.filter(c=>c.status==='diff').forEach(c=>addI('high','數值一致性',`${c.name}：報告 ${c.txt}，工具 ${c.tool}，差異 ${fmt(c.d*100,0)}%`,'確認報告數值是否為最新設計，或更新工具輸入值。',`報告中${c.name}（${c.txt.replace(/<[^>]+>/g,'')}）與計算結果不一致，請確認。`,'感謝委員意見。已重新核對計算，統一報告各章節數值（詳表○）。'));
+  h+=`<h3>B. 報告數值與工具計算一致性（容許差 10%；井數須相同）</h3>`+tbl(['項目','報告數值（片段）','工具值','結果'],cs.map(c=>[c.name,c.txt,c.tool,c.status==='ok'?'✅ 一致':c.status==='na'?'<span class="note">— 未找到</span>':`<b style="color:#b91c1c">⚠ 差 ${fmt(c.d*100,0)}%</b>`]));
+  const C=extractAll(t,'完成報告');const pc=[];for(const id of ['K','n','ne','rho','foc','grad','dtw','sod','roi','Q','conc','pH']){if(!C[id])continue;const d=pickDefault(C[id],'mode');const cv=parseFloat($(id).value);const df=Math.abs(d.v-cv)/Math.max(Math.abs(cv),1e-12);pc.push([LBL[id],nfmt(d.v),esc($(id).value),df<=0.05?'✅':`<b style="color:#b45309">⚠ 差 ${fmt(df*100,0)}%</b>`,`<span class="note">${esc(d.snip)}</span>`]);
+    if(df>0.05)addI('mid','參數一致性',`${LBL[id]}：報告 ${nfmt(d.v)}，工具輸入 ${$(id).value}`,'確認報告與計算採用相同參數。',`報告所載${LBL[id]}與設計計算採用值不一致，請說明。`,'感謝委員意見。已統一採用○○，並修正相關計算。');}
+  h+=`<h3>C. 報告參數與工具輸入值比對（容許差 5%）</h3>`+(pc.length?tbl(['參數','報告擷取值','工具輸入值','結果','報告片段'],pc):'<p class="note">未從報告擷取到可比對的參數。</p>');
+  const cc=citeCheck(t);
+  if(!cc.hasRef)addI('mid','文獻引用','未找到「參考文獻」章節標題','於文末列出參考文獻（APA 格式）。','報告未列參考文獻，請補充引用來源。');
+  cc.its.filter(e=>!e.inRef&&cc.hasRef).forEach(e=>addI('mid','文獻引用',`內文引用「${e.disp}」未列於參考文獻`,'補列於參考文獻或刪除引用。',`內文引用 ${e.disp} 未見於參考文獻，請補正。`,'感謝委員意見。已補列於參考文獻。'));
+  cc.its.filter(e=>e.st==='nv').forEach(e=>addI('high','文獻查證',`引用「${e.disp}」為本工具標示之未核實來源`,'取得原文確認數值與頁碼，或改引已核實文獻。',`${e.disp} 之出處與引用內容請確認。`,'感謝委員意見。已取得原文核對並補註頁碼／改引○○。'));
+  cc.uncited.forEach(r=>addI('low','文獻引用',`參考文獻「${r.line.slice(0,50)}…」未於內文引用`,'刪除或於內文補引用。','參考文獻部分條目未見於內文引用，請檢視。','感謝委員意見。已刪除未引用之文獻。'));
+  h+=`<h3>D. 文獻引用檢核（內文 ${cc.its.length} 則、參考文獻 ${cc.RE.length} 筆）</h3>`+(cc.its.length?tbl(['內文引用','次數','列於參考文獻','查證狀態'],cc.its.map(e=>[esc(e.disp),e.n,cc.hasRef?(e.inRef?'✅':'<b style="color:#b91c1c">⛔ 未列</b>'):'—',e.st==='ok'?`<span style="color:#166534">${e.txt}</span>`:e.st==='nv'?`<b style="color:#b91c1c">${e.txt}</b>`:`<span class="note">${e.txt}</span>`])):'<p class="note">未辨識到 APA 格式之內文引用。</p>')
+    +(cc.uncited.length?al('info',`參考文獻中 ${cc.uncited.length} 筆未於內文引用：`+cc.uncited.map(r=>esc(r.line.slice(0,60))).join('；')):'')
+    +(cc.nolink.length?al('info',`${cc.nolink.length} 筆參考文獻未附 DOI 或網址（APA 第 7 版建議有 DOI 者應列出）：`+cc.nolink.slice(0,8).map(r=>esc(r.line.slice(0,50))).join('；')):'');
+  const lf=[['〔未查證〕／未查證',/未查證/g],['〔工具預設值〕',/工具預設值/g],['〔工程假設〕',/工程假設/g],['〔自動擷取待核對〕',/自動擷取/g],['待填寫【請…】',/【請[^】]{0,40}】/g],['○ 占位符號',/○/g]].map(([n,re])=>[n,(t.match(re)||[]).length]);
+  lf.filter(x=>x[1]>0).forEach(([n,c])=>addI(/未查證|請/.test(n)?'high':'mid','文稿完整性',`報告仍有 ${c} 處「${n}」`,'提送前補充依據、填入實際數據或刪除工具標註。',`報告中仍有未完成或未查證之標註（${n}），請補正。`,'感謝委員意見。已補充依據並刪除未完成標註。'));
+  h+=`<h3>E. 未完成或待查證標註</h3>`+tbl(['標註','數量'],lf.map(([n,c])=>[n,c?`<b style="color:#b91c1c">${c}</b>`:'0']));
+  const R=qaRules();R.filter(r=>r.sev!=='low').forEach(r=>I.push({...r,cat:'設計檢核－'+r.cat}));
+  RC=I;const cnt={high:0,mid:0,low:0};I.forEach(r=>cnt[r.sev]++);
+  h+=`<h3>F. 潛在委員意見與修改建議（共 ${I.length} 則：高 ${cnt.high}、中 ${cnt.mid}、低 ${cnt.low}）</h3>`+tbl(['嚴重度','類別','發現','修改建議','預期委員意見'],I.map(r=>[sevTag(r.sev),r.cat,r.find,r.sug,`<span class="note">${r.cm}</span>`]));
+  $('rcOut').innerHTML=al('info','本檢核為關鍵字與數值規則比對（非 AI 審閱），可能有漏判或誤判；結果請人工確認。')+h;$('rcAdd').disabled=false;$('rcDoc').disabled=false;}
+/* ---------- 9.8 事件綁定 ---------- */
+$('imFile').addEventListener('change',e=>{handleFiles([...e.target.files]);e.target.value='';});
+const dz=$('imDrop');['dragover','dragenter'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.style.background='#ecfeff';}));['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.style.background='';}));
+dz.addEventListener('drop',e=>handleFiles([...e.dataTransfer.files]));
+$('imPasteGo').onclick=()=>{const t=$('imPaste').value;if(!t.trim())return;IMP.files.push({name:'貼上文字',status:`已讀取 ${t.length} 字`,text:t});mergeC(extractAll(t,'貼上文字'));renderImpFiles();renderCands();};
+$('imReset').onclick=()=>{IMP={files:[],C:{}};renderImpFiles();renderCands();$('imLog').innerHTML='';};
+$('imApply').onclick=applyCands;$('imClear').onclick=clearAuto;
+$('qaGo').onclick=askQA;$('qaQ').addEventListener('keydown',e=>{if(e.key==='Enter')askQA();});
+$('qaChips').innerHTML=KB.map((k,i)=>`<button class="btn" data-q="${i}" style="margin:2px">${k.t}</button>`).join('');
+$('qaChips').onclick=e=>{const i=e.target.dataset.q;if(i===undefined)return;$('qaQ').value=KB[+i].kw.slice(0,2).join(' ');askQA();};
+$('qaA').onclick=e=>{const i=e.target.dataset.add;if(i===undefined)return;const k=KB[+i];addCmt({src:'工具問答',cm:`請說明${k.t}。`,resp:k.r(S)});saveC();renderCmts();e.target.textContent='✓ 已加入';};
+$('cmGen').onclick=()=>{const R=qaRules();let n=0;R.forEach(r=>n+=addCmt({src:`預期（設計檢核：${r.cat}）`,cm:r.cm,resp:r.resp,sec:r.sec}));saveC();renderCmts();$('cmMsg').innerHTML=al('ok',`新增 ${n} 則預期意見（已存在者略過）。`);};
+$('cmGen2').onclick=()=>{let n=0;KB.forEach(k=>n+=addCmt({src:'預期（常見審查重點）',cm:`請說明${k.t}。`,resp:k.r(S)}));saveC();renderCmts();$('cmMsg').innerHTML=al('ok',`新增 ${n} 則常見審查重點。`);};
+$('cmImport').onclick=importComments;
+$('cmRedraft').onclick=()=>{let n=0;CMTS.forEach(c=>{if(c.st!=='待處理')return;const m=kbMatch(c.cm);if(m.length){c.resp=m[0].k.r(S);c.st='已擬答';n++;}});saveC();renderCmts();$('cmMsg').innerHTML=al('info',`已為 ${n} 則待處理意見重新擬答。`);};
+$('cmClear').onclick=()=>{if(confirm('確定清空所有意見？')){CMTS=[];saveC();renderCmts();}};
+$('cmCsv').onclick=()=>download('審查意見及答覆說明對照表.csv','項次,委員,來源,審查意見,答覆說明,修正處,狀態\n'+CMTS.map((c,i)=>[i+1,c.who,c.src,c.cm,c.resp,c.sec,c.st].map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n'));
+$('cmDoc').onclick=()=>dlDoc('審查意見及答覆說明對照表',cmtTableHTML(),true);
+$('rcFile').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;$('rcInfo').textContent='讀取中…';try{const t=await readAny(f);$('rcText').value=t;$('rcInfo').textContent=`已讀取「${f.name}」${t.length.toLocaleString()} 字`+(/\.pdf$/i.test(f.name)&&(t.length<200||textQuality(t)<0.6)?'；⚠ PDF 擷取品質不佳，建議改用 Word 檔':'');}catch(err){$('rcInfo').textContent='⛔ '+err.message;}e.target.value='';});
+$('rcGo').onclick=runCheck;
+$('rcAdd').onclick=()=>{if(!RC)return;let n=0;RC.forEach(r=>n+=addCmt({src:`預期（報告檢核：${r.cat}）`,cm:r.cm,resp:r.resp,sec:r.sec}));saveC();$('rcMsg').innerHTML=al('ok',`已加入 ${n} 則至⑬委員意見表。`);};
+$('rcDoc').onclick=()=>dlDoc('ISCO_報告檢核結果',`<h2>ISCO 報告檢核結果</h2><p>${new Date().toLocaleString('zh-TW')}</p>`+$('rcOut').innerHTML);
+cmtEvents();renderImpFiles();
 
 $('aL').disabled=true;renderRows();renderDB();calcAll();
 </script>
