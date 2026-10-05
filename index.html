@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ISCO 現地化學氧化灌注設計工具 v5</title>
+<title>ISCO 現地化學氧化灌注設計工具 v6</title>
 <!-- v3：在 v2 基礎上，於每個分頁加入「數字、參數、公式來源與核實方式」備註；計算邏輯未變更 -->
 <style>
 :root{--teal:#0d9488;--teal7:#0f766e;--teal1:#ccfbf1;--sl1:#f1f5f9;--sl2:#e2e8f0;--sl4:#94a3b8;--sl5:#64748b;--sl7:#334155;--sl8:#1e293b;--red:#b91c1c;--amb:#92400e}
@@ -57,10 +57,62 @@ details.srcbox td:nth-child(1){white-space:nowrap}
 .sev{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:6px}.sev.high{background:#fee2e2;color:#991b1b}.sev.mid{background:#fef3c7;color:#92400e}.sev.low{background:#e0f2fe;color:#075985}
 textarea.inp{font-family:inherit;resize:vertical}#cmTab select.ct{min-width:120px}#cmTab input.cs{min-width:100px}
 </style>
+<!--RWD-PATCH-START--><style>/* ===== RWD 響應式補丁（v6）===== */
+html{-webkit-text-size-adjust:100%}
+img,canvas{max-width:100%}
+.inp,select.inp,textarea.inp{box-sizing:border-box;max-width:100%}
+.tblwrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;margin:4px 0}
+.tblwrap>table{min-width:520px}
+@media (max-width:900px){
+  header{padding:12px 14px}header h1{font-size:18px}header p{font-size:11px}
+  .wrap{padding:10px}
+  .kpis{grid-template-columns:repeat(3,1fr);gap:8px}
+  .kpi{padding:8px 10px}.kpi .v{font-size:17px}
+  .tabs{position:sticky;top:0;z-index:8;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;background:var(--sl1);padding:6px 0;margin:0 -10px 10px;padding-left:10px;padding-right:10px;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex:0 0 auto;white-space:nowrap}
+  .g6{grid-template-columns:repeat(3,1fr)}.g4,.g3{grid-template-columns:repeat(2,1fr)}
+  .cols{grid-template-columns:1fr}
+  .card{padding:12px;border-radius:12px}
+  canvas{height:280px!important}
+  #cvSq,#cvTri{height:300px!important}
+  details.srcbox{padding:10px 12px}details.srcbox td:nth-child(1){white-space:normal}
+}
+@media (max-width:600px){
+  header h1{font-size:16px}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .kpi .v{font-size:16px}.kpi .l,.kpi .s{font-size:10.5px}
+  .g6,.g4{grid-template-columns:repeat(2,1fr)}.g3,.g2{grid-template-columns:1fr}
+  .inp,select.inp,textarea.inp{font-size:16px;padding:8px}   /* 避免 iOS 自動放大 */
+  label.f{font-size:12px}
+  .btn{min-height:40px;padding:8px 12px}
+  .tab{padding:8px 12px}
+  table{font-size:12px}th,td{padding:5px 4px}
+  canvas{height:240px!important}#cvSq,#cvTri{height:280px!important}
+  .al{font-size:12px}
+  #banner{left:10px;right:10px;max-width:none}
+  #alertsTop .al{margin:4px 0}
+  /* 污染物輸入表：維持表格但可橫向捲動 */
+  #ctab{min-width:560px}
+  /* 委員意見表改成卡片式 */
+  #cmTab .tblwrap>table,#cmTab table{min-width:0}
+  #cmTab thead{display:none}
+  #cmTab tr{display:block;border:1px solid var(--sl2);border-radius:12px;margin-bottom:10px;padding:8px}
+  #cmTab td{display:block;border:0;padding:3px 0}
+  #cmTab td:nth-child(1)::before{content:"項次 "}
+  #cmTab td:nth-child(3)::before{content:"審查意見";display:block;font-size:11px;color:var(--sl5)}
+  #cmTab td:nth-child(4)::before{content:"答覆說明";display:block;font-size:11px;color:var(--sl5)}
+  #cmTab td:nth-child(5)::before{content:"修正處";display:block;font-size:11px;color:var(--sl5)}
+  #cmTab td:nth-child(6)::before{content:"狀態";display:block;font-size:11px;color:var(--sl5)}
+  /* 匯入候選表：保留表格，加寬可捲動 */
+  #imTab,#imCTab{min-width:760px}
+}
+@media print{.tabs{position:static}.tblwrap{overflow:visible}}
+</style><!--RWD-PATCH-END-->
 </head>
 <body>
 <header>
-  <p>In-Situ Chemical Oxidation · Design Prototype v5（離線單一檔案｜參數來源連結｜報告產出｜資料匯入｜QA／委員意見｜報告檢核）</p>
+  <p>In-Situ Chemical Oxidation · Design Prototype v6（RWD）（離線單一檔案｜參數來源連結｜報告產出｜資料匯入｜QA／委員意見｜報告檢核）</p>
   <h1>ISCO 現地化學氧化灌注設計工具</h1>
   <p>劑量（TOD = POD + NOD + DEO）｜井位配置｜注入水力與傳輸稀釋｜反應動力學｜放熱評估｜安全檢查清單</p>
 </header>
@@ -1309,5 +1361,20 @@ cmtEvents();renderImpFiles();
 
 $('aL').disabled=true;renderRows();renderDB();calcAll();
 </script>
+<!--RWD-JS-START--><script>/* ===== RWD 響應式補丁（v6）===== */
+(function(){
+  function wrapTables(root){(root||document).querySelectorAll('table').forEach(function(t){
+    if(t.closest('.tblwrap')||t.closest('#cmTab tr'))return;var p=t.parentNode;if(!p)return;
+    var w=document.createElement('div');w.className='tblwrap';p.insertBefore(w,t);w.appendChild(t);});}
+  wrapTables();
+  var busy=false;new MutationObserver(function(){if(busy)return;busy=true;requestAnimationFrame(function(){wrapTables();busy=false;});})
+    .observe(document.body,{childList:true,subtree:true});
+  var tabs=document.getElementById('tabs');
+  if(tabs)tabs.addEventListener('click',function(e){var b=e.target.closest('.tab');if(!b)return;
+    try{b.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});}catch(x){}
+    if(window.innerWidth<=900){var y=tabs.getBoundingClientRect().top+window.scrollY;if(window.scrollY>y)window.scrollTo({top:y,behavior:'smooth'});}});
+  var t;window.addEventListener('orientationchange',function(){clearTimeout(t);t=setTimeout(function(){window.dispatchEvent(new Event('resize'));},300);});
+})();
+</script><!--RWD-JS-END-->
 </body>
 </html>
