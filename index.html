@@ -3,273 +3,696 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ISCO 現地化學氧化灌注設計工具｜過硫酸鈉</title>
-<script src="https://cdn.tailwindcss.com"></script>
+<title>ISCO 現地化學氧化灌注設計工具 v2</title>
+<!-- v2：單一檔案、無外部資源（不需 Tailwind / Chart.js CDN），可離線使用 -->
 <style>
-  input[type=number]::-webkit-inner-spin-button{opacity:.4}
-  .num{font-variant-numeric:tabular-nums}
+:root{--teal:#0d9488;--teal7:#0f766e;--teal1:#ccfbf1;--sl1:#f1f5f9;--sl2:#e2e8f0;--sl4:#94a3b8;--sl5:#64748b;--sl7:#334155;--sl8:#1e293b;--red:#b91c1c;--amb:#92400e}
+*{box-sizing:border-box}body{margin:0;font-family:"Segoe UI","Microsoft JhengHei","Noto Sans TC",sans-serif;background:var(--sl1);color:var(--sl8);font-size:14px}
+header{background:linear-gradient(90deg,#0f766e,#0891b2);color:#fff;padding:18px 24px}
+header h1{margin:4px 0;font-size:22px}header p{margin:0;font-size:12px;opacity:.9}
+.wrap{max-width:1280px;margin:0 auto;padding:16px}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:12px}
+.kpi{background:#fff;border:1px solid var(--sl2);border-radius:14px;padding:10px 12px}
+.kpi .l{font-size:11px;color:var(--sl5)}.kpi .v{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}.kpi .s{font-size:11px;color:var(--sl4)}
+.kpi.hl{background:linear-gradient(135deg,#0d9488,#0891b2);color:#fff;border:0}.kpi.hl .l,.kpi.hl .s{color:#e0f2f1}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tab{border:1px solid var(--sl2);background:#fff;border-radius:999px;padding:7px 14px;cursor:pointer;font-size:13px}
+.tab.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+.pane{display:none}.pane.on{display:block}
+.card{background:#fff;border:1px solid var(--sl2);border-radius:16px;padding:16px;margin-bottom:12px}
+.card h2{font-size:15px;margin:0 0 10px;color:var(--teal7)}.card h3{font-size:14px;margin:12px 0 8px;color:var(--sl7)}
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.g6{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label.f{display:block;font-size:11px;color:var(--sl5)}
+label.f small{color:var(--sl4)}
+.inp,select.inp{width:100%;margin-top:3px;border:1px solid #cbd5e1;border-radius:9px;padding:6px 8px;font-size:13px;background:#fff}
+.inp:focus{outline:2px solid #5eead4;border-color:var(--teal)}
+table{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
+th,td{padding:6px 6px;border-bottom:1px solid var(--sl2);text-align:left;vertical-align:top}th{color:var(--sl5);font-weight:600;background:#f8fafc}
+td.r,th.r{text-align:right}
+.al{border-radius:10px;padding:7px 11px;margin:5px 0;font-size:12.5px;border:1px solid}
+.al.err{background:#fef2f2;color:var(--red);border-color:#fecaca}.al.warn{background:#fffbeb;color:var(--amb);border-color:#fde68a}
+.al.ok{background:#f0fdf4;color:#166534;border-color:#bbf7d0}.al.info{background:#eff6ff;color:#1e40af;border-color:#bfdbfe}
+.tag{display:inline-block;font-size:10.5px;padding:1px 6px;border-radius:6px;background:#fef3c7;color:#92400e;margin-left:4px}
+.tag.src{background:#e0f2fe;color:#075985}
+canvas{width:100%;height:340px;display:block}
+.btn{border:1px solid #cbd5e1;background:#fff;border-radius:10px;padding:7px 12px;cursor:pointer;font-size:12.5px}
+.btn.p{background:var(--teal);color:#fff;border-color:var(--teal)}
+.note{font-size:11.5px;color:var(--sl5);line-height:1.55}
+.chk{display:flex;gap:8px;align-items:flex-start;padding:5px 0;border-bottom:1px dashed var(--sl2)}
+.bar{height:10px;background:var(--sl2);border-radius:99px;overflow:hidden}.bar>div{height:10px;background:var(--teal)}
+#banner{position:fixed;right:16px;bottom:16px;max-width:380px;z-index:9;display:none}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}.g4,.g6{grid-template-columns:repeat(2,1fr)}.cols{grid-template-columns:1fr}}
+@media print{.tabs,.btn,#banner{display:none}.pane{display:block!important;page-break-after:always}}
 </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen">
-
-<!-- Header -->
-<header class="bg-gradient-to-r from-teal-700 to-cyan-600 text-white">
-  <div class="max-w-6xl mx-auto px-6 py-6">
-    <p class="text-teal-100 text-sm tracking-wide">In-Situ Chemical Oxidation · Design Prototype</p>
-    <h1 class="text-2xl md:text-3xl font-bold mt-1">ISCO 現地化學氧化灌注設計工具</h1>
-    <p class="text-teal-50 text-sm mt-1">主要氧化劑：過硫酸鈉 Sodium Persulfate (Na<sub>2</sub>S<sub>2</sub>O<sub>8</sub>)　|　劑量基礎：土壤氧化劑需求量 SOD</p>
-  </div>
+<body>
+<header>
+  <p>In-Situ Chemical Oxidation · Design Prototype v2（離線單一檔案）</p>
+  <h1>ISCO 現地化學氧化灌注設計工具</h1>
+  <p>劑量（TOD = POD + NOD + DEO）｜井位配置｜注入水力與傳輸稀釋｜反應動力學｜放熱評估｜安全檢查清單</p>
 </header>
 
-<main class="max-w-6xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-5 gap-6">
+<div class="wrap">
+  <div class="kpis">
+    <div class="kpi hl"><div class="l" id="kOxName">氧化劑設計用量 TOD</div><div class="v"><span id="kTOD">–</span> kg</div><div class="s" id="kTODs">–</div></div>
+    <div class="kpi"><div class="l">灌注溶液總量</div><div class="v"><span id="kVsol">–</span> m³</div><div class="s" id="kVsols">–</div></div>
+    <div class="kpi"><div class="l">建議井數</div><div class="v"><span id="kWells">–</span> 口</div><div class="s" id="kWellss">–</div></div>
+    <div class="kpi"><div class="l">單井注入量</div><div class="v"><span id="kVw">–</span> m³</div><div class="s" id="kVws">–</div></div>
+    <div class="kpi"><div class="l">地下水流速 v</div><div class="v"><span id="kV">–</span> m/d</div><div class="s" id="kVs">–</div></div>
+    <div class="kpi"><div class="l">警示</div><div class="v"><span id="kAl">–</span></div><div class="s">各分頁詳列</div></div>
+  </div>
 
-  <!-- ===== Input Panel ===== -->
-  <section class="lg:col-span-2 space-y-6">
+  <div class="tabs" id="tabs">
+    <button class="tab on" data-p="p1">① 場址與水文地質</button>
+    <button class="tab" data-p="p2">② 污染物與分配</button>
+    <button class="tab" data-p="p3">③ 氧化劑與劑量</button>
+    <button class="tab" data-p="p4">④ 井位配置</button>
+    <button class="tab" data-p="p5">⑤ 注入水力與傳輸稀釋</button>
+    <button class="tab" data-p="p6">⑥ 反應動力學</button>
+    <button class="tab" data-p="p7">⑦ 放熱評估</button>
+    <button class="tab" data-p="p8">⑧ 安全檢查清單</button>
+    <button class="tab" data-p="p9">⑨ 資料庫</button>
+    <button class="tab" data-p="p10">⑩ 計算依據與來源</button>
+  </div>
+  <div id="alertsTop"></div>
 
-    <!-- Card: Site geometry -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-      <h2 class="font-semibold text-teal-800 flex items-center gap-2 mb-4">
-        <span class="w-7 h-7 rounded-lg bg-teal-100 text-teal-700 grid place-items-center text-sm">1</span>
-        目標處理區範圍
-      </h2>
-      <div class="grid grid-cols-3 gap-3">
-        <label class="block">
-          <span class="text-xs text-slate-500">長 L (m)</span>
-          <input id="L" type="number" step="0.1" min="0" value="10" class="inp">
-        </label>
-        <label class="block">
-          <span class="text-xs text-slate-500">寬 W (m)</span>
-          <input id="W" type="number" step="0.1" min="0" value="10" class="inp">
-        </label>
-        <label class="block">
-          <span class="text-xs text-slate-500">處理厚度 H (m)</span>
-          <input id="H" type="number" step="0.1" min="0" value="3" class="inp">
-        </label>
+  <!-- ================= P1 場址 ================= -->
+  <section class="pane on" id="p1">
+    <div class="card"><h2>處理區幾何</h2>
+      <div class="g6">
+        <label class="f">長 L (m)<input class="inp" id="L" type="number" step="0.5" value="10"></label>
+        <label class="f">寬 W (m)<input class="inp" id="W" type="number" step="0.5" value="10"></label>
+        <label class="f">處理厚度 H (m)<input class="inp" id="H" type="number" step="0.5" value="3"></label>
+        <label class="f">處理區頂部深度 (m bgs)<input class="inp" id="ztop" type="number" step="0.5" value="3"></label>
+        <label class="f">地下水位深度 (m bgs)<input class="inp" id="dtw" type="number" step="0.1" value="2"></label>
+        <label class="f">地下水流向<select class="inp" id="flowdir"><option value="L">沿長邊 L</option><option value="W">沿寬邊 W</option></select></label>
       </div>
     </div>
-
-    <!-- Card: Soil properties -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-      <h2 class="font-semibold text-teal-800 flex items-center gap-2 mb-4">
-        <span class="w-7 h-7 rounded-lg bg-teal-100 text-teal-700 grid place-items-center text-sm">2</span>
-        土壤參數
-      </h2>
-      <div class="grid grid-cols-2 gap-3">
-        <label class="block">
-          <span class="text-xs text-slate-500">有效孔隙率 n (–)</span>
-          <input id="n" type="number" step="0.01" min="0" max="1" value="0.35" class="inp">
-        </label>
-        <label class="block">
-          <span class="text-xs text-slate-500">乾總體密度 ρ<sub>b</sub> (g/cm³)</span>
-          <input id="rho" type="number" step="0.01" min="0" value="1.6" class="inp">
-        </label>
+    <div class="card"><h2>土壤／含水層性質</h2>
+      <div class="g6">
+        <label class="f">總孔隙率 n<input class="inp" id="n" type="number" step="0.01" value="0.35"></label>
+        <label class="f">有效孔隙率 nₑ <small>(傳輸用)</small><input class="inp" id="ne" type="number" step="0.01" value="0.25"></label>
+        <label class="f">乾總體密度 ρb (g/cm³)<input class="inp" id="rho" type="number" step="0.05" value="1.6"></label>
+        <label class="f">有機碳分率 f_oc (–)<input class="inp" id="foc" type="number" step="0.0005" value="0.002"></label>
+        <label class="f">水力傳導係數 K (m/d)<input class="inp" id="K" type="number" step="0.1" value="1"></label>
+        <label class="f">水力梯度 i (–)<input class="inp" id="grad" type="number" step="0.001" value="0.005"></label>
+        <label class="f">異向性 Kh/Kv<input class="inp" id="khkv" type="number" step="1" value="10"></label>
+        <label class="f">地下水溫 (°C)<input class="inp" id="Tgw" type="number" step="1" value="25"></label>
+        <label class="f">分子擴散係數 Dm (m²/s)<input class="inp" id="Dm" type="number" step="1e-10" value="1e-9"></label>
+        <label class="f">延散度來源<select class="inp" id="aMode"><option value="auto">自動（依尺度 Xu &amp; Eckstein）</option><option value="man">手動輸入</option></select></label>
+        <label class="f">縱向延散度 αL (m)<input class="inp" id="aL" type="number" step="0.1" value="1"></label>
+        <label class="f">αT/αL、αV/αL<div style="display:flex;gap:4px"><input class="inp" id="aTr" type="number" step="0.01" value="0.1"><input class="inp" id="aVr" type="number" step="0.001" value="0.01"></div></label>
       </div>
-      <p class="text-[11px] text-slate-400 mt-2">SOD 以乾土重 (g/kg dry soil) 表示時，密度應使用乾總體密度。</p>
     </div>
+    <div class="card"><h2>地下水化學（影響氧化劑消耗與活化）</h2>
+      <div class="g6">
+        <label class="f">pH<input class="inp" id="pH" type="number" step="0.1" value="7"></label>
+        <label class="f">鹼度 (mg/L as CaCO₃)<input class="inp" id="alk" type="number" step="10" value="200"></label>
+        <label class="f">氯離子 Cl⁻ (mg/L)<input class="inp" id="cl" type="number" step="10" value="50"></label>
+        <label class="f">亞鐵 Fe²⁺ (mg/L)<input class="inp" id="fe2" type="number" step="0.1" value="1"></label>
+        <label class="f">錳 Mn²⁺ (mg/L)<input class="inp" id="mn2" type="number" step="0.1" value="0.2"></label>
+        <label class="f">硫化物 S²⁻ (mg/L)<input class="inp" id="s2" type="number" step="0.1" value="0"></label>
+      </div>
+      <p class="note">Fe²⁺、Mn²⁺、S²⁻ 以化學計量（Fe²⁺→Fe³⁺ 1e⁻、Mn²⁺→MnO₂ 2e⁻、S²⁻→SO₄²⁻ 8e⁻）計入「地下水還原物質需求」，加在 NOD 之上；pH、鹼度、氯離子僅作定性警示。</p>
+    </div>
+    <div class="card"><h2>場址衍生參數</h2><div id="siteOut"></div></div>
+  </section>
 
-    <!-- Card: Oxidant -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-      <h2 class="font-semibold text-teal-800 flex items-center gap-2 mb-4">
-        <span class="w-7 h-7 rounded-lg bg-teal-100 text-teal-700 grid place-items-center text-sm">3</span>
-        氧化劑需求與藥劑配製
-      </h2>
-      <div class="grid grid-cols-2 gap-3">
-        <label class="block col-span-2">
-          <span class="text-xs text-slate-500">主要氧化劑</span>
-          <input type="text" value="過硫酸鈉 Na₂S₂O₈（MW 238.10 g/mol）" disabled class="inp bg-slate-50 text-slate-500">
-        </label>
-        <label class="block">
-          <span class="text-xs text-slate-500">SOD 值 (g/kg)</span>
-          <input id="sod" type="number" step="0.1" min="0" value="5" class="inp">
-        </label>
-        <label class="block">
-          <span class="text-xs text-slate-500">SOD 量測基準</span>
-          <select id="basis" class="inp">
-            <option value="PS">以 Na₂S₂O₈ 表示</option>
-            <option value="KMnO4">以 KMnO₄ 當量表示</option>
-          </select>
-        </label>
-        <label class="block">
-          <span class="text-xs text-slate-500">安全係數 SF (–)</span>
-          <input id="sf" type="number" step="0.1" min="1" value="1.0" class="inp">
-        </label>
-        <label class="block">
-          <span class="text-xs text-slate-500">藥劑純度 (%)</span>
-          <input id="purity" type="number" step="0.1" min="1" max="100" value="100" class="inp">
-        </label>
-        <label class="block col-span-2">
-          <span class="text-xs text-slate-500">灌注溶液濃度 (g/L)</span>
-          <input id="conc" type="number" step="1" min="1" value="100" class="inp">
-        </label>
-      </div>
-      <div class="flex gap-3 mt-5">
-        <button id="btnReset" class="flex-1 rounded-xl border border-slate-300 py-2 text-sm hover:bg-slate-50">重設預設值</button>
-        <button id="btnPrint" class="flex-1 rounded-xl bg-teal-600 text-white py-2 text-sm hover:bg-teal-700">列印 / 存成 PDF</button>
-      </div>
+  <!-- ================= P2 污染物 ================= -->
+  <section class="pane" id="p2">
+    <div class="card"><h2>污染物濃度與質量</h2>
+      <table id="ctab"><thead><tr><th>污染物</th><th class="r">土壤 (mg/kg)</th><th class="r">地下水 (mg/L)</th><th class="r">NAPL 估計 (kg)</th><th class="r">Koc (L/kg)<br><small>空白=資料庫</small></th><th></th></tr></thead><tbody></tbody></table>
+      <div style="margin-top:8px"><button class="btn" id="addRow">＋ 新增污染物</button></div>
+    </div>
+    <div class="card"><h2>相分配、遲滯與質量</h2><div id="partOut"></div>
+      <p class="note">Kd = Koc × f_oc；遲滯因子 R = 1 + ρb·Kd / nₑ；土壤飽和濃度 Csat ≈ S·(Kd + n/ρb)（飽和層、忽略氣相）。土壤濃度 &gt; Csat 表示可能有 NAPL，POD 與反彈風險會被低估。</p>
     </div>
   </section>
 
-  <!-- ===== Output Panel ===== -->
-  <section class="lg:col-span-3 space-y-6">
-
-    <div id="alerts" class="space-y-2"></div>
-
-    <!-- KPI cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-        <p class="text-xs text-slate-500">目標區土壤總重量</p>
-        <p class="text-3xl font-bold text-slate-800 num mt-1"><span id="oSoilT">–</span><span class="text-base font-medium text-slate-400 ml-1">t</span></p>
-        <p class="text-xs text-slate-400 num mt-1">= <span id="oSoilKg">–</span> kg</p>
-      </div>
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-        <p class="text-xs text-slate-500">總孔隙體積 PV</p>
-        <p class="text-3xl font-bold text-slate-800 num mt-1"><span id="oPV">–</span><span class="text-base font-medium text-slate-400 ml-1">m³</span></p>
-        <p class="text-xs text-slate-400 num mt-1">= <span id="oPVL">–</span> L</p>
-      </div>
-      <div class="bg-gradient-to-br from-teal-600 to-cyan-600 rounded-2xl shadow-sm p-5 text-white">
-        <p class="text-xs text-teal-50">過硫酸鈉設計用量</p>
-        <p class="text-3xl font-bold num mt-1"><span id="oPSdesign">–</span><span class="text-base font-medium text-teal-100 ml-1">kg</span></p>
-        <p class="text-xs text-teal-50 num mt-1">≈ <span id="oPSdesignT">–</span> t（含 SF 與純度修正）</p>
+  <!-- ================= P3 劑量 ================= -->
+  <section class="pane" id="p3">
+    <div class="card"><h2>氧化劑選擇與配製</h2>
+      <div class="g6">
+        <label class="f">主要氧化劑<select class="inp" id="ox"></select></label>
+        <label class="f">Fenton 施作<select class="inp" id="fenton"><option value="0">否</option><option value="1">是（H₂O₂+Fe+酸）</option></select></label>
+        <label class="f">SOD 值 (g/kg 乾土)<input class="inp" id="sod" type="number" step="0.5" value="5"></label>
+        <label class="f">SOD 量測基準<select class="inp" id="basis"><option value="self">以所選氧化劑表示</option><option value="KMnO4">以 KMnO₄ 當量表示</option></select></label>
+        <label class="f">DEO 自身分解比例<input class="inp" id="deo" type="number" step="0.05" value="0.1"></label>
+        <label class="f">安全係數 SF<input class="inp" id="sf" type="number" step="0.1" value="1.2"></label>
+        <label class="f">藥劑純度 (%)<input class="inp" id="purity" type="number" step="1" value="100"></label>
+        <label class="f">劑量計算之灌注濃度 (g/L)<input class="inp" id="conc" type="number" step="5" value="100"></label>
       </div>
     </div>
-
-    <!-- Detail table -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-      <h3 class="font-semibold text-slate-700 mb-3">計算明細</h3>
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="text-left text-slate-500 border-b">
-              <th class="py-2 pr-2">項目</th><th class="py-2 pr-2">公式</th><th class="py-2 text-right">結果</th>
-            </tr>
-          </thead>
-          <tbody id="tbl" class="num"></tbody>
-        </table>
-      </div>
+    <div class="cols">
+      <div class="card"><h2>計算明細</h2><div id="doseOut"></div></div>
+      <div class="card"><h2>需求量組成</h2><canvas id="cvDose" style="height:280px"></canvas><div id="doseAl"></div></div>
     </div>
+  </section>
 
-    <!-- Injection gauge -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-      <div class="flex justify-between items-end mb-2">
-        <h3 class="font-semibold text-slate-700">灌注溶液體積 / 孔隙體積</h3>
-        <p class="text-sm text-slate-500 num"><span id="oVsol">–</span> m³ ÷ PV</p>
+  <!-- ================= P4 井位 ================= -->
+  <section class="pane" id="p4">
+    <div class="card"><h2>灌注井矩陣排列（圓形覆蓋演算法）</h2>
+      <div class="g6">
+        <label class="f">影響半徑 ROI (m)<input class="inp" id="roi" type="number" step="0.1" value="3"></label>
+        <label class="f">ROI 設計折減係數<input class="inp" id="roiF" type="number" step="0.05" value="1"></label>
+        <label class="f">採用配置<select class="inp" id="pat"><option value="auto">自動（井數較少者）</option><option value="square">正方形</option><option value="triangular">三角形</option></select></label>
       </div>
-      <div class="w-full h-4 rounded-full bg-slate-100 overflow-hidden">
-        <div id="bar" class="h-4 rounded-full bg-teal-500 transition-all" style="width:0%"></div>
-      </div>
-      <div class="flex justify-between mt-2 text-xs text-slate-400"><span>0%</span><span>50%</span><span>100% PV</span></div>
-      <p class="mt-3 text-2xl font-bold num text-slate-800"><span id="oRatio">–</span><span class="text-sm font-medium text-slate-400 ml-1">% PV</span></p>
-      <p class="text-[11px] text-slate-400 mt-1">本比值僅作為灌注量合理性的參考指標；實際灌注體積需依現地透水性、影響半徑及模場試驗決定。</p>
+      <div id="layOut" style="margin-top:10px"></div>
     </div>
+    <div class="cols">
+      <div class="card"><h3>正方形配置</h3><canvas id="cvSq" style="height:360px"></canvas></div>
+      <div class="card"><h3>三角形（交錯）配置</h3><canvas id="cvTri" style="height:360px"></canvas></div>
+    </div>
+    <div class="card"><button class="btn p" id="dlWells">⬇ 下載採用配置井位座標 CSV</button></div>
+  </section>
 
-    <!-- Method note -->
-    <details class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-      <summary class="font-semibold text-slate-700 cursor-pointer">計算依據與限制</summary>
-      <ul class="list-disc pl-5 mt-3 text-sm text-slate-600 space-y-1">
-        <li>總氧化劑需求量 TOD = 污染物需求 POD + 天然需求 NOD + 氧化劑自身分解 DEO；本工具以實驗室批次試驗所得 SOD 作為整體劑量基礎。</li>
-        <li>KMnO₄ 當量換算以電子當量計：KMnO₄（MnO₄⁻→MnO₂，3e⁻）當量重 52.68 g/eq；Na₂S₂O₈（S₂O₈²⁻→2SO₄²⁻，2e⁻）當量重 119.05 g/eq；換算係數 ≈ 2.26。</li>
-        <li>過硫酸鈉約 20 °C 溶解度約 570 g/L（供應商技術資料），濃度超過時本工具會提示。</li>
-        <li>本工具未計入活化劑（鹼、鐵螯合物、H₂O₂ 或熱）用量，亦未考慮多次灌注分配。</li>
+  <!-- ================= P5 注入與傳輸 ================= -->
+  <section class="pane" id="p5">
+    <div class="card"><h2>注入水力參數</h2>
+      <div class="g6">
+        <label class="f">篩管長度 b (m)<input class="inp" id="bs" type="number" step="0.5" value="3"></label>
+        <label class="f">井半徑 r_w (m)<input class="inp" id="rw" type="number" step="0.005" value="0.025"></label>
+        <label class="f">單井注入流率 Q (L/min)<input class="inp" id="Q" type="number" step="1" value="10"></label>
+        <label class="f">注入體積控制<select class="inp" id="vctl"><option value="max">取 劑量 / ROI 兩者較大</option><option value="dose">依劑量濃度</option><option value="roi">依 ROI 孔隙體積</option></select></label>
+      </div>
+      <div id="injOut" style="margin-top:10px"></div>
+    </div>
+    <div class="card"><h2>下游傳輸與稀釋（處理區下游邊界起算）</h2>
+      <div class="g6">
+        <label class="f">模擬物質<select class="inp" id="spc"><option value="c">殘餘污染物</option><option value="o">氧化劑</option></select></label>
+        <label class="f">邊界濃度 C₀ (mg/L)<small> 空白=自動</small><input class="inp" id="obC0" type="number" placeholder="自動"></label>
+        <label class="f">污染物生物降解 λ (1/d)<input class="inp" id="lam" type="number" step="0.001" value="0"></label>
+        <label class="f">受體距離 x (m)<input class="inp" id="xr" type="number" step="5" value="50"></label>
+        <label class="f">繪圖最大距離 (m)<input class="inp" id="xmax" type="number" step="10" value="100"></label>
+        <label class="f">時間點 (d，逗號分隔)<input class="inp" id="tlist" value="30,90,180,365"></label>
+      </div>
+      <canvas id="cvOB" style="margin-top:10px"></canvas>
+      <div id="trOut"></div>
+    </div>
+  </section>
+
+  <!-- ================= P6 動力學 ================= -->
+  <section class="pane" id="p6">
+    <div class="card"><h2>反應動力學（二階反應＋氧化劑衰減＋多次灌注＋脫附回補＋流出稀釋）</h2>
+      <div class="g6">
+        <label class="f">模擬污染物<select class="inp" id="kc"></select></label>
+        <label class="f">初始地下水濃度 C₀ (mg/L)<input class="inp" id="kC0" type="number" step="0.1" value="20"></label>
+        <label class="f">目標濃度 (mg/L)<input class="inp" id="ktg" type="number" step="0.001" value="0.05"></label>
+        <label class="f">速率常數來源<select class="inp" id="kmode"><option value="lit">文獻 k₂</option><option value="obs">處理性試驗 k_obs</option></select></label>
+        <label class="f">k₂ (M⁻¹s⁻¹, 參考溫度)<input class="inp" id="k2" type="number" step="0.01" value="0.67"></label>
+        <label class="f">k_obs (1/d，於下列氧化劑濃度)<input class="inp" id="kobs" type="number" step="0.01" value="0.2"></label>
+        <label class="f">k 參考溫度 (°C)<input class="inp" id="Tref" type="number" step="1" value="21"></label>
+        <label class="f">活化能 Ea (kJ/mol)<input class="inp" id="Ea" type="number" step="5" value="60"></label>
+        <label class="f">現地有效氧化劑濃度 (mg/L)<input class="inp" id="oxIn" type="number" step="10" value="50"></label>
+        <label class="f">氧化劑衰減 k_d (1/d)<input class="inp" id="kd" type="number" step="0.01" value="0.03"></label>
+        <label class="f">灌注次數<input class="inp" id="ninj" type="number" step="1" value="2"></label>
+        <label class="f">灌注間隔 (d)<input class="inp" id="itv" type="number" step="5" value="30"></label>
+        <label class="f">脫附回補 k_des (1/d)<input class="inp" id="kdes" type="number" step="0.01" value="0"></label>
+        <label class="f">平衡回補濃度 C_eq (mg/L)<small> 空白=C₀</small><input class="inp" id="Ceq" type="number" placeholder="=C₀"></label>
+        <label class="f">考慮地下水流出稀釋<select class="inp" id="flush"><option value="1">是</option><option value="0">否</option></select></label>
+        <label class="f">上游流入濃度 (mg/L)<input class="inp" id="Cup" type="number" step="0.1" value="0"></label>
+        <label class="f">模擬天數<input class="inp" id="days" type="number" step="10" value="120"></label>
+        <label class="f">&nbsp;<button class="btn" id="kFill" style="width:100%;margin-top:3px">帶入設計濃度／預設 k_d</button></label>
+      </div>
+      <div id="kinAl"></div>
+      <canvas id="cvKin" style="margin-top:10px"></canvas>
+      <div id="kinOut"></div>
+    </div>
+  </section>
+
+  <!-- ================= P7 放熱 ================= -->
+  <section class="pane" id="p7">
+    <div class="card"><h2>H₂O₂ / Fenton 放熱與氣體生成評估</h2>
+      <div class="g6">
+        <label class="f">H₂O₂ 用量 (kg，100% 計)<small> 空白=TOD</small><input class="inp" id="hkg" type="number" placeholder="自動"></label>
+        <label class="f">H₂O₂ 濃度 (wt%)<input class="inp" id="hwt" type="number" step="1" value="10"></label>
+        <label class="f">分解時間 (h)<input class="inp" id="hhr" type="number" step="1" value="24"></label>
+        <label class="f">溫度警戒值 (°C)<input class="inp" id="hTl" type="number" step="5" value="60"></label>
+        <label class="f">土壤固體比熱 (kJ/kg·K)<small> 假設</small><input class="inp" id="cps" type="number" step="0.01" value="0.84"></label>
+      </div>
+      <div id="heatOut" style="margin-top:10px"></div>
+      <canvas id="cvHeat" style="height:300px;margin-top:10px"></canvas>
+    </div>
+  </section>
+
+  <!-- ================= P8 安全 ================= -->
+  <section class="pane" id="p8">
+    <div class="card"><h2 id="safeTitle">現場安全檢查清單</h2>
+      <div class="al info">架構：危害控制層級（消除 → 替代 → 工程控制 → 行政管理 → PPE）。標示 <span class="tag">未查證</span> 者為一般實務，須以供應商 SDS 第 7、8、10 節及專案 HSE 計畫確認。</div>
+      <h3>管材／墊圈相容性檢核（勾選預計使用材料）</h3>
+      <div id="matPick" class="g4"></div><div id="matOut" style="margin-top:8px"></div>
+      <h3>作業前檢查項目</h3>
+      <div class="bar"><div id="chkBar" style="width:0"></div></div><div class="note" id="chkTxt"></div>
+      <div id="chkList"></div>
+      <div style="margin-top:8px"><button class="btn p" id="dlChk">⬇ 下載檢查清單 CSV（現場簽核）</button></div>
+    </div>
+  </section>
+
+  <!-- ================= P9 資料庫 ================= -->
+  <section class="pane" id="p9">
+    <div class="card"><h2>污染物資料庫</h2><div id="dbC"></div></div>
+    <div class="card"><h2>氧化劑資料庫</h2><div id="dbO"></div></div>
+    <div class="card"><h2>化學計量比（kg 氧化劑 / kg 污染物，完全礦化）</h2><div id="dbS"></div></div>
+  </section>
+
+  <!-- ================= P10 依據 ================= -->
+  <section class="pane" id="p10">
+    <div class="card"><h2>理論架構</h2>
+      <table><thead><tr><th>模組</th><th>理論／方程式</th><th>狀態</th></tr></thead><tbody>
+        <tr><td>劑量</td><td>TOD = (POD + NOD + 地下水還原物質需求) ÷ (1 − DEO) × SF；POD 以電子當量化學計量：kg 氧化劑/kg 污染物 = (n<sub>e,c</sub>/n<sub>e,ox</sub>)·(MW<sub>ox</sub>/MW<sub>c</sub>)</td><td><span class="tag src">已查證</span> TOD 組成：陳凱等，ISCO 氧化劑需求量測算綜述；當量重：Brown (ERM, 2003)</td></tr>
+        <tr><td>相分配</td><td>Kd = Koc·f<sub>oc</sub>；R = 1 + ρb·Kd/nₑ；Csat ≈ S·(Kd + n/ρb)</td><td><span class="tag src">Koc 已查證</span> US EPA SSG Appendix K、On-Site 工具；Csat 簡化式 <span class="tag">未逐字查證</span></td></tr>
+        <tr><td>井位</td><td>圓形覆蓋：正方形井距 √2·R；三角形井距 √3·R、排距 1.5·R；數值取樣驗證 100% 覆蓋</td><td>幾何推導</td></tr>
+        <tr><td>注入</td><td>徑向推移（plug flow）：V = π r² b nₑ；Thiem 穩態徑向流：Δh = Q/(2πKb)·ln(R/r<sub>w</sub>)；NOD 限制傳輸半徑 r<sub>ox</sub> = √(M/(π b ρb·SOD))</td><td>Thiem 為經典解；r<sub>ox</sub> 為瞬時消耗假設之推導</td></tr>
+        <tr><td>前緣混合</td><td>徑向延散前緣寬度 σ ≈ √(4/3·αL·r)（Gelhar &amp; Collins, 1971）</td><td><span class="tag">未查證</span></td></tr>
+        <tr><td>流速</td><td>v = K·i / nₑ；污染物速度 v/R</td><td><span class="tag src">已查證</span> Ogata-Banks 計算例（Fetter, 1994）</td></tr>
+        <tr><td>延散</td><td>D = αL·v + Dm；αL 自動值 Xu &amp; Eckstein：αL = 0.83 (log₁₀ L)<sup>2.414</sup>；αT = 0.1αL、αV = 0.01αL</td><td>αL 隨尺度增加：<span class="tag src">已查證</span> Schulze-Makuch (2005)；公式係數 <span class="tag">未查證</span></td></tr>
+        <tr><td>下游傳輸</td><td>Ogata-Banks 一維解（含遲滯 R、一階衰減 λ）；Domenico 穩態中心線稀釋（橫向、垂向延散）</td><td>Ogata-Banks <span class="tag src">已查證</span>；Domenico <span class="tag">未逐字查證</span></td></tr>
+        <tr><td>動力學</td><td>dC/dt = −k₂[Ox]C·f(T) + k<sub>des</sub>(C<sub>eq</sub>−C) − (v/(R·L<sub>f</sub>))(C−C<sub>up</sub>)；d[Ox]/dt = −(k<sub>d</sub> + v/L<sub>f</sub>)[Ox]；f(T)：Arrhenius</td><td>k₂(TCE+KMnO₄)≈0.65–0.68 M⁻¹s⁻¹ <span class="tag src">已查證</span>；Ea 預設 60 kJ/mol <span class="tag">假設</span></td></tr>
+        <tr><td>放熱</td><td>H₂O₂ 分解熱 98.25 kJ/mol；情境 A 注入液絕熱、情境 B 處理區整體熱容</td><td><span class="tag src">已查證</span> Miletiev et al. (2012)；土壤比熱 <span class="tag">假設</span></td></tr>
+      </tbody></table>
+    </div>
+    <div class="card"><h2>未納入或簡化之地下環境因子</h2>
+      <ul class="note">
+        <li>非均質性與優勢流路：以 Kh/Kv 及低 K 提示，未做隨機場或數值模擬。</li>
+        <li>密度流：高濃度過硫酸鹽溶液密度大，有下沉傾向（定性提示）。</li>
+        <li>不飽和層：僅標示處理區位於地下水位以上之厚度，徑向推移式假設飽和。</li>
+        <li>自由基清除（Cl⁻、碳酸根）、活化劑用量、pH 緩衝：僅定性提示，須處理性試驗。</li>
+        <li>NAPL 溶解速率、基質擴散（back-diffusion）：以 k<sub>des</sub> 集總參數近似。</li>
+        <li>MnO₂ 沉澱、氣體生成造成之滲透率下降：定性提示。</li>
       </ul>
-    </details>
+      <p class="note">原型工具，計算結果僅供初步設計估算；實場參數應以場址調查、處理性試驗、注水／示蹤試驗與模場試驗確認。</p>
+    </div>
   </section>
-</main>
-
-<footer class="max-w-6xl mx-auto px-6 pb-8 text-xs text-slate-400">
-  原型工具，計算結果僅供初步設計估算，實場劑量應以處理性試驗（treatability study）與模場試驗結果確認。
-</footer>
-
-<style type="text/tailwindcss">
-  .inp{ @apply mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500; }
-</style>
+</div>
+<div id="banner"></div>
 
 <script>
-// ===== Constants =====
-const MW_PS = 238.10;               // Na2S2O8 g/mol
-const MW_KMnO4 = 158.03;            // KMnO4 g/mol
-const EQ_PS = MW_PS / 2;            // 2 e- per S2O8^2-  -> 119.05 g/eq
-const EQ_KMnO4 = MW_KMnO4 / 3;      // 3 e- per MnO4- (to MnO2) -> 52.68 g/eq
-const KMNO4_TO_PS = EQ_PS / EQ_KMnO4; // ≈ 2.26
-const PS_SOLUBILITY = 570;          // g/L at ~20 °C
+"use strict";
+/* ============================================================
+   1. 化學資料庫
+   ============================================================ */
+const AW={H:1.008,C:12.011,N:14.007,O:15.999,Na:22.990,S:32.06,Cl:35.45,K:39.098,Mn:54.938,Ca:40.078,Fe:55.845,Br:79.904};
+function parseF(f){const o={};for(const m of f.matchAll(/([A-Z][a-z]?)(\d*)/g)){o[m[1]]=(o[m[1]]||0)+(m[2]?+m[2]:1);}return o;}
+const molw=f=>Object.entries(parseF(f)).reduce((s,[e,n])=>s+AW[e]*n,0);
+const nElec=f=>{const a=parseF(f),g=k=>a[k]||0;return 4*g('C')+g('H')-g('Cl')-g('Br')-2*g('O')+8*g('N');};
+const SRCK='US EPA SSG Appendix K（實測 Koc 幾何平均）', SRCOS='US EPA On-Site 工具化學性質表';
+// koc: L/kg, S: mg/L, H: 無因次亨利常數
+const CONT={
+ 'PCE':{f:'C2Cl4',g:'含氯烯類',koc:265,kocS:SRCK,S:null,H:null},
+ 'TCE':{f:'C2HCl3',g:'含氯烯類',koc:94.3,kocS:SRCK,S:null,H:null},
+ 'cis-1,2-DCE':{f:'C2H2Cl2',g:'含氯烯類',koc:null,kocS:'未查證',S:null,H:null},
+ 'VC':{f:'C2H3Cl',g:'含氯烯類',koc:null,kocS:'未查證',S:null,H:null},
+ '1,1,1-TCA':{f:'C2H3Cl3',g:'含氯烷類',koc:135,kocS:SRCK,S:null,H:null},
+ '1,2-DCA':{f:'C2H4Cl2',g:'含氯烷類',koc:38.0,kocS:SRCK,S:null,H:null},
+ 'Benzene':{f:'C6H6',g:'BTEX',koc:61.7,kocS:SRCK,S:1780,H:0.229},
+ 'Toluene':{f:'C7H8',g:'BTEX',koc:140,kocS:SRCK,S:535,H:0.265},
+ 'Ethylbenzene':{f:'C8H10',g:'BTEX',koc:204,kocS:SRCK,S:152,H:0.267},
+ 'Xylene (o-)':{f:'C8H10',g:'BTEX',koc:241,kocS:SRCK,S:175,H:0.212},
+ 'MTBE':{f:'C5H12O',g:'油品添加劑',koc:11,kocS:SRCOS,S:48000,H:0.0228},
+ 'Naphthalene':{f:'C10H8',g:'PAH',koc:null,kocS:'未查證',S:null,H:null},
+ '1,4-Dioxane':{f:'C4H8O2',g:'醚類',koc:null,kocS:'未查證',S:null,H:null},
+ 'Chlorobenzene':{f:'C6H5Cl',g:'氯苯類',koc:224,kocS:SRCK,S:null,H:null},
+ 'TPH (as C10H22)':{f:'C10H22',g:'油品代表物（假設）',koc:null,kocS:'未查證',S:null,H:null}
+};
+for(const k in CONT){CONT[k].mw=molw(CONT[k].f);CONT[k].ne=nElec(CONT[k].f);CONT[k].nC=parseF(CONT[k].f).C||0;}
+const OX={
+ Na2S2O8:{name:'過硫酸鈉',f:'Na2S2O8',ne:2,half:'S₂O₈²⁻ + 2e⁻ → 2SO₄²⁻',sol:560,kd:0.03,note:'溶解度約 56 g/100 mL；土中可存留數週至數月'},
+ KMnO4:{name:'過錳酸鉀',f:'KMnO4',ne:3,half:'MnO₄⁻ + 4H⁺ + 3e⁻ → MnO₂ + 2H₂O',sol:64,kd:0.1,note:'溶解度 64 g/L @20°C；MnO₂ 沉澱'},
+ NaMnO4:{name:'過錳酸鈉',f:'NaMnO4',ne:3,half:'MnO₄⁻ + 4H⁺ + 3e⁻ → MnO₂ + 2H₂O',sol:400,kd:0.1,note:'溶解度 >400 g/L；商品多為 40% 溶液'},
+ H2O2:{name:'過氧化氫',f:'H2O2',ne:2,half:'H₂O₂ + 2H⁺ + 2e⁻ → 2H₂O',sol:null,kd:5,note:'與水互溶；分解放熱並產生 O₂；存留數分鐘至數小時'},
+ O3:{name:'臭氧',f:'O3',ne:2,half:'O₃ + 2H⁺ + 2e⁻ → O₂ + H₂O',sol:null,kd:10,note:'現場產生之氣體'}
+};
+for(const k in OX){OX[k].mw=molw(OX[k].f);OX[k].eq=OX[k].mw/OX[k].ne;}
+const stoich=(c,o)=>(CONT[c].ne/OX[o].ne)*OX[o].mw/CONT[c].mw;
+const K2PRE={'TCE|KMnO4':[0.67,'文獻 0.65–0.68 M⁻¹s⁻¹（pH 4–8, 21°C）'],'TCE|NaMnO4':[0.67,'同 MnO₄⁻ 反應，沿用 KMnO₄ 值（推論）']};
 
-const DEFAULTS = {L:10, W:10, H:3, n:0.35, rho:1.6, sod:5, basis:'PS', sf:1.0, purity:100, conc:100};
-const ids = Object.keys(DEFAULTS);
-const $ = id => document.getElementById(id);
+/* ============================================================
+   2. 安全資料
+   ============================================================ */
+const S_H='H₂O₂ 材料相容性表（ISM／Cole-Parmer）',S_HC='H₂O₂ 金屬催化分解（BenchChem 技術文件）',S_KZ='Klozur® Persulfate 材料相容性技術公報',S_TW='貯存系統設置設施及監測設備與預防管理參考手冊（使用者 OneDrive）',S_IS='本工具放熱評估（H₂O₂ 分解熱 98.25 kJ/mol）';
+const MAT={
+ H2O2:{'316 不鏽鋼':['OK','高濃度亦評為良好至優',S_H],'304 不鏽鋼':['CAUTION','評為 Good（輕微影響）',S_H],'鋁':['OK','評為 Excellent',S_H],'PVC / CPVC':['OK','評為 Excellent',S_H],'HDPE':['OK','評為 A',S_H],'PTFE / PVDF':['OK','評為 Excellent',S_H],'Viton (FKM) 墊圈':['OK','評為 Excellent',S_H],'EPDM 墊圈':['CAUTION','10% Excellent，30–50% 降為 Good',S_H],'碳鋼':['NG','Do Not Use；鐵會催化分解',S_H],'鑄鐵':['NG','Do Not Use／Fair（來源不一）',S_H],'銅':['NG','Severe Effect；銅催化分解',S_H],'黃銅':['NG','Severe Effect／Do Not Use',S_H],'鍍鋅管':['NG','鋅／鐵屬金屬催化，建議避免','未查證'],'Buna-N (NBR) 墊圈':['NG','Severe Effect',S_H],'Neoprene 墊圈':['NG','Severe Effect',S_H],'Nylon':['NG','30% 以上 Severe Effect',S_H],'Acetal (POM)':['NG','Severe Effect',S_H]},
+ Na2S2O8:{'316 不鏽鋼':['OK','304L/316L 於 20 wt% 與 40 g/L 測試無可觀察腐蝕',S_KZ],'304 不鏽鋼':['OK','304L 測試無可觀察腐蝕',S_KZ],'PTFE / PVDF':['OK','PVDF 1 個月暴露表現良好（PTFE 未測）',S_KZ],'FRP':['OK','1 個月暴露表現良好',S_KZ],'HDPE':['CAUTION','公報摘要未列，請向供應商確認','未查證'],'PVC / CPVC':['CAUTION','公報摘要未列，請向供應商確認','未查證'],'碳鋼':['NG','測試初期即嚴重腐蝕',S_KZ],'銅':['NG','嚴重腐蝕',S_KZ],'黃銅':['NG','嚴重腐蝕',S_KZ],'鍍鋅管':['NG','鋅鍍層屬一般金屬，建議避免','未查證'],'混凝土':['CAUTION','長期暴露有劣化跡象',S_KZ],'天然／合成橡膠':['CAUTION','長期暴露有劣化跡象',S_KZ]}
+};
+const ALLMAT=[...new Set(Object.values(MAT).flatMap(o=>Object.keys(o)))];
+const COMMON=[['文件','取得最新版 SDS，並放在現場可隨時查閱處','Stantec HSSE SWP（ANZ）；台灣專案以本地 HSE 計畫為準'],['文件','完成作業危害分析（JHA/JSA）並納入專案 HSE 計畫','Stantec HSE 計畫範本'],['文件','列入危害性化學品清單，依數量判斷是否需危險物品申報',S_TW],['工程控制','氧化劑與還原劑、有機物、燃料分開儲存','未查證'],['工程控制','現場設洗眼器／緊急沖淋或可攜式洗眼設備','未查證'],['工程控制','備妥洩漏圍堵材料（惰性吸收材，勿用木屑等可燃物）','未查證'],['PPE','化學防濺護目鏡；配藥／加壓灌注時加戴面罩','未查證'],['PPE','耐化學手套（材質依 SDS 第 8 節）','未查證'],['PPE','耐化學圍裙或防護衣、安全鞋','未查證'],['行政管理','灌注前確認管線材質相容（見上方材料檢核）','本工具材料相容性表'],['行政管理','灌注期間監測井口壓力、地表冒漿／冒液（見⑤注入水力）','未查證']];
+const SPEC={
+ H2O2:[['危害','8–28% 屬 Class 1 氧化劑；28–52% 屬 Class 2 氧化劑並具腐蝕性',S_H],['危害','消防法將過氧化氫列為第 6 類氧化性液體',S_TW],['危害','接觸鐵、銅、錳等金屬或其鹽類會加速放熱分解；密閉容器可能升壓',S_HC],['工程控制','儲槽／管線需有排氣，禁止密閉加壓存放',S_HC],['工程控制','以⑦放熱評估檢查注入液溫升；濃度約 11–12% 以上有沸騰／蒸氣風險',S_IS],['行政管理','監測井內溫度、VOC、O₂／LEL，設定停止灌注條件','未查證']],
+ Fenton:[['危害','同 H₂O₂ 全部項目，另含酸化（常見 pH 3–5）與鐵觸媒','Fenton 操作參數文獻（BenchChem）'],['危害','放熱與 O₂／CO₂ 氣體生成，可能造成井口噴濺、地表冒氣、VOC 逸散',S_IS],['PPE','酸液配製須具耐酸防護（手套、面罩）','未查證'],['工程控制','H₂O₂ 與鐵觸媒／酸依設計順序注入，避免地面混合','未查證']],
+ Na2S2O8:[['危害','過硫酸鹽類屬工廠危險物品申報之氧化性固體',S_TW],['危害','溶液可能呈強酸性（pH ≤ 2）；鹼活化時 pH > 10.5，兩者皆具腐蝕性',S_KZ],['PPE','粉體配藥注意粉塵，必要時使用防塵呼吸防護','未查證'],['工程控制','鹼活化（NaOH）配藥會放熱，依序緩慢加入並監測溫度','未查證']],
+ KMnO4:[['危害','過錳酸鹽類屬工廠危險物品申報之氧化性固體',S_TW],['危害','接觸皮膚／衣物會染色；與有機物、還原劑接觸可能劇烈反應','未查證'],['工程控制','MnO₂ 沉澱可能堵塞篩管，規劃回洗或清井','KMnO₄ vs 過硫酸鹽比較文獻（BenchChem）'],['行政管理','材料相容性本工具尚未建資料，請以供應商資料確認','未查證']],
+ O3:[['行政管理','臭氧為現場產生之氣體，需另行評估氣體偵測與通風；本工具未建資料','未查證']]
+};
+SPEC.NaMnO4=SPEC.KMnO4;
 
-const fmt = (v, d=2) => isFinite(v)
-  ? v.toLocaleString('zh-TW', {minimumFractionDigits:d, maximumFractionDigits:d})
-  : '–';
+/* ============================================================
+   3. 工具函式
+   ============================================================ */
+const $=id=>document.getElementById(id);
+const v=id=>parseFloat($(id).value);
+const vo=(id,d)=>{const x=parseFloat($(id).value);return isFinite(x)?x:d;};
+const fmt=(x,d=2)=>isFinite(x)?Number(x).toLocaleString('zh-TW',{minimumFractionDigits:d,maximumFractionDigits:d}):'–';
+const sci=x=>!isFinite(x)?'–':(Math.abs(x)>=1e4||Math.abs(x)<1e-3)&&x!==0?x.toExponential(2):fmt(x,3);
+const al=(t,m)=>`<div class="al ${t}">${{err:'⛔',warn:'⚠️',ok:'✅',info:'ℹ️'}[t]} ${m}</div>`;
+const tbl=(head,rows,rcols=[])=>`<table><thead><tr>${head.map((h,i)=>`<th class="${rcols.includes(i)?'r':''}">${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((c,i)=>`<td class="${rcols.includes(i)?'r':''}">${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+const tagNV='<span class="tag">未查證</span>';
+function expErfc(a,b){ // exp(a)*erfc(b)，避免溢位（Numerical Recipes erfcc，誤差 <1.2e-7）
+  if(b<0) return 2*Math.exp(a)-expErfc(a,-b);
+  const t=1/(1+0.5*b);
+  const p=-b*b-1.26551223+t*(1.00002368+t*(0.37409196+t*(0.09678418+t*(-0.18628806+t*(0.27886807+t*(-1.13520398+t*(1.48851587+t*(-0.82215223+t*0.17087277))))))));
+  return t*Math.exp(a+p);
+}
+const erf=x=>1-expErfc(0,x);
+const xuEck=Ls=>Ls>1?Math.max(0.01,0.83*Math.pow(Math.log10(Ls),2.414)):0.01;
+function download(name,text){const b=new Blob(['\ufeff'+text],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();}
 
-function readInputs(){
-  const o = {};
-  ids.forEach(k => o[k] = k === 'basis' ? $(k).value : parseFloat($(k).value));
-  return o;
+/* ---------- 簡易 Canvas 繪圖 ---------- */
+function niceTicks(a,b,n=6){if(a===b){a-=1;b+=1;}const s=(b-a)/n,p=Math.pow(10,Math.floor(Math.log10(s))),m=s/p,st=(m<1.5?1:m<3?2:m<7?5:10)*p;const t=[];for(let x=Math.ceil(a/st)*st;x<=b+st*1e-9;x+=st)t.push(+x.toFixed(10));return t;}
+function setupCv(cv){const dpr=window.devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;if(!W)return null;cv.width=W*dpr;cv.height=H*dpr;const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,H);g.font='11px "Segoe UI","Microsoft JhengHei",sans-serif';return{g,W,H};}
+function plot(cv,o){
+  const c=setupCv(cv);if(!c)return;const{g,W,H}=c;const has2=o.series.some(s=>s.y2);
+  const m={l:64,r:has2?60:16,t:12,b:40},pw=W-m.l-m.r,ph=H-m.t-m.b;
+  const xs=o.series.flatMap(s=>s.x);const x0=o.xmin??Math.min(...xs),x1=o.xmax??Math.max(...xs);
+  let y1s=o.series.filter(s=>!s.y2).flatMap(s=>s.y).concat((o.hlines||[]).map(h=>h.y)).filter(y=>isFinite(y)&&(!o.logy||y>0));
+  let y0,yT;
+  if(o.logy){const mx=Math.max(...y1s);let mn=Math.min(...y1s);mn=Math.max(mn,mx*1e-8);y0=Math.pow(10,Math.floor(Math.log10(mn)));yT=Math.pow(10,Math.ceil(Math.log10(mx)));if(y0===yT)y0/=10;}
+  else{y0=Math.min(0,...y1s);yT=Math.max(...y1s)*1.08||1;}
+  const fx=x=>m.l+(x-x0)/(x1-x0||1)*pw;
+  const fy=y=>o.logy?m.t+ph-(Math.log10(Math.max(y,y0))-Math.log10(y0))/(Math.log10(yT)-Math.log10(y0))*ph:m.t+ph-(y-y0)/(yT-y0)*ph;
+  g.strokeStyle='#e2e8f0';g.fillStyle='#64748b';g.lineWidth=1;g.textAlign='center';
+  niceTicks(x0,x1).forEach(t=>{if(t<x0||t>x1)return;const X=fx(t);g.beginPath();g.moveTo(X,m.t);g.lineTo(X,m.t+ph);g.stroke();g.fillText(+t.toPrecision(6),X,m.t+ph+14);});
+  g.textAlign='right';
+  const yt=o.logy?(()=>{const a=[];for(let e=Math.log10(y0);e<=Math.log10(yT)+1e-9;e++)a.push(Math.pow(10,e));return a;})():niceTicks(y0,yT);
+  yt.forEach(t=>{if(t<y0||t>yT)return;const Y=fy(t);g.beginPath();g.moveTo(m.l,Y);g.lineTo(m.l+pw,Y);g.stroke();g.fillText(o.logy?t.toExponential(0):+t.toPrecision(6),m.l-5,Y+4);});
+  g.strokeStyle='#334155';g.strokeRect(m.l,m.t,pw,ph);
+  g.fillStyle='#334155';g.textAlign='center';g.fillText(o.xlabel||'',m.l+pw/2,H-6);
+  g.save();g.translate(13,m.t+ph/2);g.rotate(-Math.PI/2);g.fillText(o.ylabel||'',0,0);g.restore();
+  let f2=null;
+  if(has2){const y2s=o.series.filter(s=>s.y2).flatMap(s=>s.y).filter(isFinite);const t2=Math.max(...y2s,1e-12)*1.08;f2=y=>m.t+ph-y/t2*ph;
+    g.textAlign='left';g.fillStyle='#64748b';niceTicks(0,t2,5).forEach(t=>{if(t>t2)return;g.fillText(+t.toPrecision(5),m.l+pw+5,f2(t)+4);});
+    g.save();g.translate(W-8,m.t+ph/2);g.rotate(Math.PI/2);g.textAlign='center';g.fillText(o.y2label||'',0,0);g.restore();}
+  g.save();g.beginPath();g.rect(m.l,m.t,pw,ph);g.clip();
+  (o.hlines||[]).forEach(h=>{g.strokeStyle=h.color||'#e11d48';g.setLineDash([6,4]);g.beginPath();g.moveTo(m.l,fy(h.y));g.lineTo(m.l+pw,fy(h.y));g.stroke();g.setLineDash([]);});
+  o.series.forEach(s=>{const F=s.y2?f2:fy;g.strokeStyle=s.color;g.lineWidth=s.w||2;g.setLineDash(s.dash||[]);g.beginPath();let st=false;
+    s.x.forEach((x,i)=>{const y=s.y[i];if(!isFinite(y)||(o.logy&&!s.y2&&y<=0)){st=false;return;}const X=fx(x),Y=F(y);st?g.lineTo(X,Y):g.moveTo(X,Y);st=true;});g.stroke();g.setLineDash([]);});
+  g.restore();
+  const leg=o.series.map(s=>[s.label,s.color,s.dash]).concat((o.hlines||[]).map(h=>[h.label,h.color||'#e11d48',[6,4]]));
+  g.textAlign='left';let ly=m.t+12;leg.forEach(([l,col,d])=>{const lx=m.l+pw-170;g.strokeStyle=col;g.lineWidth=2;g.setLineDash(d||[]);g.beginPath();g.moveTo(lx,ly-4);g.lineTo(lx+22,ly-4);g.stroke();g.setLineDash([]);g.fillStyle='#334155';g.fillText(l,lx+27,ly);ly+=15;});
+}
+function drawLayout(cv,L,W,d){
+  const c=setupCv(cv);if(!c)return;const{g,W:CW,H:CH}=c;const R=d.R,pad=36;
+  const sc=Math.min((CW-pad*2)/(L+2*R),(CH-pad*2)/(W+2*R));const ox=pad+(CW-pad*2-(L+2*R)*sc)/2+R*sc,oy=CH-pad-(CH-pad*2-(W+2*R)*sc)/2-R*sc;
+  const X=x=>ox+x*sc,Y=y=>oy-y*sc;
+  d.wells.forEach(([x,y])=>{g.beginPath();g.arc(X(x),Y(y),R*sc,0,2*Math.PI);g.fillStyle='rgba(20,184,166,.13)';g.fill();g.strokeStyle='rgba(15,118,110,.55)';g.lineWidth=.8;g.stroke();});
+  g.strokeStyle='#0f172a';g.lineWidth=2;g.strokeRect(X(0),Y(W),L*sc,W*sc);
+  g.fillStyle='#0f766e';d.wells.forEach(([x,y],i)=>{g.beginPath();g.arc(X(x),Y(y),3.5,0,2*Math.PI);g.fill();});
+  g.fillStyle='#334155';g.textAlign='center';g.fillText(`${d.n} 口｜dx=${fmt(d.dx,2)} m、dy=${fmt(d.dy,2)} m｜覆蓋率 ${(d.cov*100).toFixed(2)}%`,CW/2,14);
+  g.fillText(`L = ${L} m`,X(L/2),Y(0)+16);g.save();g.translate(X(0)-10,Y(W/2));g.rotate(-Math.PI/2);g.fillText(`W = ${W} m`,0,0);g.restore();
 }
 
-function validate(p){
-  const msgs = [];
-  ['L','W','H','rho','sod','conc'].forEach(k => { if(!(p[k] > 0)) msgs.push(['err', `「${k}」需為大於 0 的數值。`]); });
-  if(!(p.n > 0 && p.n < 1)) msgs.push(['err','孔隙率需介於 0 與 1 之間。']);
-  if(!(p.purity > 0 && p.purity <= 100)) msgs.push(['err','藥劑純度需介於 0–100%。']);
-  if(!(p.sf >= 1)) msgs.push(['warn','安全係數小於 1，設計用量將低於 SOD 理論需求。']);
-  if(p.rho < 1.0 || p.rho > 2.3) msgs.push(['warn','土壤密度超出一般土壤常見範圍（約 1.0–2.3 g/cm³），請確認單位。']);
-  if(p.conc > PS_SOLUBILITY) msgs.push(['warn',`灌注濃度 ${p.conc} g/L 高於過硫酸鈉約 ${PS_SOLUBILITY} g/L（~20 °C）溶解度。`]);
-  return msgs;
+/* ============================================================
+   4. 井位配置演算法
+   ============================================================ */
+function coverage(w,L,W,R,n=120){const ny=Math.max(Math.round(n*W/L),25);let ok=0,tot=0;const R2=R*R*(1+1e-9);
+  for(let j=0;j<=ny;j++){const y=W*j/ny;for(let i=0;i<=n;i++){const x=L*i/n;tot++;for(const p of w){const dx=x-p[0],dy=y-p[1];if(dx*dx+dy*dy<=R2){ok++;break;}}}}return ok/tot;}
+function squareLayout(L,W,R){let best=null;for(let ny=1;ny<=Math.ceil(W/R)*2+1;ny++){const b=W/ny;if(b/2>=R)continue;const nx=Math.max(1,Math.ceil(L/(2*Math.sqrt(R*R-b*b/4))-1e-9)),a=L/nx;const w=[];for(let j=0;j<ny;j++)for(let i=0;i<nx;i++)w.push([(i+.5)*a,(j+.5)*b]);if(!best||w.length<best.wells.length)best={wells:w,dx:a,dy:b};}return best;}
+function triLayout(L,W,R){let best=null;
+  for(const sw of [false,true]){const LL=sw?W:L,WW=sw?L:W;
+    for(let nx=1;nx<=Math.ceil(LL/R)*2+2;nx++){const a=LL/nx;if(a/2>=R)continue;const e=Math.sqrt(R*R-a*a/4);let ys;
+      if(WW<=2*e)ys=[WW/2];else{const ny=1+Math.ceil((WW-2*e)/(R+e)-1e-9),b=(WW-2*e)/(ny-1);ys=[...Array(ny)].map((_,j)=>e+j*b);}
+      const w=[];ys.forEach((y,j)=>{if(j%2===0)for(let i=0;i<nx;i++)w.push([(i+.5)*a,y]);else for(let i=0;i<=nx;i++)w.push([i*a,y]);});
+      const dy=ys.length>1?ys[1]-ys[0]:WW;const c={wells:sw?w.map(p=>[p[1],p[0]]):w,dx:sw?dy:a,dy:sw?a:dy};
+      if(!best||c.wells.length<best.wells.length)best=c;}}
+  return best;}
+function designLayout(L,W,R){const sq=squareLayout(L,W,R),tr=triLayout(L,W,R);
+  for(const d of [sq,tr]){d.R=R;d.n=d.wells.length;d.cov=coverage(d.wells,L,W,R);d.apw=L*W/d.n;}
+  return{sq,tr,rec:tr.n<sq.n?'tr':'sq',tmin:Math.ceil(L*W/(1.5*Math.sqrt(3)*R*R))};}
+
+/* ============================================================
+   5. 污染物表格狀態
+   ============================================================ */
+let rows=[{c:'TCE',soil:50,gw:20,napl:0,koc:''},{c:'Benzene',soil:10,gw:5,napl:0,koc:''}];
+function renderRows(){
+  $('ctab').querySelector('tbody').innerHTML=rows.map((r,i)=>`<tr>
+    <td><select class="inp" data-i="${i}" data-k="c">${Object.keys(CONT).map(k=>`<option ${k===r.c?'selected':''}>${k}</option>`).join('')}</select></td>
+    <td><input class="inp" style="text-align:right" type="number" step="1" data-i="${i}" data-k="soil" value="${r.soil}"></td>
+    <td><input class="inp" style="text-align:right" type="number" step="0.1" data-i="${i}" data-k="gw" value="${r.gw}"></td>
+    <td><input class="inp" style="text-align:right" type="number" step="1" data-i="${i}" data-k="napl" value="${r.napl}"></td>
+    <td><input class="inp" style="text-align:right" type="number" step="1" data-i="${i}" data-k="koc" value="${r.koc}" placeholder="${CONT[r.c].koc??'未查證'}"></td>
+    <td><button class="btn" data-del="${i}">刪除</button></td></tr>`).join('');
+  const kc=$('kc'),cur=kc.value;kc.innerHTML=[...new Set(rows.map(r=>r.c).concat(Object.keys(CONT)))].map(k=>`<option>${k}</option>`).join('');if(cur)kc.value=cur;
+}
+$('ctab').addEventListener('input',e=>{const t=e.target,i=t.dataset.i;if(i===undefined)return;const k=t.dataset.k;rows[i][k]=k==='c'?t.value:(t.value===''?'':parseFloat(t.value));if(k==='c')renderRows();calcAll();});
+$('ctab').addEventListener('click',e=>{const d=e.target.dataset.del;if(d!==undefined){rows.splice(+d,1);renderRows();calcAll();}});
+$('addRow').onclick=()=>{rows.push({c:'PCE',soil:0,gw:0,napl:0,koc:''});renderRows();calcAll();};
+
+/* ============================================================
+   6. 主計算
+   ============================================================ */
+let S={};
+function calcAll(){
+  const p={};['L','W','H','ztop','dtw','n','ne','rho','foc','K','grad','khkv','Tgw','Dm','aL','aTr','aVr','pH','alk','cl','fe2','mn2','s2','sod','deo','sf','purity','conc','roi','roiF','bs','rw','Q','lam','xr','xmax'].forEach(k=>p[k]=v(k));
+  p.ox=$('ox').value;p.fenton=$('fenton').value==='1'&&p.ox==='H2O2';p.basis=$('basis').value;p.flow=$('flowdir').value;
+  const A=[],ox=OX[p.ox];
+  // ---- 檢核 ----
+  ['L','W','H','rho','K','conc','roi','bs','rw','Q'].forEach(k=>{if(!(p[k]>0))A.push(['err',`參數「${k}」需 > 0`]);});
+  if(!(p.n>0&&p.n<1))A.push(['err','總孔隙率需介於 0–1']);
+  if(!(p.ne>0&&p.ne<=p.n))A.push(['err','有效孔隙率需 > 0 且 ≤ 總孔隙率']);
+  if(!(p.deo>=0&&p.deo<1))A.push(['err','DEO 需介於 0–1']);
+  if(A.some(a=>a[0]==='err')){$('alertsTop').innerHTML=A.map(a=>al(...a)).join('');$('kAl').textContent='錯誤';return;}
+  // ---- 場址 ----
+  const V=p.L*p.W*p.H,soilKg=V*p.rho*1000,PV=V*p.n,PVe=V*p.ne;
+  const Lf=p.flow==='L'?p.L:p.W,Wp=p.flow==='L'?p.W:p.L;
+  const q=p.K*p.grad,vel=q/p.ne;
+  const aL=$('aMode').value==='auto'?xuEck(Lf):p.aL;
+  const D=aL*vel+p.Dm*86400;
+  const unsat=Math.max(0,Math.min(p.dtw,p.ztop+p.H)-p.ztop);
+  const Tf=p.Tgw;
+  // ---- 污染物分配 ----
+  const pr=rows.filter(r=>CONT[r.c]).map(r=>{const c=CONT[r.c];const koc=r.koc!==''&&isFinite(r.koc)?r.koc:c.koc;const kocSrc=r.koc!==''&&isFinite(r.koc)?'使用者輸入':c.kocS;
+    const Kd=koc!=null?koc*p.foc:null;const R=Kd!=null?1+p.rho*Kd/p.ne:null;
+    const mS=(r.soil||0)*soilKg/1e6,mW=(r.gw||0)*PV*1000/1e6,mN=r.napl||0,m=mS+mW+mN;
+    const Csat=(c.S&&Kd!=null)?c.S*(Kd+p.n/p.rho):null;
+    const soilEq=Kd!=null?(r.gw||0)*(Kd+p.n/p.rho):null;
+    return{...r,koc,kocSrc,Kd,R,mS,mW,mN,m,Csat,soilEq,ratio:stoich(r.c,p.ox),pod:m*stoich(r.c,p.ox),mol:m*1000/c.mw,nC:c.nC};});
+  // ---- 劑量 ----
+  const sodOx=p.basis==='KMnO4'?p.sod*(ox.eq/OX.KMnO4.eq):p.sod;
+  const pod=pr.reduce((s,r)=>s+r.pod,0);
+  const nod=sodOx*soilKg/1000;
+  const gwRed=( (p.fe2/55.845)*1 + (p.mn2/54.938)*2 + (p.s2/32.06)*8 )/1000*PV*1000/ox.ne*ox.mw/1000; // kg oxidant
+  const base=pod+nod+gwRed,tod=base/(1-p.deo)*p.sf,prod=tod/(p.purity/100),deoKg=base/(1-p.deo)-base,sfKg=tod-base/(1-p.deo);
+  const Vsol=tod/p.conc;
+  // ---- 井位 ----
+  const Rd=p.roi*p.roiF;const lay=designLayout(p.L,p.W,Rd);const patSel=$('pat').value;
+  const use=patSel==='square'?lay.sq:patSel==='triangular'?lay.tr:(lay.rec==='tr'?lay.tr:lay.sq);
+  const nW=use.n;
+  // ---- 注入 ----
+  const Vroi=Math.PI*Rd*Rd*p.bs*p.ne, Vdose=Vsol/nW;
+  const ctl=$('vctl').value;const Vw=ctl==='dose'?Vdose:ctl==='roi'?Vroi:Math.max(Vdose,Vroi);
+  const Mw=tod/nW,Cdes=Mw/Vw; // g/L
+  const demC=sodOx*p.rho/p.ne; // g/L 孔隙水當量需求
+  const rox=Math.sqrt(Mw/(Math.PI*p.bs*p.rho*Math.max(sodOx,1e-9)));
+  const Qd=p.Q*1.44, tinj=Vw/Qd*24; // h
+  const dh=Qd/(2*Math.PI*p.K*p.bs)*Math.log(Math.max(Rd,p.rw*1.01)/p.rw);
+  const Pwh=Math.max(0,dh-p.dtw)*9.81; // kPa
+  const aLr=xuEck(Rd);const sig=Math.sqrt(4/3*aLr*Rd);
+  const rFromV=Math.sqrt(Vw/(Math.PI*p.bs*p.ne));
+  const kdOx=vo('kd',ox.kd);
+  const tPers=Math.log(10)/Math.max(kdOx,1e-9),drift=vel*tPers;
+  S={p,ox,V,soilKg,PV,PVe,Lf,Wp,q,vel,aL,D,unsat,pr,sodOx,pod,nod,gwRed,base,tod,prod,deoKg,sfKg,Vsol,lay,use,nW,Rd,Vroi,Vdose,Vw,Mw,Cdes,demC,rox,Qd,tinj,dh,Pwh,aLr,sig,rFromV,kdOx,tPers,drift,A};
+  // ---- 警示 ----
+  if(ox.sol&&p.conc>ox.sol)A.push(['warn',`劑量灌注濃度 ${p.conc} g/L 超過 ${ox.name} 溶解度約 ${ox.sol} g/L`]);
+  if(ox.sol&&Cdes>ox.sol)A.push(['warn',`設計注入濃度 ${fmt(Cdes,1)} g/L 超過溶解度，需增加注入體積或分次灌注`]);
+  if(p.K<0.1)A.push(['warn','K < 0.1 m/d：低滲透性，藥劑可能無法有效到達（用戶簡報：滲透性較差處藥劑可能無法到達）；考慮直接推注／壓裂或土壤混拌']);
+  if(p.khkv>10)A.push(['warn',`Kh/Kv = ${p.khkv}：層狀異向性明顯，藥劑易沿高透水層側向優勢流動，建議分層灌注`]);
+  if(unsat>0)A.push(['info',`處理區上方 ${fmt(unsat,2)} m 位於地下水位以上（不飽和層），徑向推移式假設飽和，該段分布需另評估`]);
+  if(rox<Rd)A.push(['warn',`NOD 限制傳輸半徑 r_ox = ${fmt(rox,2)} m < 設計 ROI ${fmt(Rd,2)} m：氧化劑可能在抵達 ROI 前被土壤消耗`]);
+  if(Cdes<demC)A.push(['warn',`設計注入濃度 ${fmt(Cdes,1)} g/L 低於 1 倍孔隙水當量需求 ${fmt(demC,1)} g/L，單次注入不足以滿足 NOD`]);
+  if(dh>p.dtw)A.push(['warn',`Thiem 注入水頭上升 ${fmt(dh,2)} m > 地下水位深度 ${p.dtw} m：井口需加壓（約 ${fmt(Pwh,0)} kPa），有地表冒漿／沿井壁回流風險（推論）`]);
+  if(drift>Lf)A.push(['warn',`氧化劑存留期間（衰減至 10%）隨地下水漂移約 ${fmt(drift,1)} m，大於處理區流向長度 ${Lf} m，可能流出處理區`]);
+  pr.forEach(r=>{if(r.koc==null)A.push(['info',`${r.c} 的 Koc 未查證，請於表格輸入；目前遲滯 R 以 1 計算`]);if(r.Csat&&r.soil>r.Csat)A.push(['warn',`${r.c} 土壤濃度 ${r.soil} mg/kg > Csat ${fmt(r.Csat,0)} mg/kg：可能存在 NAPL，請估計 NAPL 質量`]);});
+  if(p.ox==='Na2S2O8'){A.push(['info','過硫酸鹽高濃度溶液密度大於地下水，具密度驅動下沉傾向（BenchChem 比較文件）；活化方式（鹼、熱、Fe-螯合、H₂O₂）未計入用量']);
+    if(p.cl>500||p.alk>300)A.push(['warn',`Cl⁻ ${p.cl} mg/L、鹼度 ${p.alk} mg/L：可能清除自由基、降低活化效率（門檻值為示意，未查證），請以處理性試驗確認`]);}
+  if(p.fenton){if(p.pH>5)A.push(['warn',`地下水 pH ${p.pH} 高於 Fenton 常見最佳範圍 3–5；土壤緩衝能力會抵抗酸化`]);}
+  if(p.ox.includes('MnO4'))A.push(['info','過錳酸鹽反應生成 MnO₂ 沉澱，可能降低含水層透水性']);
+  if(p.ox==='KMnO4'&&Cdes>64)A.push(['warn','KMnO₄ 溶解度僅約 64 g/L @20°C']);
+  if(p.Tgw<10)A.push(['info','地下水溫低，反應速率下降（見⑥ Arrhenius 修正）']);
+  $('alertsTop').innerHTML=A.filter(a=>a[0]!=='info').slice(0,3).map(a=>al(...a)).join('')+(A.filter(a=>a[0]!=='info').length>3?al('info','其他警示請見各分頁'):'');
+  renderKPI();renderSite();renderPart();renderDose();renderLayoutTxt();renderInj();renderSafety();renderVisible();
 }
 
-function calc(p){
-  const V = p.L * p.W * p.H;                       // m³
-  const soilKg = V * p.rho * 1000;                 // g/cm³ = t/m³ → ×1000 kg
-  const PV = V * p.n;                              // m³
-  const sodPS = p.basis === 'KMnO4' ? p.sod * KMNO4_TO_PS : p.sod; // g Na2S2O8 / kg soil
-  const psTheo = sodPS * soilKg / 1000;            // kg
-  const psDesign = psTheo * p.sf / (p.purity/100); // kg product
-  const psPure = psTheo * p.sf;                    // kg active Na2S2O8
-  const Vsol = psPure / p.conc;                    // kg ÷ (g/L) = m³
-  const ratio = Vsol / PV * 100;                   // %
-  return {V, soilKg, PV, sodPS, psTheo, psPure, psDesign, Vsol, ratio};
+function renderKPI(){const s=S;
+  $('kOxName').textContent=`${s.ox.name}${s.p.fenton?'（Fenton）':''} 設計用量 TOD`;
+  $('kTOD').textContent=fmt(s.tod,1);$('kTODs').textContent=`商品量 ${fmt(s.prod,1)} kg（純度 ${s.p.purity}%）`;
+  $('kVsol').textContent=fmt(s.nW*s.Vw,2);$('kVsols').textContent=`${fmt(s.nW*s.Vw/s.PVe*100,1)}% 有效 PV`;
+  $('kWells').textContent=s.nW;$('kWellss').textContent=`${s.use===s.lay.tr?'三角形':'正方形'}｜ROI ${fmt(s.Rd,2)} m`;
+  $('kVw').textContent=fmt(s.Vw,2);$('kVws').textContent=`濃度 ${fmt(s.Cdes,1)} g/L｜${fmt(s.tinj,1)} h`;
+  $('kV').textContent=sci(s.vel);$('kVs').textContent=`${fmt(s.vel*365,1)} m/yr`;
+  const n=s.A.filter(a=>a[0]==='warn').length+s.A.filter(a=>a[0]==='err').length;$('kAl').textContent=n?`${n} 項`:'無';
+}
+function renderSite(){const s=S,p=s.p;
+  $('siteOut').innerHTML=tbl(['項目','公式','結果'],[
+   ['處理區體積 V','L×W×H',`${fmt(s.V,1)} m³`],['土壤乾重','V×ρb×1000',`${fmt(s.soilKg/1000,1)} t`],
+   ['總孔隙體積 PV','V×n',`${fmt(s.PV,2)} m³`],['有效孔隙體積 PVₑ','V×nₑ',`${fmt(s.PVe,2)} m³`],
+   ['Darcy 通量 q','K×i',`${sci(s.q)} m/d`],['平均線性流速 v','K×i/nₑ',`${sci(s.vel)} m/d（${fmt(s.vel*365,1)} m/yr）`],
+   ['流向長度 L_f／垂直寬度','依流向設定',`${s.Lf} m／${s.Wp} m`],['水力停留時間','L_f / v',`${fmt(s.Lf/Math.max(s.vel,1e-12),1)} d`],
+   [`縱向延散度 αL ${$('aMode').value==='auto'?'(自動)':''}`,$('aMode').value==='auto'?'0.83(log₁₀L_f)^2.414':'手動',`${fmt(s.aL,3)} m`],
+   ['αT／αV','比例',`${fmt(s.aL*p.aTr,3)}／${fmt(s.aL*p.aVr,4)} m`],
+   ['水動力延散係數 D','αL·v + Dm',`${sci(s.D)} m²/d`],['Peclet 數 (L_f)','v·L_f / D',fmt(s.vel*s.Lf/Math.max(s.D,1e-15),1)],
+   ['垂向傳導係數 Kv','K/(Kh/Kv)',`${sci(p.K/p.khkv)} m/d`],['不飽和段厚度','處理區位於水位以上部分',`${fmt(s.unsat,2)} m`]],[2]);
+}
+function renderPart(){const s=S;
+  $('partOut').innerHTML=tbl(['污染物','Koc (L/kg)／來源','Kd (L/kg)','R','土壤 kg','地下水 kg','NAPL kg','總質量 kg','吸附相占比','Csat (mg/kg)','依 Cw 平衡之土壤濃度'],
+   s.pr.map(r=>[r.c,r.koc!=null?`${r.koc}<br><small>${r.kocSrc}</small>`:`–<br>${tagNV}`,r.Kd!=null?fmt(r.Kd,3):'–',r.R!=null?fmt(r.R,2):'1（假設）',
+     fmt(r.mS,2),fmt(r.mW,3),fmt(r.mN,2),`<b>${fmt(r.m,2)}</b>`,r.m?fmt(r.mS/r.m*100,1)+'%':'–',r.Csat?fmt(r.Csat,0):'–',r.soilEq!=null?fmt(r.soilEq,2)+' mg/kg':'–']),[2,3,4,5,6,7,8,9,10])
+   +'<p class="note">「依 Cw 平衡之土壤濃度」= Cw·(Kd + n/ρb)，若遠低於實測土壤濃度，表示吸附相／NAPL 未與地下水平衡，灌注後易出現濃度反彈。</p>';
+}
+function renderDose(){const s=S,p=s.p;
+  $('doseOut').innerHTML=tbl(['項目','公式','結果'],[
+   ...s.pr.map(r=>[`POD：${r.c}`,`${fmt(r.m,2)} kg × ${fmt(r.ratio,2)}`,`${fmt(r.pod,1)} kg`]),
+   ['POD 合計','Σ m × 化學計量比',`${fmt(s.pod,1)} kg`],
+   ['SOD（所選氧化劑基準）',p.basis==='KMnO4'?`SOD × ${fmt(s.ox.eq/OX.KMnO4.eq,3)}（當量換算）`:'SOD',`${fmt(s.sodOx,2)} g/kg`],
+   ['NOD','SOD × 土壤乾重',`${fmt(s.nod,1)} kg`],['地下水還原物質需求','Fe²⁺/Mn²⁺/S²⁻ 化學計量 × PV',`${fmt(s.gwRed,2)} kg`],
+   ['DEO（自身分解）',`÷(1−${p.deo})`,`${fmt(s.deoKg,1)} kg`],['安全餘裕',`×SF ${p.sf}`,`${fmt(s.sfKg,1)} kg`],
+   ['<b>TOD 設計用量</b>','(POD+NOD+GW)÷(1−DEO)×SF',`<b>${fmt(s.tod,1)} kg</b>`],['商品藥劑量','TOD ÷ 純度',`${fmt(s.prod,1)} kg`],
+   ['劑量濃度下溶液體積','TOD ÷ 濃度',`${fmt(s.Vsol,2)} m³（${fmt(s.Vsol/s.PVe*100,1)}% PVₑ）`],['POD 占比','POD/(POD+NOD+GW)',`${fmt(s.pod/s.base*100,1)}%`]],[2]);
+  $('doseAl').innerHTML=s.A.filter(a=>/溶解度|NAPL|Koc/.test(a[1])).map(a=>al(...a)).join('');
+}
+function renderLayoutTxt(){const s=S,l=s.lay;
+  $('layOut').innerHTML=tbl(['配置','井數','井距 dx (m)','排距 dy (m)','每井面積 (m²)','覆蓋率驗證'],[
+   ['正方形',l.sq.n,fmt(l.sq.dx,2),fmt(l.sq.dy,2),fmt(l.sq.apw,1),(l.sq.cov*100).toFixed(2)+'%'],
+   ['三角形（交錯）',l.tr.n,fmt(l.tr.dx,2),fmt(l.tr.dy,2),fmt(l.tr.apw,1),(l.tr.cov*100).toFixed(2)+'%'],
+   ['理論面積下限',l.tmin,'–','–','2.598R²','不可能低於此值']],[1,2,3,4])
+   +al('info',`採用：${s.use===l.tr?'三角形':'正方形'}配置 ${s.nW} 口；設計 ROI = ${fmt(s.Rd,2)} m。限制：未考慮障礙物、異向性；ROI 應以注水／示蹤或模場試驗求得。`);
+}
+function renderInj(){const s=S,p=s.p;
+  $('injOut').innerHTML=tbl(['項目','公式','結果'],[
+   ['ROI 所需單井注入體積','π·R²·b·nₑ（徑向推移）',`${fmt(s.Vroi,2)} m³`],['劑量濃度所需單井體積','溶液總量 ÷ 井數',`${fmt(s.Vdose,2)} m³`],
+   ['<b>採用單井注入體積</b>',$('vctl').selectedOptions[0].text,`<b>${fmt(s.Vw,2)} m³</b>`],['單井氧化劑量','TOD ÷ 井數',`${fmt(s.Mw,1)} kg`],
+   ['<b>設計注入濃度</b>','單井量 ÷ 單井體積',`<b>${fmt(s.Cdes,1)} g/L</b>`],['注入體積對應半徑','√(V/(π b nₑ))',`${fmt(s.rFromV,2)} m`],
+   ['孔隙水當量 NOD 濃度','SOD·ρb / nₑ',`${fmt(s.demC,1)} g/L`],['NOD 限制傳輸半徑 r_ox','√(M/(π b ρb SOD))',`${fmt(s.rox,2)} m`],
+   ['單井注入時間','V / Q',`${fmt(s.tinj,1)} h（Q = ${p.Q} L/min）`],['注入水頭上升 Δh（Thiem）','Q/(2πKb)·ln(R/r_w)',`${fmt(s.dh,2)} m`],
+   ['所需井口壓力（估）','(Δh − 地下水位深度)×9.81',`${fmt(s.Pwh,0)} kPa`],['前緣混合帶寬 2σ','2√(4/3·αL(R)·R)'+tagNV,`${fmt(2*s.sig,2)} m（αL(R) = ${fmt(s.aLr,3)} m）`],
+   ['氧化劑存留（衰減至 10%）','ln10 / k_d',`${fmt(s.tPers,1)} d（k_d = ${s.kdOx} 1/d）`],['存留期間漂移距離','v × 存留時間',`${fmt(s.drift,2)} m`],
+   ['污染物移動速度','v / R',s.pr.map(r=>`${r.c}: ${sci(s.vel/(r.R||1))} m/d`).join('<br>')]],[2])
+   +s.A.filter(a=>/r_ox|NOD|水頭|漂移|不飽和|K <|Kh\/Kv|密度/.test(a[1])).map(a=>al(...a)).join('');
+}
+function renderOB(){const s=S,p=s.p,spc=$('spc').value;
+  const r0=s.pr.find(r=>r.c===$('kc').value)||s.pr[0];
+  const R=spc==='o'?1:(r0&&r0.R)||1, lam=spc==='o'?s.kdOx:p.lam;
+  const C0=isFinite(v('obC0'))?v('obC0'):(spc==='o'?s.Cdes*1000:(r0?r0.gw:1));
+  const aX=$('aMode').value==='auto'?xuEck(Math.max(p.xr,1.01)):s.aL;const Dx=aX*s.vel+p.Dm*86400;
+  const vr=s.vel/R,Dr=Dx/R;
+  const ob=(x,t)=>{if(t<=0)return 0;const U=vr*Math.sqrt(1+4*lam*Dr/Math.max(vr*vr,1e-30));const sq=2*Math.sqrt(Dr*t);
+    return C0/2*(expErfc(x*(vr-U)/(2*Dr),(x-U*t)/sq)+expErfc(x*(vr+U)/(2*Dr),(x+U*t)/sq));};
+  const ts=$('tlist').value.split(',').map(Number).filter(t=>t>0).slice(0,6);const cols=['#0f766e','#0891b2','#7c3aed','#ea580c','#be123c','#334155'];
+  const xs=[...Array(201)].map((_,i)=>p.xmax*i/200);
+  plot($('cvOB'),{series:ts.map((t,i)=>({x:xs,y:xs.map(x=>ob(x,t)),color:cols[i],label:`t = ${t} d`})),xlabel:'距處理區下游邊界 x (m)',ylabel:`${spc==='o'?'氧化劑':'污染物'} 濃度 (mg/L)`,xmin:0,xmax:p.xmax});
+  // Domenico 穩態中心線（污染物）
+  const ax=aX;const ay=ax*p.aTr,az=ax*p.aVr,x=p.xr;
+  const vc=s.vel/R;const dom=Math.exp(x/(2*ax)*(1-Math.sqrt(1+4*lam*ax/Math.max(vc,1e-12))))*erf(s.Wp/(4*Math.sqrt(ay*x)))*erf(p.H/(2*Math.sqrt(az*x)));
+  const tArr=x/Math.max(vc,1e-12);
+  $('trOut').innerHTML=tbl(['項目','公式','結果'],[
+   ['邊界濃度 C₀',spc==='o'?'設計注入濃度':'所選污染物地下水濃度',`${fmt(C0,2)} mg/L`],['使用之 R、λ',spc==='o'?'氧化劑不吸附、λ = k_d':'污染物 R、生物降解 λ',`R = ${fmt(R,2)}、λ = ${lam} 1/d`],
+   ['受體處一維 Ogata-Banks（最後時間點）','含延散、遲滯、衰減',`${fmt(ob(x,ts[ts.length-1]||365),4)} mg/L`],
+   ['受體處 Domenico 穩態中心線 C/C₀','含橫向（αy）與垂向（αz）稀釋'+tagNV,`${sci(dom)}（C = ${sci(dom*C0)} mg/L）`],
+   ['稀釋＋衰減因子 DAF','C₀ / C',fmt(1/Math.max(dom,1e-300),1)],['受體延散度 αx／αy／αz','尺度 x 之 Xu & Eckstein',`${fmt(ax,2)}／${fmt(ay,3)}／${fmt(az,4)} m`],
+   ['平流到達時間','x·R / v',`${fmt(tArr,0)} d（${fmt(tArr/365,1)} 年）`]],[2])
+   +'<p class="note">一維解假設污染團全斷面混合（不含橫向稀釋，偏保守）；Domenico 解考慮源寬 = 處理區垂直流向寬度、源厚 = H（源位於含水層頂部）。</p>';
+}
+function renderLayoutCv(){const s=S;drawLayout($('cvSq'),s.p.L,s.p.W,s.lay.sq);drawLayout($('cvTri'),s.p.L,s.p.W,s.lay.tr);}
+function renderDoseCv(){const s=S;const items=[['POD',s.pod,'#0f766e'],['NOD',s.nod,'#0891b2'],['地下水還原物質',s.gwRed,'#7c3aed'],['DEO',s.deoKg,'#ea580c'],['安全餘裕',s.sfKg,'#94a3b8']];
+  const c=setupCv($('cvDose'));if(!c)return;const{g,W,H}=c;const mx=Math.max(...items.map(i=>i[1]),1);const bh=(H-30)/items.length;
+  items.forEach(([l,val,col],i)=>{const y=10+i*bh;g.fillStyle='#334155';g.textAlign='right';g.fillText(l,108,y+bh/2+4);g.fillStyle=col;const w=(W-200)*val/mx;g.fillRect(114,y+4,w,bh-10);g.fillStyle='#334155';g.textAlign='left';g.fillText(`${fmt(val,1)} kg（${fmt(val/s.tod*100,1)}%）`,118+w,y+bh/2+4);});}
+
+/* ---------- 動力學 ---------- */
+function renderKin(){const s=S,p=s.p;const c=$('kc').value;const ox=s.ox;
+  const pre=K2PRE[`${c}|${p.ox}`];const mode=$('kmode').value;
+  const oxIn=v('oxIn'),oxM=oxIn/1000/ox.mw;
+  const TK=p.Tgw+273.15,TrK=v('Tref')+273.15,fT=Math.exp(-v('Ea')*1000/8.314*(1/TK-1/TrK));
+  let k2,msg='';
+  if(mode==='lit'){k2=v('k2');msg=pre?al('info',`k₂ 預設來源：${pre[1]}`):al('warn',`資料庫無 ${c} + ${ox.name} 的 k₂，請查 IscoKin 資料庫（Tratnyek 等）或改用處理性試驗 k_obs；目前使用輸入值 ${k2}`);}
+  else{k2=v('kobs')/86400/Math.max(oxM,1e-15);msg=al('info',`由 k_obs 反算 k₂ = ${sci(k2)} M⁻¹s⁻¹（於 ${oxIn} mg/L 氧化劑）`);}
+  if(p.ox==='Na2S2O8')msg+=al('info','活化過硫酸鹽以自由基反應為主，k₂ 隨活化方式改變，建議使用處理性試驗 k_obs');
+  msg+=al('info',`Arrhenius 溫度修正係數 f(T) = ${fmt(fT,3)}（地下水 ${p.Tgw}°C、參考 ${v('Tref')}°C、Ea ${v('Ea')} kJ/mol；Ea 為假設值）`);
+  const r0=s.pr.find(r=>r.c===c);const R=(r0&&r0.R)||1;
+  const flush=$('flush').value==='1';const kfo=flush?s.vel/s.Lf:0,kfc=flush?s.vel/(R*s.Lf):0;
+  const C0=v('kC0'),Ceq=isFinite(v('Ceq'))?v('Ceq'):C0,Cup=v('Cup'),kdes=v('kdes'),kd=s.kdOx,ninj=Math.max(1,Math.round(v('ninj'))),itv=v('itv'),days=v('days');
+  const k2d=k2*86400*fT,dt=Math.max(days/20000,1e-3),N=Math.floor(days/dt)+1;
+  const T=[],C=[],O=[];let cc=C0,oo=oxM,k=1;const stride=Math.max(1,Math.floor(N/800));
+  for(let i=0;i<N;i++){const t=i*dt;if(i%stride===0){T.push(t);C.push(cc);O.push(oo*ox.mw*1000);}
+    const on=oo*Math.exp(-(kd+kfo)*dt);const cn=cc*Math.exp(-k2d*oo*dt)+(kdes*(Ceq-cc)-kfc*(cc-Cup))*dt;
+    cc=Math.max(cn,0);oo=on;if(k<ninj&&t+dt>=k*itv){oo+=oxM;k++;}}
+  const tg=v('ktg');let tt=null;for(let i=0;i<T.length;i++)if(C[i]<=tg){tt=T[i];break;}
+  const Cpl=C.map(x=>Math.max(x,1e-9));
+  plot($('cvKin'),{series:[{x:T,y:Cpl,color:'#0f766e',label:`${c} (mg/L)`},{x:T,y:O,color:'#94a3b8',label:'氧化劑 (mg/L，右軸)',y2:true,w:1.5}],hlines:[{y:tg,label:`目標 ${tg} mg/L`}],logy:true,xlabel:'時間 (d)',ylabel:'污染物濃度 (mg/L, log)',y2label:'氧化劑 (mg/L)',xmin:0,xmax:days});
+  const mn=Math.min(...C),end=C[C.length-1];
+  $('kinAl').innerHTML=msg;
+  $('kinOut').innerHTML=tbl(['項目','結果'],[['達目標時間',tt!=null?`${fmt(tt,2)} d`:'未達標'],['最低濃度',mn>1e-6?`${sci(mn)} mg/L`:'< 1e-6 mg/L'],['期末濃度',`${end>1e-6?sci(end):'< 1e-6'} mg/L ${end>mn*1.5&&end>1e-6?'（反彈）':''}`],
+   ['流出稀釋速率（氧化劑／污染物）',flush?`${sci(kfo)}／${sci(kfc)} 1/d（v/L_f、v/(R·L_f)）`:'未考慮'],['使用之 k₂（溫度修正後）',`${sci(k2*fT)} M⁻¹s⁻¹`]],[1])
+   +'<p class="note">完全混合（CSTR）假設：處理區內均勻，流出稀釋以 v/L_f 近似。溶解相常在數小時內被氧化，實場速率多受吸附相／NAPL 脫附（k_des）與傳輸限制。</p>';
+}
+$('kFill').onclick=()=>{const s=S;$('oxIn').value=(s.Cdes*1000).toFixed(0);$('kd').value=s.ox.kd;const r=s.pr.find(r=>r.c===$('kc').value);if(r)$('kC0').value=r.gw;const pre=K2PRE[`${$('kc').value}|${s.p.ox}`];if(pre)$('k2').value=pre[0];calcAll();};
+
+/* ---------- 放熱 ---------- */
+function renderHeat(){const s=S,p=s.p;const MWH=OX.H2O2.mw,DH=98.25,CPW=4.18,cps=v('cps');
+  const hkg=isFinite(v('hkg'))?v('hkg'):(p.ox==='H2O2'?s.tod:1000);const wt=v('hwt')/100,hrs=v('hhr'),Tl=v('hTl');
+  const mol=hkg*1000/MWH,Q=mol*DH,sol=hkg/wt;const dTA=wt*1000/MWH*DH/CPW;
+  const dTB=Q/(s.soilKg*cps+(s.PV*1000+sol)*CPW);const Cmol=s.pr.reduce((a,r)=>a+r.mol*r.nC,0);
+  const ng=0.5*mol+Cmol,P=101325+1000*9.81*Math.max(p.ztop+p.H/2-p.dtw,0),Vg=ng*8.314*(p.Tgw+dTB+273.15)/P;
+  const F=[];if(p.Tgw+dTA>=100)F.push(['err','注入液局部絕熱溫升可達沸點，可能產生蒸氣；應降低 H₂O₂ 濃度']);
+  if(p.Tgw+dTB>Tl)F.push(['warn',`處理區整體溫度可能超過 ${Tl}°C`]);if(Vg/s.PV>0.1)F.push(['warn','現地氣體體積 > 10% PV，留意氣體壓力、地表冒氣與 VOC 逸散']);
+  if(wt>0.15)F.push(['warn','H₂O₂ 濃度高於 Fenton ISCO 常見 1–15% 範圍']);if(!F.length)F.push(['ok','未觸發警示']);
+  if(p.ox!=='H2O2')F.unshift(['info','目前主要氧化劑非 H₂O₂；本頁以輸入之 H₂O₂ 用量獨立評估']);
+  $('heatOut').innerHTML=tbl(['項目','結果'],[['H₂O₂ 用量',`${fmt(hkg,1)} kg（${fmt(mol,0)} mol）`],['放熱量',`${fmt(Q/1000,1)} MJ（平均 ${fmt(Q/(hrs*3600),2)} kW）`],['注入液量',`${fmt(sol/1000,2)} m³`],
+   ['A 注入液局部絕熱溫升',`+${fmt(dTA,1)} K → ${fmt(p.Tgw+dTA,1)} °C`],['B 處理區整體溫升',`+${fmt(dTB,2)} K`],['O₂ + CO₂ 生成',`${fmt(ng,0)} mol`],
+   ['現地氣體體積（含靜水壓）',`${fmt(Vg,1)} m³（${fmt(Vg/s.PV,2)} × PV）`],['STP 氣體體積',`${fmt(ng*0.022414,1)} m³`]],[1])+F.map(a=>al(...a)).join('');
+  const xs=[...Array(35)].map((_,i)=>i+1);
+  plot($('cvHeat'),{series:[{x:xs,y:xs.map(w=>p.Tgw+w*10/MWH*DH/CPW),color:'#ea580c',label:'注入液絕熱溫度 (°C)'}],hlines:[{y:100,label:'沸點 100°C',color:'#b91c1c'},{y:Tl,label:`警戒 ${Tl}°C`,color:'#d97706'}],xlabel:'H₂O₂ 濃度 (wt%)',ylabel:'溫度 (°C)',xmin:1,xmax:35});
 }
 
-function render(){
-  const p = readInputs();
-  const msgs = validate(p);
-  $('alerts').innerHTML = msgs.map(([t,m]) =>
-    `<div class="rounded-xl px-4 py-2 text-sm ${t==='err'?'bg-red-50 text-red-700 border border-red-200':'bg-amber-50 text-amber-800 border border-amber-200'}">${t==='err'?'⛔':'⚠️'} ${m}</div>`
-  ).join('');
-  if(msgs.some(m => m[0]==='err')) return;
+/* ---------- 安全 ---------- */
+let lastOx=null;const chkState={};
+function renderSafety(){const s=S,p=s.p;const key=p.fenton?'Fenton':p.ox;const label=`${s.ox.name}${p.fenton?'（Fenton）':''}`;
+  $('safeTitle').textContent=`🦺 ${label} 現場安全檢查清單`;
+  if(lastOx!==null&&lastOx!==key){const b=$('banner');b.innerHTML=al('warn',`已選擇 <b>${label}</b>：請至「⑧ 安全檢查清單」確認 PPE 與管材相容性`);b.style.display='block';clearTimeout(b._t);b._t=setTimeout(()=>b.style.display='none',6000);}
+  lastOx=key;
+  if(!$('matPick').children.length)$('matPick').innerHTML=ALLMAT.map(m=>`<label class="f" style="font-size:12.5px;color:#334155"><input type="checkbox" data-m="${m}" ${['316 不鏽鋼','碳鋼','黃銅','HDPE'].includes(m)?'checked':''}> ${m}</label>`).join('');
+  const db=MAT[p.fenton?'H2O2':p.ox];const sel=[...$('matPick').querySelectorAll('input:checked')].map(i=>i.dataset.m);
+  $('matOut').innerHTML=sel.map(m=>{if(!db||!db[m])return al('info',`❔ <b>${m}</b>：本工具無 ${label} 相容性資料，請查供應商相容性表`);const[lv,nt,src]=db[m];
+    return al({NG:'err',CAUTION:'warn',OK:'ok'}[lv],`${{NG:'不可使用',CAUTION:'注意',OK:'可用'}[lv]} — <b>${m}</b>：${nt}（依據：${src}）${src==='未查證'?tagNV:''}`);}).join('');
+  const items=(SPEC[key]||[]).concat(key==='Fenton'?SPEC.H2O2:[]).concat(COMMON);
+  $('chkList').innerHTML=items.map(([c,t,src],i)=>{const id=`${key}_${i}`;return `<div class="chk"><input type="checkbox" data-c="${id}" ${chkState[id]?'checked':''}><div><b>【${c}】</b>${t}${/未查證/.test(src)?tagNV:''}<div class="note">依據：${src}</div></div></div>`;}).join('');
+  const upd=()=>{const all=$('chkList').querySelectorAll('input'),d=[...all].filter(x=>x.checked).length;$('chkBar').style.width=(d/all.length*100)+'%';$('chkTxt').textContent=`已完成 ${d} / ${all.length} 項`;};upd();
+  $('chkList').onchange=e=>{chkState[e.target.dataset.c]=e.target.checked;upd();};
+  $('dlChk').onclick=()=>download(`safety_checklist_${key}.csv`,'完成,類別,項目,依據\n'+items.map(([c,t,src],i)=>`${chkState[`${key}_${i}`]?'☑':'☐'},${c},"${t}","${src}"`).join('\n'));
+}
+$('matPick').addEventListener('change',()=>renderSafety());
 
-  const r = calc(p);
-  $('oSoilT').textContent = fmt(r.soilKg/1000, 1);
-  $('oSoilKg').textContent = fmt(r.soilKg, 0);
-  $('oPV').textContent = fmt(r.PV, 2);
-  $('oPVL').textContent = fmt(r.PV*1000, 0);
-  $('oPSdesign').textContent = fmt(r.psDesign, 1);
-  $('oPSdesignT').textContent = fmt(r.psDesign/1000, 2);
-  $('oVsol').textContent = fmt(r.Vsol, 2);
-  $('oRatio').textContent = fmt(r.ratio, 1);
-  $('bar').style.width = Math.min(r.ratio,100) + '%';
-  $('bar').className = 'h-4 rounded-full transition-all ' + (r.ratio > 100 ? 'bg-rose-500' : 'bg-teal-500');
-
-  const rows = [
-    ['處理區體積 V', 'L × W × H', `${fmt(r.V,2)} m³`],
-    ['土壤總重量 M<sub>soil</sub>', 'V × ρ<sub>b</sub> × 1,000', `${fmt(r.soilKg,0)} kg`],
-    ['總孔隙體積 PV', 'V × n', `${fmt(r.PV,2)} m³`],
-    ['SOD（Na₂S₂O₈ 基準）', p.basis==='KMnO4' ? `SOD<sub>KMnO₄</sub> × ${KMNO4_TO_PS.toFixed(3)}` : 'SOD', `${fmt(r.sodPS,2)} g/kg`],
-    ['理論需求量 M<sub>PS,theo</sub>', 'SOD × M<sub>soil</sub> ÷ 1,000', `${fmt(r.psTheo,1)} kg`],
-    ['有效成分設計量', 'M<sub>PS,theo</sub> × SF', `${fmt(r.psPure,1)} kg`],
-    ['<b>商品藥劑設計量</b>', 'M<sub>PS,theo</sub> × SF ÷ 純度', `<b>${fmt(r.psDesign,1)} kg</b>`],
-    ['灌注溶液體積 V<sub>sol</sub>', '有效成分量 ÷ 濃度', `${fmt(r.Vsol,2)} m³`],
-    ['V<sub>sol</sub> / PV', 'V<sub>sol</sub> ÷ PV × 100', `${fmt(r.ratio,1)} %`],
-  ];
-  $('tbl').innerHTML = rows.map(([a,b,c]) =>
-    `<tr class="border-b last:border-0"><td class="py-2 pr-2">${a}</td><td class="py-2 pr-2 text-slate-500">${b}</td><td class="py-2 text-right whitespace-nowrap">${c}</td></tr>`
-  ).join('');
+/* ---------- 資料庫 ---------- */
+function renderDB(){
+  $('dbC').innerHTML=tbl(['名稱','化學式','MW','nₑ（礦化電子數）','類別','Koc (L/kg)','S (mg/L)','H′','Koc 來源'],Object.entries(CONT).map(([k,c])=>[k,c.f,fmt(c.mw,2),c.ne,c.g,c.koc??'–',c.S??'–',c.H??'–',c.kocS==='未查證'?tagNV:c.kocS]),[2,3,5,6,7])
+   +'<p class="note">nₑ = 4C + H − Cl − Br − 2O（完全礦化：C→CO₂、H→H₂O、X→X⁻）；S、H′ 來源：US EPA On-Site 工具化學性質表（僅 BTEX、MTBE）。</p>';
+  $('dbO').innerHTML=tbl(['代號','名稱','MW','nₑ','當量重','半反應','溶解度 (g/L)','預設 k_d (1/d)','備註'],Object.entries(OX).map(([k,o])=>[k,o.name,fmt(o.mw,2),o.ne,fmt(o.eq,2),o.half,o.sol??'–',`${o.kd} ${tagNV}`,o.note]),[2,3,4,6]);
+  const ks=Object.keys(OX);$('dbS').innerHTML=tbl(['污染物',...ks],Object.keys(CONT).map(c=>[c,...ks.map(o=>fmt(stoich(c,o),2))]),[1,2,3,4,5]);
 }
 
-ids.forEach(k => $(k).addEventListener('input', render));
-$('btnReset').addEventListener('click', () => { ids.forEach(k => $(k).value = DEFAULTS[k]); render(); });
-$('btnPrint').addEventListener('click', () => window.print());
-render();
+/* ============================================================
+   7. 介面控制
+   ============================================================ */
+let cur='p1';
+function renderVisible(){if(cur==='p3')renderDoseCv();if(cur==='p4')renderLayoutCv();if(cur==='p5')renderOB();if(cur==='p6')renderKin();if(cur==='p7')renderHeat();}
+$('tabs').onclick=e=>{const b=e.target.closest('.tab');if(!b)return;document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t===b));document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('on',x.id===b.dataset.p));cur=b.dataset.p;renderVisible();};
+$('ox').innerHTML=Object.entries(OX).map(([k,o])=>`<option value="${k}" ${k==='Na2S2O8'?'selected':''}>${o.name}（${k}）</option>`).join('');
+$('ox').addEventListener('change',()=>{$('kd').value=OX[$('ox').value].kd;const pre=K2PRE[`${$('kc').value}|${$('ox').value}`];if(pre)$('k2').value=pre[0];});
+$('H').addEventListener('change',()=>{$('bs').value=$('H').value;});
+$('aMode').addEventListener('change',()=>{$('aL').disabled=$('aMode').value==='auto';});
+document.querySelectorAll('input.inp,select.inp').forEach(el=>{if(!el.closest('#ctab'))el.addEventListener('input',calcAll);});
+$('dlWells').onclick=()=>{const s=S;download('injection_wells.csv','井號,X (m),Y (m),注入體積 (m3),注入濃度 (g/L),氧化劑 (kg)\n'+s.use.wells.map((w,i)=>`IW-${String(i+1).padStart(2,'0')},${w[0].toFixed(2)},${w[1].toFixed(2)},${s.Vw.toFixed(2)},${s.Cdes.toFixed(1)},${s.Mw.toFixed(1)}`).join('\n'));};
+window.addEventListener('resize',renderVisible);
+$('aL').disabled=true;renderRows();renderDB();calcAll();
 </script>
 </body>
 </html>
