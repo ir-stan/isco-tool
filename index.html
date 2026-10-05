@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ISCO 現地化學氧化灌注設計工具 v7.3</title>
-<!-- ISCO 現地化學氧化灌注設計工具 v7.3（2026-10-05）；單一離線 HTML 檔 -->
+<title>ISCO 現地化學氧化灌注設計工具 v7.4</title>
+<!-- ISCO 現地化學氧化灌注設計工具 v7.4（2026-10-05）；單一離線 HTML 檔 -->
 <style>
 :root{--teal:#0d9488;--teal7:#0f766e;--teal1:#ccfbf1;--sl1:#f1f5f9;--sl2:#e2e8f0;--sl4:#94a3b8;--sl5:#64748b;--sl7:#334155;--sl8:#1e293b;--red:#b91c1c;--amb:#92400e}
 *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI","Microsoft JhengHei","Noto Sans TC",sans-serif;background:var(--sl1);color:var(--sl8);font-size:14px}
@@ -121,7 +121,7 @@ img,canvas{max-width:100%}
 </head>
 <body>
 <header>
-  <p>In-Situ Chemical Oxidation · Design v7.3（2026-10-05｜離線單一檔案｜參數來源連結｜報告產出｜資料匯入｜QA／委員意見｜報告檢核）</p>
+  <p>In-Situ Chemical Oxidation · Design v7.4（2026-10-05｜離線單一檔案｜參數來源連結｜報告產出（含限制與假設說明）｜自動填入參數｜報告檢核｜QA／委員意見）</p>
   <h1>ISCO 現地化學氧化灌注設計工具</h1>
   <p>劑量（TOD = POD + NOD + DEO）｜井位配置｜注入水力與傳輸稀釋｜反應動力學｜放熱評估｜安全檢查清單</p>
 </header>
@@ -135,6 +135,7 @@ img,canvas{max-width:100%}
     <div class="kpi"><div class="l">警示</div><div class="v"><span id="kAl">–</span></div><div class="s">各分頁詳列</div></div>
   </div>
   <div class="tabs" id="tabs">
+    <button class="tab" data-p="p12">★ 自動填入參數</button>
     <button class="tab on" data-p="p1">① 場址與水文地質</button>
     <button class="tab" data-p="p2">② 污染物與分配</button>
     <button class="tab" data-p="p3">③ 氧化劑與劑量</button>
@@ -146,9 +147,8 @@ img,canvas{max-width:100%}
     <button class="tab" data-p="p9">⑨ 資料庫</button>
     <button class="tab" data-p="p10">⑩ 計算依據與來源</button>
     <button class="tab" data-p="p11">⑪ 報告產出</button>
-    <button class="tab" data-p="p12">⑫ 資料匯入</button>
+    <button class="tab" data-p="p14">⑫ 報告檢核</button>
     <button class="tab" data-p="p13">⑬ QA／委員意見</button>
-    <button class="tab" data-p="p14">⑭ 報告檢核</button>
   </div>
   <div id="alertsTop"></div>
   <!-- ================= P1 場址 ================= -->
@@ -409,7 +409,7 @@ img,canvas{max-width:100%}
   </section>
   <!-- ================= P12 資料匯入 ================= -->
   <section class="pane" id="p12">
-    <div class="card"><h2>上傳調查報告或檢測結果，自動擷取參數</h2>
+    <div class="card"><h2>★ 自動填入參數：上傳調查報告或檢測結果，自動擷取參數</h2>
       <div id="imDrop" style="border:2px dashed #94a3b8;border-radius:14px;padding:18px;text-align:center">
         <p style="margin:4px 0">將檔案拖曳到這裡，或 <label class="btn p" style="display:inline-block">選擇檔案<input id="imFile" type="file" multiple accept=".docx,.xlsx,.xlsm,.pptx,.pdf,.txt,.csv,.md,.htm,.html" style="display:none"></label></p>
         <p class="note">支援 Word（.docx）、Excel（.xlsx）、PowerPoint（.pptx）、PDF（文字型）、TXT／CSV。檔案只在您的瀏覽器內讀取，不會上傳到任何伺服器。</p>
@@ -886,7 +886,7 @@ function renderReport(){
   const pat=s.use===s.lay.tr?'三角形（交錯）':'正方形';
   const ztop=p.ztop,zbot=p.ztop+p.H,sb=p.ztop+p.bs;
   const H2=t=>`<h3 style="color:#0f766e;margin:16px 0 6px">${t}</h3>`;
-  let o=`<h2 style="color:#0f766e">${esc(site)}──現地化學氧化（ISCO）灌注設計說明</h2><p class="note">本節由「ISCO 現地化學氧化灌注設計工具 v7.3」依目前輸入值產生（${new Date().toLocaleDateString('zh-TW')}）。〔標註〕為查證狀態，正式提送前請逐項確認。</p>`;
+  let o=`<h2 style="color:#0f766e">${esc(site)}──現地化學氧化（ISCO）灌注設計說明</h2><p class="note">本節由「ISCO 現地化學氧化灌注設計工具 v7.4」依目前輸入值產生（${new Date().toLocaleDateString('zh-TW')}）。〔標註〕為查證狀態，正式提送前請逐項確認。</p>`;
   o+=H2('一、處理範圍與場址條件');
   o+=`<p>本計畫處理區範圍為長 ${p.L} m × 寬 ${p.W} m（面積 ${fmt(p.L*p.W,1)} m²）${SV('L')}，處理深度為地表下 ${fmt(ztop,1)}～${fmt(zbot,1)} m（厚度 ${p.H} m）${SV('H')}，處理土體體積 ${fmt(s.V,1)} m³${T('der')}。依乾總體密度 ρ<sub>b</sub> = ${p.rho} g/cm³ ${SV('rho')}估算土壤乾重約 ${fmt(s.soilKg/1000,1)} t；依總孔隙率 n = ${p.n} ${SV('n')}及有效孔隙率 n<sub>e</sub> = ${p.ne} ${SV('ne')}，孔隙體積 PV 為 ${fmt(s.PV,1)} m³、有效孔隙體積為 ${fmt(s.PVe,1)} m³${T('der')}。</p>`;
   o+=`<p>地下水位約地表下 ${p.dtw} m ${SV('dtw')}${s.unsat>0?`，處理區上方 ${fmt(s.unsat,2)} m 位於地下水位以上，該段藥劑分布需另行評估${T('asm')}`:''}。水力傳導係數 K = ${sci(p.K)} m/d ${SV('K')}、水力梯度 i = ${p.grad} ${SV('grad')}，依 v = K·i/n<sub>e</sub> 計算地下水平均線性流速 ${sci(s.vel)} m/d（約 ${fmt(s.vel*365,1)} m/yr）${T('std')}。地下水溫 ${p.Tgw} °C ${SV('Tgw')}、pH ${p.pH} ${SV('pH')}、鹼度 ${p.alk} mg/L as CaCO₃ ${SV('alk')}、Cl⁻ ${p.cl} mg/L ${SV('cl')}。</p>`;
@@ -1151,7 +1151,7 @@ const sevTag=s=>`<span class="sev ${s}">${{high:'高',mid:'中',low:'低'}[s]}</
 function qaRules(){renderKin();renderOB();const s=S,p=s.p,K=window.KIN||{},O=window.OBR||{};const R=[];const add=(sev,cat,find,sug,cm,resp,sec)=>R.push({sev,cat,find,sug,cm,resp,sec});
   const PS=p.ox==='Na2S2O8',MN=/MnO4/.test(p.ox),HP=p.ox==='H2O2'||p.fenton;
   const dl=['L','W','H','ztop','dtw','n','ne','rho','foc','K','grad','sod','roi','Q','pH','alk','cl','fe2','mn2','kobs','kd'].filter(dflt);
-  if(dl.length)add('high','參數來源',`${dl.length} 項參數仍為工具預設值：${dl.map(i=>LBL[i]).join('、')}`,'以場址調查、處理性試驗、注水試驗數據取代；可於⑫匯入調查報告自動擷取。','設計參數多項未見場址實測依據，請列表說明各參數數值與來源。','感謝委員意見。已將設計參數改以本場址調查與試驗結果為依據，並於報告表○列明各參數數值、來源文件（報告名稱、日期、頁碼）與查證狀態。','第三章 場址條件');
+  if(dl.length)add('high','參數來源',`${dl.length} 項參數仍為工具預設值：${dl.map(i=>LBL[i]).join('、')}`,'以場址調查、處理性試驗、注水試驗數據取代；可於「★ 自動填入參數」分頁匯入調查報告自動擷取。','設計參數多項未見場址實測依據，請列表說明各參數數值與來源。','感謝委員意見。已將設計參數改以本場址調查與試驗結果為依據，並於報告表○列明各參數數值、來源文件（報告名稱、日期、頁碼）與查證狀態。','第三章 場址條件');
   if(dflt('sod'))add('high','劑量依據','SOD 仍為工具預設值（5 g/kg），NOD 占需氧量主要部分時，劑量不確定性極大。','以本場址代表性土樣進行批次試驗測定 SOD（含接觸時間與氧化劑濃度條件）。','劑量計算採用之 SOD 依據為何？是否經本場址土樣試驗？請補充試驗方法與結果。',`感謝委員意見。本計畫 SOD 係以場址○處代表性土樣進行批次試驗求得○ g/kg（試驗方法、氧化劑種類、濃度與接觸時間詳附錄○），據以計算 NOD 約 ${fmt(s.nod,0)} kg，設計總用量 ${fmt(s.tod,0)} kg。`,'第四章 劑量計算');
   if(p.basis==='KMnO4'&&!MN)add('mid','劑量依據',`SOD 以 KMnO₄ 量測，依電子當量換算為${s.ox.name}（×${fmt(s.ox.eq/OX.KMnO4.eq,2)}）。`,'不同氧化劑對天然有機質反應性不同，建議以實際採用之氧化劑直接測定 SOD。',`SOD 以過錳酸鉀測定，換算為${s.ox.name}需求之合理性為何？`,`感謝委員意見。本計畫以電子當量換算（換算係數 ${fmt(s.ox.eq/OX.KMnO4.eq,2)}），惟不同氧化劑對天然有機質之反應性不同，此換算屬假設；後續將以${s.ox.name}直接進行 SOD 批次試驗確認，並依結果修正劑量。`,'第四章 劑量計算');
   if(dflt('roi'))add('high','灌注範圍','ROI 仍為工具預設值（3 m），未經現地試驗確認。','以注水試驗、示蹤試驗或模場試驗求得 ROI，並說明判定指標（如導電度、殘留氧化劑、ORP）。','影響半徑如何決定？是否有現地注入試驗佐證？','感謝委員意見。ROI 係依模場（注水／示蹤）試驗結果決定：於距灌注井○ m、○ m 之監測井觀測導電度／殘留氧化劑變化，判定有效影響半徑為○ m，設計採折減後○ m（詳第○章）。','第五章 灌注井配置');
@@ -1644,5 +1644,129 @@ $('aL').disabled=true;renderRows();renderDB();calcAll();
 })();
 
 </script><!--/ISCO-PATCH-BODY-->
+<!--ISCO-V74-LIM--><script>/* ===== 設計限制與假設說明（⑪報告產出）===== */
+(function(){
+  if(typeof S==='undefined'||!document.getElementById('p11'))return;
+  var $$=function(id){return document.getElementById(id);};
+  var VER='v7.4';
+  var f2=function(x,d){return (typeof fmt==='function')?fmt(x,d):String(x);};
+  var RED=function(s){return '<span style="color:#b91c1c">'+s+'</span>';};
+  var TT=function(k){try{return T(k);}catch(e){return '';}};
+  var SVv=function(id){try{return SV(id);}catch(e){return '';}};
+  var LREF=['itrc','huling','huang99','yan99','yan00','xu95','ogata','domenico','ssg','evonik'];
+  function ref(k){var r=REFS[k];return r?'<a href="'+r.url+'" target="_blank" rel="noopener noreferrer">'+r.it+'</a>':'';}
+  function ci(){return '（'+Array.prototype.map.call(arguments,ref).join('；')+'）';}
+  var card=document.createElement('div');card.className='card';card.id='limCard';
+  card.innerHTML='<h2>設計限制與假設說明（報告可直接採用）</h2>'+
+   '<p class="note">依各分頁目前輸入值自動帶入本案數值、資料來源與查證標註；紅色【】為須人工補充之處。內容可直接複製或下載後貼入報告「設計限制與假設」章節。</p>'+
+   '<div class="g4">'+
+   '<label class="f">章節編號<input class="inp" id="limSec" value="○.○"></label>'+
+   '<label class="f">覆核人員（姓名、職稱）<input class="inp" id="limRev" placeholder="例：王○○ 技術經理"></label>'+
+   '<label class="f">覆核日期<input class="inp" id="limDate" type="date"></label>'+
+   '<label class="f">專案資料夾路徑<input class="inp" id="limPath" placeholder="例：SharePoint／專案編號／Calculations"></label></div>'+
+   '<div style="margin-top:8px;display:flex;gap:14px;flex-wrap:wrap"><label class="note"><input type="checkbox" id="limHide" checked> 隱藏不適用本案之項目</label>'+
+   '<label class="note"><input type="checkbox" id="limInRpt"> 附加於上方報告草稿（作為附錄）</label></div>'+
+   '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn p" id="limGen" type="button">↻ 重新產生</button>'+
+   '<button class="btn" id="limCopy" type="button">📋 複製全文</button><button class="btn" id="limDoc" type="button">⬇ 下載 Word（.doc）</button>'+
+   '<button class="btn" id="limPrint" type="button">🖨 列印／存 PDF</button></div>'+
+   '<div id="limMsg" style="margin-top:6px"></div>'+
+   '<div id="limOut" style="line-height:1.75;font-size:13.5px;margin-top:8px;border-top:1px solid #e2e8f0;padding-top:8px"></div>';
+  $$('p11').appendChild(card);
+  var td='border:1px solid #cbd5e1;padding:4px;vertical-align:top';
+  function tb(head,rows){return '<table style="border-collapse:collapse;width:100%;font-size:12.5px;margin:6px 0"><tr>'+head.map(function(h){return '<th style="'+td+';background:#f1f5f9">'+h+'</th>';}).join('')+'</tr>'+rows.map(function(r){return '<tr>'+r.map(function(c){return '<td style="'+td+'">'+c+'</td>';}).join('')+'</tr>';}).join('')+'</table>';}
+  function gen(){
+    var s=S,p=s&&s.p;var out=$$('limOut');
+    if(!s||!p||!isFinite(s.tod)){out.innerHTML=al('err','計算尚未完成或輸入有誤，請先修正各分頁錯誤。');return;}
+    try{renderKin();}catch(e){}
+    var sec=($$('limSec').value||'○.○').trim(),hide=$$('limHide').checked;
+    var PS=p.ox==='Na2S2O8',MN=/MnO4/.test(p.ox),HP=p.ox==='H2O2'||p.fenton;
+    var oxn=s.ox.name+(p.fenton?'（Fenton）':'');
+    var dsrc=($$('rData')&&$$('rData').value.trim())||'';
+    var sodS=$$('rSod')?$$('rSod').value:'def',roiS=$$('rRoi')?$$('rRoi').value:'def';
+    var sodSrc=(typeof AUTO!=='undefined'&&AUTO.sod)?'自「'+esc(AUTO.sod.src)+'」擷取':{def:RED('【工具預設值，須以本場址試驗取代】'),lab:'本場址土樣處理性試驗',doc:'引用既有調查／試驗報告'}[sodS]+(dsrc&&sodS!=='def'?'（'+esc(dsrc)+'）':'');
+    var roiSrc=(typeof AUTO!=='undefined'&&AUTO.roi)?'自「'+esc(AUTO.roi.src)+'」擷取':{def:RED('【工具預設值，須以現地試驗取代】'),test:'注水／示蹤試驗',pilot:'模場試驗',asm:'工程判斷假設'}[roiS]+(dsrc&&(roiS==='test'||roiS==='pilot')?'（'+esc(dsrc)+'）':'');
+    var sodTag=(typeof AUTO!=='undefined'&&AUTO.sod&&!AUTO.sod.ed)?TT('auto'):sodS==='def'?TT('def'):TT('site');
+    var roiTag=(typeof AUTO!=='undefined'&&AUTO.roi&&!AUTO.roi.ed)?TT('auto'):roiS==='def'?TT('def'):roiS==='asm'?TT('asm'):TT('site');
+    var mTot=s.pr.reduce(function(a,r){return a+r.m;},0),mS=s.pr.reduce(function(a,r){return a+r.mS;},0),mW=s.pr.reduce(function(a,r){return a+r.mW;},0),mN=s.pr.reduce(function(a,r){return a+r.mN;},0);
+    var sfPct=((p.sf+0.1)/p.sf-1)*100;
+    var dflt2=function(id){return typeof DEF!=='undefined'&&DEF[id]===$$(id).value;};
+    var K=window.KIN||{};var kmode=$$('kmode')?$$('kmode').value:'obs';
+    var kTxt=kmode==='obs'?'處理性試驗 k<sub>obs</sub> = '+$$('kobs').value+' d⁻¹'+(dflt2('kobs')?TT('def'):TT('site')):'文獻 k₂ = '+$$('k2').value+' M⁻¹s⁻¹'+(K.pre?TT('ok'):TT('nv'));
+    var act=$$('rAct')?$$('rAct').value:'未定';
+    var pat=s.use===s.lay.tr?'三角形':'正方形';
+    var hw=$$('hwt')?+$$('hwt').value:10;
+    var A=[
+     [1,'化學計量','污染物以完全礦化（C→CO₂、H→H₂O、鹵素→鹵離子）計算污染物需氧量（POD），依電子當量平衡求得氧化劑／污染物質量比。','電子當量推導；TCE 與 KMnO₄ 之 2:1 莫耳比與實驗結果一致'+ci('huang99'),'中間產物或不完全氧化時實際需求可能較低，屬保守估計',oxn+'；'+s.pr.map(function(r){return r.c+' '+f2(r.ratio,2)+' kg/kg';}).join('、')+TT('der')],
+     [1,'污染物質量','土壤與地下水濃度以代表值乘以處理體積估算；NAPL 質量另行估計。','質量平衡定義','濃度空間變異大或 NAPL 未完整估計時，POD 可能低估','總質量 '+f2(mTot,2)+' kg（土壤 '+f2(mS,2)+'、地下水 '+f2(mW,2)+'、NAPL '+f2(mN,2)+' kg）'+TT('der')+'；濃度代表值採'+RED('【平均／最大／加權】')],
+     [1,'土壤氧化劑需求量（SOD／NOD）','NOD = SOD × 處理區土壤乾重，視為一次性消耗量。','ISCO 設計指引建議以批次試驗測定'+ci('itrc','huling'),'NOD 常為需氧量主要部分，SOD 代表性直接決定劑量','SOD '+p.sod+' g/kg'+sodTag+'，來源：'+sodSrc+'；NOD '+f2(s.nod,0)+' kg，占需氧量 '+f2(s.nod/s.base*100,0)+'%'],
+     [p.basis==='KMnO4'&&!MN,'SOD 量測基準換算','以 KMnO₄ 量測之 SOD 依電子當量換算為其他氧化劑需求。','當量重推導','不同氧化劑對天然有機質反應性不同，換算屬假設','換算係數 '+f2(s.ox.eq/OX.KMnO4.eq,3)+'，換算後 '+f2(s.sodOx,2)+' g/kg'+TT('asm')],
+     [1,'自身分解（DEO）','氧化劑非目標分解比例以固定比例計，TOD 除以（1 − DEO）。','工程假設','比例偏低時劑量不足','DEO = '+p.deo+(dflt2('deo')?TT('def'):TT('asm'))+'；依據：'+RED('【處理性試驗殘留曲線／其他】')],
+     [1,'安全係數（SF）','以單一倍數涵蓋 SOD 變異、地層非均質性與施工損失。','工程判斷','SF 每增加 0.1，劑量約增加 '+f2(sfPct,1)+'%（以 SF '+p.sf+' 為基準）','SF = '+p.sf+(dflt2('sf')?TT('def'):TT('asm'))+'；考量：'+RED('【SOD 變異○%、非均質性等】')],
+     [1,'藥劑輸送','地層視為均質等向，注入液以柱塞流（plug flow）徑向推進，到達半徑 r = √(V／(π·b·nₑ))。','體積平衡推導','實際受優勢流路、層狀構造影響，到達範圍不規則','Kh/Kv = '+p.khkv+SVv('khkv')+'；單井每次注入 '+f2(s.Vw,2)+' m³，到達半徑 '+f2(s.rFromV,2)+' m（設計 ROI '+f2(s.Rd,2)+' m）'+TT('der')],
+     [1,'影響半徑（ROI）與井位','以設計 ROI 進行圓形覆蓋配置（正方形或三角形），覆蓋率以網格逐點檢核。','幾何推導','ROI 高估將造成處理盲區','ROI '+f2(s.Rd,2)+' m'+roiTag+'，來源：'+roiSrc+'；'+pat+'配置 '+s.nW+' 口，覆蓋率 '+(s.use.cov*100).toFixed(1)+'%'+TT('der')],
+     [1,'注入水頭','以 Thiem 穩態徑向流估算注入水頭上升，影響半徑取設計 ROI。','標準解析解；影響半徑取值為假設','實際影響半徑通常大於 ROI，注入壓力可能低估','Δh 約 '+f2(s.dh,2)+' m'+(s.dh>p.dtw?'，井口約需 '+f2(s.Pwh,0)+' kPa':'，理論上不需加壓')+TT('asm')+'；現場壓力上限：'+RED('【○ kPa】')],
+     [!!s.ox.sol,'藥劑溶解度',PS?'過硫酸鈉最大溶解度依地下水溫於 0／25／50 °C 之 37／42／46 wt% 間線性內插。':'藥劑溶解度採手冊或供應商資料。',PS?'供應商技術文件'+ci('evonik')+'；內插為推導':'手冊／供應商資料（未查證）','低溫時上限降低',PS?'地下水溫 '+p.Tgw+' °C'+SVv('Tgw')+' → 上限約 '+f2(s.ox.sol,0)+' g/L；設計濃度 '+f2(s.Cdes,1)+' g/L'+TT('der'):s.ox.name+'約 '+f2(s.ox.sol||0,0)+' g/L'+TT('nv')],
+     [1,'反應動力學','處理區視為完全混合反應槽，污染物以二階反應消減，並考慮氧化劑一階衰減、分次灌注、脫附回補及地下水流出。','模型結構為簡化組合；TCE–MnO₄⁻ 速率常數引自文獻'+ci('yan99','yan00'),'僅供趨勢評估，不代表實際整治期程',kTxt+'；Ea '+($$('Ea')?$$('Ea').value:'–')+' kJ/mol；灌注 '+s.ni+' 次'],
+     [PS,'活化（過硫酸鈉）','劑量計算未包含活化劑（鹼、熱、鐵螯合或 H₂O₂）用量。','—','活化劑需另行計算','活化方式：'+(act==='未定'?RED('【未定，須依處理性試驗決定】'):esc(act)+TT('site'))+'；活化劑用量：'+RED('【○ kg】')],
+     [1,'相分配與遲滯','吸附以線性 Kd = Koc × f<sub>oc</sub> 表示，遲滯因子 R = 1 + ρb·Kd／nₑ。','Koc 文獻值'+ci('ssg')+'；標準定義','f<sub>oc</sub> 很低或非線性吸附時誤差增加','f<sub>oc</sub> = '+p.foc+SVv('foc')],
+     [1,'下游傳輸','以 Ogata–Banks 一維解及 Domenico 穩態中心線解估算；縱向延散度採 Xu 與 Eckstein（1995）經驗式，橫向、垂向延散度採固定比例。','Ogata–Banks 解、Domenico 解、延散度經驗式'+ci('ogata','domenico','xu95')+'；比例為假設','解析解假設均勻流場，僅供量級評估','受體距離 '+p.xr+' m'+SVv('xr')+'；αT/αL = '+p.aTr+'、αV/αL = '+p.aVr+TT('asm')],
+     [1,'地下水還原物質','Fe²⁺、Mn²⁺、S²⁻ 以完全氧化計入需氧量。','氧化數推導','屬保守上限','Fe²⁺ '+p.fe2+'、Mn²⁺ '+p.mn2+'、S²⁻ '+p.s2+' mg/L'+SVv('fe2')+' → '+f2(s.gwRed,2)+' kg'+TT('der')],
+     [HP,'放熱（H₂O₂）','注入液局部絕熱及處理區整體熱容兩種情境估算溫升，分解熱約 98 kJ/mol。','標準生成焓推導','未考慮熱散失與反應速率，屬保守估計','H₂O₂ '+hw+' wt%，局部絕熱溫升約 '+f2(hw*10/OX.H2O2.mw*98.25/4.18,1)+' K'+TT('der')]
+    ];
+    var rows=A.filter(function(r){return r[0]||!hide;}).map(function(r){return [r[1],r[2],r[3],r[4],r[0]?r[5]:'不適用本案'];});
+    var fac=[
+     [1,'地層非均質性與優勢流路：計算假設地層均質，未進行隨機場或數值模擬；層狀構造（本案 Kh／Kv = '+p.khkv+'）可能使藥劑沿高透水層側向優勢流動。'],
+     [PS,'密度流：高濃度氧化劑溶液密度高於地下水，可能產生下沉現象'+ci('evonik')+'。'],
+     [1,'不飽和層：注入計算假設處理區位於飽和層'+(s.unsat>0?'；本案處理區上方約 '+f2(s.unsat,2)+' m 位於地下水位以上，該段藥劑分布須另行評估':'')+'。'],
+     [PS,'自由基清除與基質效應：地下水中氯離子（本案 '+p.cl+' mg/L）、碳酸鹽（鹼度 '+p.alk+' mg/L）等對活化過硫酸鹽自由基之消耗，未納入定量計算。'],
+     [1,'NAPL 溶解與基質反擴散（back-diffusion）：以集總脫附參數近似，可能造成灌注後濃度反彈。'],
+     [MN||HP,'滲透率變化：'+(MN?'過錳酸鹽反應生成 MnO₂ 沉澱':'過氧化氫分解產生氣體')+'，可能降低含水層透水性。'],
+     [1,'二次地化影響：'+(PS?'硫酸鹽增加、pH 下降':MN?'錳殘留、色度':'溫度上升、溶氧變化')+'及重金屬溶出等，以監測方式管理'+ci('huling')+'。']
+    ].filter(function(x){return x[0]||!hide;});
+    var ST=window.SELFTEST,stOk=ST&&ST.out&&ST.out.every(function(r){return r[5];});
+    var stTxt=ST&&ST.out?('共 '+ST.out.length+' 項，於 '+ST.when.toLocaleString('zh-TW')+' 執行，'+(stOk?'全數通過':RED('【有未通過項目，請檢查】'))):RED('【請至⑩執行「計算自我驗證」後重新產生】');
+    var rev=esc($$('limRev').value.trim()),dt=$$('limDate').value,path=esc($$('limPath').value.trim());
+    var H3=function(t){return '<h3 style="color:#0f766e;margin:14px 0 6px">'+t+'</h3>';};
+    var o='<h2 style="color:#0f766e">'+esc(sec)+'　設計限制與假設</h2>';
+    o+=H3('一、計算方法與適用範圍');
+    o+='<p>本計畫 ISCO 灌注設計之藥劑量、灌注井配置、注入量、注入濃度及相關操作條件，係以解析解與簡化模型進行初步設計估算。藥劑設計用量依總氧化劑需求量（total oxidant demand, TOD）計算，包含污染物需氧量（POD）、土壤天然需氧量（NOD）、地下水還原物質需求及氧化劑自身分解，並乘以安全係數；此設計架構參考 ISCO 技術指引之設計原則'+ci('itrc','huling')+'。本案選用'+oxn+'，設計用量 TOD 為 '+f2(s.tod,1)+' kg（商品量 '+f2(s.prod,1)+' kg），分 '+s.ni+' 次灌注'+TT('der')+'。</p>';
+    o+='<p>依上述文獻建議，ISCO 實場劑量應以實驗室批次試驗（處理性試驗）及模場試驗確認。本計畫土壤氧化劑需求量（SOD）來源為'+sodSrc+'，影響半徑（ROI）來源為'+roiSrc+'，反應速率參數採'+kTxt+'；其餘參數之來源及查證狀態列於表'+esc(sec)+'-2。本節計算結果作為設計規劃之依據，實際施工條件將依模場試驗及施工期間監測結果滾動修正。</p>';
+    o+=H3('二、主要設計假設');
+    o+='<p>本計畫設計採用之主要假設、依據、對結果之影響及本案採用值如表'+esc(sec)+'-1。</p><p style="text-align:center"><b>表'+esc(sec)+'-1　ISCO 設計主要假設</b></p>';
+    o+=tb(['項目','假設內容','依據','對結果之影響','本案採用值與來源'],rows);
+    o+=H3('三、模型未納入之地下環境因子');
+    o+='<p>下列因子未於本設計計算中進行定量模擬，僅以定性方式評估，實際影響將以模場試驗及施工監測結果確認：</p><ul>'+fac.map(function(x){return '<li>'+x[1]+'</li>';}).join('')+'</ul>';
+    o+=H3('四、參數來源與查證狀態');
+    o+='<p>本計畫設計參數均標示其來源及查證狀態，分類定義如表'+esc(sec)+'-2；標示「工程假設，未查證」者，已於表'+esc(sec)+'-1 說明其採用理由。</p><p style="text-align:center"><b>表'+esc(sec)+'-2　參數查證狀態分類</b></p>';
+    o+=tb(['狀態','定義'],[['已查證','文獻書目、DOI 或網址已線上核對，數值與引用文獻一致。'],['文獻已核實，段落頁碼待核','文獻書目已核對，引用內容之頁碼或段落尚待查原文確認。'],['標準定義／常數','教科書定義、物理常數或 IUPAC 原子量。'],['推導','由已知公式經數學或化學計量推導，可自行驗算。'],['工程假設，未查證','依工程判斷或一般實務設定，無特定文獻依據，須說明理由或以試驗數據取代。'],['場址資料','由使用者輸入或自調查、試驗報告擷取之場址數據，須註明出處。'],['工具預設值','工具示範數值，尚未以場址資料取代，不得作為正式設計依據。'],['未查證','無法確認來源或尚未核對，不得作為設計依據。']]);
+    o+=H3('五、計算品質管理');
+    o+='<ul><li>計算工具驗證：設計計算工具（ISCO 現地化學氧化灌注設計工具 '+VER+'）內建基準案例驗證，以獨立計算之期望值比對工具結果，'+stTxt+'（驗證紀錄詳附錄○）。</li>'+
+       '<li>技術覆核：本設計計算及假設經'+(rev||RED('【覆核人員姓名、職稱】'))+'於'+(dt||RED('【日期】'))+'完成覆核。</li>'+
+       '<li>版本管理：設計計算採用工具版本為 '+VER+'，計算檔案及專案資料存放於'+(path||RED('【專案資料夾路徑】'))+'。</li></ul>';
+    o+=H3('六、結果解讀與使用限制');
+    o+='<ol><li>本節計算結果為初步設計估算，不代表實際整治成效或整治期程之保證。</li><li>反應動力學模擬僅供評估濃度變化趨勢，實際整治期程以灌注後監測結果為準。</li><li>灌注濃度、注入流率及壓力上限之現場設定，以模場試驗結果及施工計畫為準，並依施工期間監測結果調整。</li><li>下游傳輸估算採解析解，僅供量級評估，不取代下游監測。</li><li>若場址條件（污染範圍、地層、地下水流向等）與調查結果不同，應重新評估設計參數。</li></ol>';
+    var key=function(r){return r.apa.replace(/<[^>]+>/g,'').replace('(n.d.)','(0000)');};
+    var RR=LREF.map(function(k){return REFS[k];}).filter(Boolean).sort(function(a,b){return key(a).localeCompare(key(b));});
+    o+=H3('參考文獻');
+    o+=RR.map(function(r){return '<p style="padding-left:2em;text-indent:-2em;margin:4px 0">'+r.apa+' <a href="'+r.url+'" target="_blank" rel="noopener noreferrer">'+r.url+'</a></p>';}).join('');
+    o+=H3('精簡版（篇幅有限時使用）');
+    o+='<p>本計畫 ISCO 藥劑量依總氧化劑需求量（TOD）計算，包含污染物需氧量、土壤天然需氧量、地下水還原物質需求及氧化劑自身分解，並乘以安全係數 '+p.sf+ci('itrc','huling')+'，設計用量 '+f2(s.tod,0)+' kg。灌注井配置、注入量及注入濃度係假設地層均質、藥劑以柱塞流徑向推進，並以設計影響半徑 '+f2(s.Rd,2)+' m 進行'+pat+'配置（'+s.nW+' 口）估算。土壤氧化劑需求量取自'+sodSrc+'，影響半徑取自'+roiSrc+'；安全係數、自身分解比例等工程假設之理由詳表'+esc(sec)+'-1。本計算未定量考慮地層非均質性、密度流、不飽和層傳輸'+(PS?'、自由基清除':'')+'及 NAPL 溶解速率等因子，計算結果為初步設計估算，實際施工條件將依模場試驗及施工監測結果修正。</p>';
+    out.innerHTML=o;
+    var nRed=(o.match(/color:#b91c1c">【/g)||[]).length,nDef=(o.match(/尚未以場址資料取代/g)||[]).length;
+    $$('limMsg').innerHTML=(nRed||nDef)?al('warn','尚有 '+nRed+' 處【待補充】、'+nDef+' 處〔工具預設值〕；正式提送前請補齊或以場址資料取代。'):al('ok','已無待補充處與工具預設值。');
+  }
+  window.genLimitations=gen;
+  $$('limGen').onclick=gen;
+  ['limSec','limRev','limDate','limPath','limHide'].forEach(function(id){$$(id).addEventListener('input',gen);$$(id).addEventListener('change',gen);});
+  $$('limCopy').onclick=function(){gen();copyEl($$('limOut'));};
+  $$('limDoc').onclick=function(){gen();dlDoc('ISCO_設計限制與假設說明',$$('limOut').innerHTML);};
+  $$('limPrint').onclick=function(){gen();var w=window.open('','_blank');w.document.write('<html><head><meta charset="utf-8"><title>設計限制與假設說明</title><style>body{font-family:"Microsoft JhengHei",sans-serif;font-size:12pt;line-height:1.7;margin:2cm}td,th{border:1px solid #999;padding:3px}table{border-collapse:collapse;width:100%}</style></head><body>'+$$('limOut').innerHTML+'</body></html>');w.document.close();w.focus();w.print();};
+  var orig=renderReport;
+  renderReport=function(){orig();gen();if($$('limInRpt').checked){$$('rpOut').insertAdjacentHTML('beforeend','<hr style="margin:20px 0"><h2 style="color:#0f766e">附錄　設計限制與假設說明</h2>'+$$('limOut').innerHTML);}};
+  $$('rGen').onclick=renderReport;
+  $$('limInRpt').addEventListener('change',function(){renderReport();});
+  try{if(cur==='p11')renderReport();else gen();}catch(e){}
+})();
+</script><!--/ISCO-V74-LIM-->
 </body>
 </html>
